@@ -151,7 +151,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   <Eye className="w-5 h-5" />
                 </motion.div>
               </Link>
-            </motion.button>
+            </motion.div>
             
             {/* Add to Cart Button */}
             <motion.div

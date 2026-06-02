@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { useStore } from "@/lib/store"
+import { useCartStore } from "@/lib/store"
 
 const promos = [
   {
@@ -97,7 +97,7 @@ function CountdownTimer({ endDate }: { endDate: Date }) {
 }
 
 export default function PromocionesPage() {
-  const { addItem } = useStore()
+  const { addItem } = useCartStore()
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("es-CO", {
