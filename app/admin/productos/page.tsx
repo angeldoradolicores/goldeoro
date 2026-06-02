@@ -1,0 +1,736 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
+import { 
+  Plus, 
+  Search, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  MoreVertical,
+  Upload,
+  X,
+  Save,
+  Loader2,
+  Video,
+  Image as ImageIcon
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+
+interface Product {
+  id: string
+  name: string
+  slug: string
+  description: string
+  price: number
+  original_price?: number
+  category: string
+  stock: number
+  featured: boolean
+  is_promotion: boolean
+  images: string[]
+  videos: string[]
+  colors: string[]
+  sizes: string[]
+  created_at: string
+}
+
+const categories = ['Todos', 'Premium', 'Urban', 'Snapback', 'Classic', 'Sport', 'Limited Edition']
+
+function formatPrice(price: number) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+  }).format(price)
+}
+
+function generateSlug(name: string) {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+export default function ProductosPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('Todos')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [deleteProduct, setDeleteProduct] = useState<Product | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('/api/admin/products')
+      const data = await response.json()
+      if (data.products) {
+        setProducts(data.products)
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase())
+    const matchesCategory = categoryFilter === 'Todos' || product.category === categoryFilter
+    return matchesSearch && matchesCategory
+  })
+
+  const handleAddProduct = () => {
+    setEditingProduct(null)
+    setIsModalOpen(true)
+  }
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product)
+    setIsModalOpen(true)
+  }
+
+  const handleDeleteProduct = async (product: Product) => {
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: product.id }),
+      })
+
+      if (response.ok) {
+        setProducts(products.filter((p) => p.id !== product.id))
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error)
+    }
+    setDeleteProduct(null)
+  }
+
+  const handleSaveProduct = async (productData: Partial<Product>) => {
+    setSaving(true)
+    try {
+      const method = editingProduct ? 'PUT' : 'POST'
+      const body = editingProduct 
+        ? { ...productData, id: editingProduct.id }
+        : { ...productData, slug: generateSlug(productData.name || '') }
+
+      const response = await fetch('/api/admin/products', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.product) {
+        if (editingProduct) {
+          setProducts(products.map((p) => 
+            p.id === editingProduct.id ? data.product : p
+          ))
+        } else {
+          setProducts([data.product, ...products])
+        }
+        setIsModalOpen(false)
+      }
+    } catch (error) {
+      console.error('Error saving product:', error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-display font-bold">Productos</h1>
+          <p className="text-muted-foreground">
+            Gestiona tu catalogo de gorras ({products.length} productos)
+          </p>
+        </div>
+        <Button onClick={handleAddProduct} className="btn-luxury">
+          <Plus className="w-4 h-4 mr-2" />
+          Agregar Producto
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar productos..."
+            className="pl-9 bg-card border-border/50"
+          />
+        </div>
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="w-full sm:w-48 bg-card border-border/50">
+            <SelectValue placeholder="Categoria" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Products Table */}
+      <div className="rounded-2xl bg-card border border-border/50 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border bg-secondary/30">
+                <th className="text-left p-4 font-medium text-muted-foreground">Producto</th>
+                <th className="text-left p-4 font-medium text-muted-foreground hidden md:table-cell">Categoria</th>
+                <th className="text-left p-4 font-medium text-muted-foreground">Precio</th>
+                <th className="text-left p-4 font-medium text-muted-foreground hidden sm:table-cell">Stock</th>
+                <th className="text-left p-4 font-medium text-muted-foreground hidden lg:table-cell">Estado</th>
+                <th className="text-right p-4 font-medium text-muted-foreground">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <AnimatePresence>
+                {filteredProducts.map((product, index) => (
+                  <motion.tr
+                    key={product.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ delay: index * 0.03 }}
+                    className="border-b border-border/50 hover:bg-secondary/20 transition-colors"
+                  >
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-secondary">
+                          {product.images?.[0] ? (
+                            <Image
+                              src={product.images[0]}
+                              alt={product.name}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{product.name}</p>
+                          <p className="text-sm text-muted-foreground md:hidden">
+                            {product.category}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 hidden md:table-cell">
+                      <Badge variant="outline" className="border-primary/30 text-primary">
+                        {product.category}
+                      </Badge>
+                    </td>
+                    <td className="p-4">
+                      <div>
+                        <p className="font-semibold text-primary">{formatPrice(product.price)}</p>
+                        {product.original_price && (
+                          <p className="text-xs text-muted-foreground line-through">
+                            {formatPrice(product.original_price)}
+                          </p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-4 hidden sm:table-cell">
+                      <span className={`font-medium ${
+                        product.stock < 10 ? 'text-destructive' : 'text-foreground'
+                      }`}>
+                        {product.stock}
+                      </span>
+                    </td>
+                    <td className="p-4 hidden lg:table-cell">
+                      <div className="flex gap-2 flex-wrap">
+                        {product.featured && (
+                          <Badge className="bg-primary/20 text-primary">Destacado</Badge>
+                        )}
+                        {product.is_promotion && (
+                          <Badge className="bg-destructive/20 text-destructive">Oferta</Badge>
+                        )}
+                        {product.videos?.length > 0 && (
+                          <Badge className="bg-blue-500/20 text-blue-500">
+                            <Video className="w-3 h-3 mr-1" />
+                            Video
+                          </Badge>
+                        )}
+                        {!product.featured && !product.is_promotion && !product.videos?.length && (
+                          <Badge variant="outline">Normal</Badge>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditProduct(product)}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <a href={`/productos/${product.slug}`} target="_blank">
+                              <Eye className="w-4 h-4 mr-2" />
+                              Ver en tienda
+                            </a>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-destructive"
+                            onClick={() => setDeleteProduct(product)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </tbody>
+          </table>
+        </div>
+
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No se encontraron productos</p>
+            {products.length === 0 && (
+              <Button onClick={handleAddProduct} className="mt-4 btn-luxury">
+                <Plus className="w-4 h-4 mr-2" />
+                Agregar tu primer producto
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Product Modal */}
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        product={editingProduct}
+        onSave={handleSaveProduct}
+        saving={saving}
+      />
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteProduct} onOpenChange={() => setDeleteProduct(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar producto</AlertDialogTitle>
+            <AlertDialogDescription>
+              Estas seguro de que deseas eliminar &quot;{deleteProduct?.name}&quot;? 
+              Esta accion no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => deleteProduct && handleDeleteProduct(deleteProduct)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}
+
+function ProductModal({
+  isOpen,
+  onClose,
+  product,
+  onSave,
+  saving,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  product: Product | null
+  onSave: (data: Partial<Product>) => void
+  saving: boolean
+}) {
+  const [formData, setFormData] = useState<Partial<Product>>({
+    name: '',
+    description: '',
+    price: 0,
+    original_price: undefined,
+    category: 'Premium',
+    stock: 0,
+    featured: false,
+    is_promotion: false,
+    colors: ['Negro'],
+    sizes: ['M'],
+    images: [],
+    videos: [],
+  })
+  const [imageUrl, setImageUrl] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
+
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        original_price: product.original_price,
+        category: product.category,
+        stock: product.stock,
+        featured: product.featured,
+        is_promotion: product.is_promotion,
+        colors: product.colors || ['Negro'],
+        sizes: product.sizes || ['M'],
+        images: product.images || [],
+        videos: product.videos || [],
+      })
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        price: 0,
+        original_price: undefined,
+        category: 'Premium',
+        stock: 0,
+        featured: false,
+        is_promotion: false,
+        colors: ['Negro'],
+        sizes: ['M'],
+        images: [],
+        videos: [],
+      })
+    }
+    setImageUrl('')
+    setVideoUrl('')
+  }, [product, isOpen])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave(formData)
+  }
+
+  const addImage = () => {
+    if (imageUrl.trim()) {
+      setFormData({
+        ...formData,
+        images: [...(formData.images || []), imageUrl.trim()]
+      })
+      setImageUrl('')
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setFormData({
+      ...formData,
+      images: formData.images?.filter((_, i) => i !== index)
+    })
+  }
+
+  const addVideo = () => {
+    if (videoUrl.trim()) {
+      setFormData({
+        ...formData,
+        videos: [...(formData.videos || []), videoUrl.trim()]
+      })
+      setVideoUrl('')
+    }
+  }
+
+  const removeVideo = (index: number) => {
+    setFormData({
+      ...formData,
+      videos: formData.videos?.filter((_, i) => i !== index)
+    })
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-display">
+            {product ? 'Editar Producto' : 'Agregar Producto'}
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Images */}
+          <div>
+            <Label>Imagenes</Label>
+            <div className="mt-2 space-y-3">
+              <div className="flex gap-2">
+                <Input
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="URL de la imagen"
+                  className="bg-secondary border-border/50"
+                />
+                <Button type="button" onClick={addImage} variant="outline">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              {formData.images && formData.images.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.images.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <div className="w-16 h-16 rounded-lg overflow-hidden">
+                        <Image src={img} alt="" fill className="object-cover" />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Videos */}
+          <div>
+            <Label>Videos</Label>
+            <div className="mt-2 space-y-3">
+              <div className="flex gap-2">
+                <Input
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="URL del video (YouTube, Vimeo, etc.)"
+                  className="bg-secondary border-border/50"
+                />
+                <Button type="button" onClick={addVideo} variant="outline">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              {formData.videos && formData.videos.length > 0 && (
+                <div className="space-y-2">
+                  {formData.videos.map((video, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 bg-secondary/50 rounded-lg">
+                      <Video className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span className="text-sm truncate flex-1">{video}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeVideo(index)}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Basic Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <Label>Nombre del Producto</Label>
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="mt-1 bg-secondary border-border/50"
+                placeholder="Ej: Crown Elite Black"
+                required
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Label>Descripcion</Label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="mt-1 bg-secondary border-border/50"
+                rows={3}
+                placeholder="Describe el producto..."
+              />
+            </div>
+            <div>
+              <Label>Precio (COP)</Label>
+              <Input
+                type="number"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                className="mt-1 bg-secondary border-border/50"
+                required
+                min={0}
+              />
+            </div>
+            <div>
+              <Label>Precio Original (Promocion)</Label>
+              <Input
+                type="number"
+                value={formData.original_price || ''}
+                onChange={(e) => setFormData({ ...formData, original_price: Number(e.target.value) || undefined })}
+                className="mt-1 bg-secondary border-border/50"
+                placeholder="Opcional"
+                min={0}
+              />
+            </div>
+            <div>
+              <Label>Categoria</Label>
+              <Select 
+                value={formData.category} 
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
+              >
+                <SelectTrigger className="mt-1 bg-secondary border-border/50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.filter(c => c !== 'Todos').map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Stock</Label>
+              <Input
+                type="number"
+                value={formData.stock}
+                onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
+                className="mt-1 bg-secondary border-border/50"
+                required
+                min={0}
+              />
+            </div>
+          </div>
+
+          {/* Colors & Sizes */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Colores (separados por coma)</Label>
+              <Input
+                value={formData.colors?.join(', ')}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  colors: e.target.value.split(',').map(c => c.trim()).filter(Boolean) 
+                })}
+                className="mt-1 bg-secondary border-border/50"
+                placeholder="Negro, Blanco, Dorado"
+              />
+            </div>
+            <div>
+              <Label>Tallas (separadas por coma)</Label>
+              <Input
+                value={formData.sizes?.join(', ')}
+                onChange={(e) => setFormData({ 
+                  ...formData, 
+                  sizes: e.target.value.split(',').map(s => s.trim()).filter(Boolean) 
+                })}
+                className="mt-1 bg-secondary border-border/50"
+                placeholder="S, M, L, XL"
+              />
+            </div>
+          </div>
+
+          {/* Options */}
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.featured}
+                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                className="w-4 h-4 rounded border-border accent-primary"
+              />
+              <span>Producto Destacado</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.is_promotion}
+                onChange={(e) => setFormData({ ...formData, is_promotion: e.target.checked })}
+                className="w-4 h-4 rounded border-border accent-primary"
+              />
+              <span>En Promocion</span>
+            </label>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-4 pt-4 border-t border-border">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1" disabled={saving}>
+              Cancelar
+            </Button>
+            <Button type="submit" className="flex-1 btn-luxury" disabled={saving}>
+              {saving ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 mr-2" />
+              )}
+              {saving ? 'Guardando...' : 'Guardar Producto'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
