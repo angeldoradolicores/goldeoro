@@ -154,84 +154,101 @@ export default function PerfilPage() {
   useEffect(() => {
     let mounted = true
 
-    const loadUserData = async (userId: string) => {
-      if (!mounted) return
-      setUserId(userId)
-
-      // Sync cart in background (don't block profile loading)
-      useCartStore.getState().syncCart().catch(e => console.warn('Cart sync warning:', e))
-
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
-      if (!mounted) return
-
-      if (profile) {
-        const parts = profile.full_name ? profile.full_name.split(' ') : ['']
-        const d = { nombre: parts[0] || '', apellido: parts.slice(1).join(' ') || '', email: profile.email || '', telefono: profile.phone || '', fechaNacimiento: profile.birth_date || '', avatarUrl: profile.avatar_url || '' }
-        setUserData(d); setEditForm(d)
-      } else {
-        // Try to get email from current auth user
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!mounted) return
-        const d = { nombre: '', apellido: '', email: user?.email || '', telefono: '', fechaNacimiento: '', avatarUrl: '' }
-        setUserData(d); setEditForm(d)
+    // Safety timeout: if loading takes more than 5 seconds, force stop
+    const safetyTimer = setTimeout(() => {
+      if (mounted) {
+        console.warn('Profile load timeout - forcing loading false')
+        setLoading(false)
       }
+    }, 5000)
 
-      // Fetch orders with items
-      const { data: userOrders } = await supabase
-        .from('orders')
-        .select('id, order_number, created_at, status, total, subtotal, shipping_cost, tracking_number, carrier, tracking_photo_url, admin_note, shipped_at, items:order_items(product_name, quantity, price, color, size)')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-      if (mounted && userOrders) setOrders(userOrders as Order[])
+    const init = async () => {
+      try {
+        // getUser() makes a verified server-side call - always accurate
+        // unlike getSession() which can return stale/null data from localStorage
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-      // Fetch notifications
-      fetchNotifications()
+        if (!mounted) return
 
-      // Fetch addresses
-      const { data: userAddresses } = await supabase.from('addresses').select('*').eq('user_id', userId).order('is_default', { ascending: false })
-      if (mounted && userAddresses) setAddresses(userAddresses as Address[])
+        if (!user || userError) {
+          router.push('/auth/login')
+          return
+        }
 
-      // Sync favorites in background
-      await syncFavorites().catch(e => console.warn('Favorites sync warning:', e))
+        setUserId(user.id)
 
-      if (mounted) setLoading(false)
+        // Update auth store
+        useAuthStore.getState().setUser(user)
+        useAuthStore.getState().setInitialized(true)
+
+        // Sync cart in background
+        useCartStore.getState().syncCart().catch(e => console.warn('Cart sync:', e))
+
+        // Load profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        if (!mounted) return
+
+        const d = {
+          nombre: profile?.full_name?.split(' ')[0] || '',
+          apellido: profile?.full_name?.split(' ').slice(1).join(' ') || '',
+          email: profile?.email || user.email || '',
+          telefono: profile?.phone || '',
+          fechaNacimiento: profile?.birth_date || '',
+          avatarUrl: profile?.avatar_url || ''
+        }
+        setUserData(d)
+        setEditForm(d)
+
+        // Load orders
+        const { data: userOrders } = await supabase
+          .from('orders')
+          .select('id, order_number, created_at, status, total, subtotal, shipping_cost, tracking_number, carrier, tracking_photo_url, admin_note, shipped_at, items:order_items(product_name, quantity, price, color, size)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (mounted && userOrders) setOrders(userOrders as Order[])
+
+        // Load notifications (don't await - runs in background)
+        fetchNotifications()
+
+        // Load addresses
+        const { data: userAddresses } = await supabase
+          .from('addresses')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('is_default', { ascending: false })
+
+        if (mounted && userAddresses) setAddresses(userAddresses as Address[])
+
+        // Sync favorites in background
+        syncFavorites().catch(e => console.warn('Favorites sync:', e))
+
+      } catch (err) {
+        console.error('Error loading profile:', err)
+      } finally {
+        clearTimeout(safetyTimer)
+        if (mounted) setLoading(false)
+      }
     }
 
-    let dataLoaded = false
+    init()
 
-    // Subscribe to auth state changes - this fires immediately with the current session
-    // AND fires when a new session is established, solving the post-login blank page issue.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Only listen for sign-out events after initial load
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (!mounted) return
-
-      if (session?.user && !dataLoaded) {
-        dataLoaded = true
-        // Update auth store
-        useAuthStore.getState().setUser(session.user)
-        useAuthStore.getState().setInitialized(true)
-        // Load user data
-        try {
-          await loadUserData(session.user.id)
-        } catch (err) {
-          console.error('Error loading profile data:', err)
-          if (mounted) setLoading(false)
-        }
-      } else if (event === 'SIGNED_OUT') {
-        // Only redirect when explicitly signed out
-        if (mounted) {
-          router.push('/auth/login')
-        }
-      } else if (!session?.user && event === 'INITIAL_SESSION' && !dataLoaded) {
-        // No session on initial load - middleware should have caught this
-        // but redirect as fallback
-        if (mounted) {
-          router.push('/auth/login')
-        }
+      if (event === 'SIGNED_OUT') {
+        router.push('/auth/login')
       }
     })
 
     return () => {
       mounted = false
+      clearTimeout(safetyTimer)
       subscription.unsubscribe()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -176,61 +176,81 @@ function OrdersContent() {
   useEffect(() => {
     let mounted = true
     let ordersChannel: any = null
-    let dataLoaded = false
 
-    const setupUser = async (userId: string) => {
-      if (!mounted || dataLoaded) return
-      dataLoaded = true
+    // Safety timeout: if 5s pass and still loading, stop the spinner
+    const safetyTimer = setTimeout(() => {
+      if (mounted) {
+        console.warn('Pedidos load timeout - forcing authLoading false')
+        setAuthLoading(false)
+      }
+    }, 5000)
 
-      await fetchOrders(userId)
-      await fetchNotifications()
+    const init = async () => {
+      try {
+        // getUser() is a verified server-side call - always returns the real session
+        // unlike getSession() which can return null while localStorage hydrates
+        const { data: { user }, error } = await supabase.auth.getUser()
 
-      // Set up real-time subscription for logged-in user
-      ordersChannel = supabase
-        .channel(`user-updates-${userId}`)
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` },
-          async (payload: any) => {
-            console.log('Order changed in real-time:', payload)
-            await fetchOrders(userId)
-            toast.info(`Pedido #${payload.new.order_number} actualizado a: ${payload.new.status}`)
-          }
-        )
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
-          async (payload: any) => {
-            console.log('New notification in real-time:', payload)
-            await fetchNotifications()
-            toast.info(`Nueva notificación: ${payload.new.title}`)
-          }
-        )
-        .subscribe()
+        if (!mounted) return
 
-      if (mounted) setAuthLoading(false)
+        if (user && !error) {
+          setUser(user)
+
+          // Load orders and notifications in parallel
+          await Promise.all([
+            fetchOrders(user.id),
+            fetchNotifications()
+          ])
+
+          if (!mounted) return
+
+          // Set up real-time subscription for order and notification updates
+          ordersChannel = supabase
+            .channel(`user-updates-${user.id}`)
+            .on(
+              'postgres_changes',
+              { event: 'UPDATE', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` },
+              async (payload: any) => {
+                if (!mounted) return
+                await fetchOrders(user.id)
+                toast.info(`Pedido #${payload.new.order_number} actualizado a: ${payload.new.status}`)
+              }
+            )
+            .on(
+              'postgres_changes',
+              { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+              async (payload: any) => {
+                if (!mounted) return
+                await fetchNotifications()
+                toast.info(`Nueva notificación: ${payload.new.title}`)
+              }
+            )
+            .subscribe()
+        }
+        // If no user: show guest view (don't redirect - page has guest tracking feature)
+      } catch (err) {
+        console.error('Error loading pedidos:', err)
+      } finally {
+        clearTimeout(safetyTimer)
+        if (mounted) setAuthLoading(false)
+      }
     }
 
-    // onAuthStateChange fires with the current session immediately (even from localStorage)
-    // This solves the "blank page after login" issue where getSession() returns null
-    // for a brief moment while the SDK hydrates.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return
+    init()
 
-      if (session?.user && !dataLoaded) {
-        setUser(session.user)
-        await setupUser(session.user.id)
-      } else if (event === 'SIGNED_OUT') {
+    // Listen only for sign-out to clear user state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (!mounted) return
+      if (event === 'SIGNED_OUT') {
         setUser(null)
-        if (mounted) setAuthLoading(false)
-      } else if (event === 'INITIAL_SESSION' && !session?.user && !dataLoaded) {
-        // No session - allow guest view
-        if (mounted) setAuthLoading(false)
+        setOrders([])
+        setNotifications([])
       }
     })
 
     return () => {
       mounted = false
+      clearTimeout(safetyTimer)
       subscription.unsubscribe()
       if (ordersChannel) {
         supabase.removeChannel(ordersChannel)
