@@ -13,6 +13,7 @@ const navLinks = [
   { href: '/', label: 'Inicio' },
   { href: '/catalogo', label: 'Catalogo' },
   { href: '/promociones', label: 'Ofertas' },
+  { href: '/pedidos', label: 'Mis Pedidos' },
   { href: '/nosotros', label: 'Nosotros' },
   { href: '/contacto', label: 'Contacto' },
 ]

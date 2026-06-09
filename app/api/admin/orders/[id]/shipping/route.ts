@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { sendOrderStatusEmail } from '@/lib/mail'
 
 export async function PUT(
   request: Request,
@@ -80,6 +81,29 @@ export async function PUT(
           console.warn('[shipping] Notification insert warning:', notifError.message)
         }
       }
+    }
+
+    // Send email notification to customer
+    const customerEmail = order.shipping_address?.email || order.guest_email
+    if (customerEmail && status) {
+      // Async send email so it doesn't block the API response
+      sendOrderStatusEmail(
+        customerEmail,
+        order.order_number,
+        status,
+        {
+          carrier: order.carrier,
+          trackingNumber: order.tracking_number,
+          trackingPhotoUrl: order.tracking_photo_url,
+          adminNote: order.admin_note,
+        },
+        {
+          subtotal: order.subtotal,
+          shipping_cost: order.shipping_cost,
+          total: order.total,
+          items: order.items,
+        }
+      ).catch((err) => console.error('[shipping-api] Async email error:', err))
     }
 
     return NextResponse.json({ success: true, order })
