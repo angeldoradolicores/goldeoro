@@ -153,38 +153,50 @@ export default function PerfilPage() {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push('/auth/login'); return }
-      setUserId(session.user.id)
-      useCartStore.getState().syncCart()
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+          router.push('/auth/login')
+          return
+        }
+        setUserId(session.user.id)
+        
+        // Sync cart in background (don't block profile loading)
+        useCartStore.getState().syncCart().catch(e => console.warn('Cart sync warning:', e))
 
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle()
-      if (profile) {
-        const parts = profile.full_name ? profile.full_name.split(' ') : ['']
-        const d = { nombre: parts[0] || '', apellido: parts.slice(1).join(' ') || '', email: profile.email || session.user.email || '', telefono: profile.phone || '', fechaNacimiento: profile.birth_date || '', avatarUrl: profile.avatar_url || '' }
-        setUserData(d); setEditForm(d)
-      } else {
-        const d = { nombre: '', apellido: '', email: session.user.email || '', telefono: '', fechaNacimiento: '', avatarUrl: '' }
-        setUserData(d); setEditForm(d)
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle()
+        if (profile) {
+          const parts = profile.full_name ? profile.full_name.split(' ') : ['']
+          const d = { nombre: parts[0] || '', apellido: parts.slice(1).join(' ') || '', email: profile.email || session.user.email || '', telefono: profile.phone || '', fechaNacimiento: profile.birth_date || '', avatarUrl: profile.avatar_url || '' }
+          setUserData(d); setEditForm(d)
+        } else {
+          const d = { nombre: '', apellido: '', email: session.user.email || '', telefono: '', fechaNacimiento: '', avatarUrl: '' }
+          setUserData(d); setEditForm(d)
+        }
+
+        // Fetch orders with items
+        const { data: userOrders } = await supabase
+          .from('orders')
+          .select('id, order_number, created_at, status, total, subtotal, shipping_cost, tracking_number, carrier, tracking_photo_url, admin_note, shipped_at, items:order_items(product_name, quantity, price, color, size)')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+        if (userOrders) setOrders(userOrders as Order[])
+
+        // Fetch notifications
+        fetchNotifications()
+
+        // Fetch addresses
+        const { data: userAddresses } = await supabase.from('addresses').select('*').eq('user_id', session.user.id).order('is_default', { ascending: false })
+        if (userAddresses) setAddresses(userAddresses as Address[])
+
+        // Sync favorites in background (don't block profile loading)
+        await syncFavorites().catch(e => console.warn('Favorites sync warning:', e))
+      } catch (err) {
+        console.error('Error initializing profile page:', err)
+        toast.error('Ocurrió un error al cargar tus datos. Por favor recarga la página.')
+      } finally {
+        setLoading(false)
       }
-
-      // Fetch orders with items
-      const { data: userOrders } = await supabase
-        .from('orders')
-        .select('id, order_number, created_at, status, total, subtotal, shipping_cost, tracking_number, carrier, tracking_photo_url, admin_note, shipped_at, items:order_items(product_name, quantity, price, color, size)')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-      if (userOrders) setOrders(userOrders as Order[])
-
-      // Fetch notifications
-      fetchNotifications()
-
-      // Fetch addresses
-      const { data: userAddresses } = await supabase.from('addresses').select('*').eq('user_id', session.user.id).order('is_default', { ascending: false })
-      if (userAddresses) setAddresses(userAddresses as Address[])
-
-      await syncFavorites()
-      setLoading(false)
     }
     init()
     // eslint-disable-next-line react-hooks/exhaustive-deps

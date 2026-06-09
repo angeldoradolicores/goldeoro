@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -24,6 +24,19 @@ function LoginForm() {
     email: "",
     password: "",
   })
+
+  useEffect(() => {
+    // Clear any residual session when landing on login page to ensure clean login
+    const clearSession = async () => {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      useAuthStore.getState().setUser(null)
+      useAuthStore.getState().setIsAdmin(false)
+      useCartStore.getState().clearCart()
+      useFavoritesStore.getState().clearFavorites()
+    }
+    clearSession()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -166,7 +179,7 @@ function LoginForm() {
             <h2 className="text-2xl font-bold text-foreground mb-2">Bienvenido de vuelta</h2>
             <p className="text-muted-foreground mb-8">Ingresa tus credenciales para continuar</p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Email</label>
                 <div className="relative">
@@ -179,6 +192,7 @@ function LoginForm() {
                     className="pl-12 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
                     required
                     disabled={isLoading}
+                    autoComplete="off"
                   />
                 </div>
               </div>
@@ -195,6 +209,7 @@ function LoginForm() {
                     className="pl-12 pr-12 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
                     required
                     disabled={isLoading}
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
@@ -206,11 +221,7 @@ function LoginForm() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="rounded border-border text-gold focus:ring-gold/20" />
-                  <span className="text-sm text-muted-foreground">Recordarme</span>
-                </label>
+              <div className="flex items-center justify-end">
                 <Link href="/auth/recuperar" className="text-sm text-gold hover:text-gold/80 transition-colors">
                   Olvidaste tu contrasena?
                 </Link>
