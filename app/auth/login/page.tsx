@@ -72,7 +72,7 @@ function LoginForm() {
           toast.success('Bienvenido al Panel de Administrador')
           // Wait for Supabase SSR to finish writing session cookies asynchronously
           setTimeout(() => {
-            window.location.href = '/admin'
+            window.location.href = `/admin?t=${Date.now()}`
           }, 800)
           return
         }
@@ -81,7 +81,8 @@ function LoginForm() {
       toast.success('Bienvenido de vuelta!')
       // Wait for Supabase SSR to finish writing session cookies asynchronously
       setTimeout(() => {
-        window.location.href = redirectTo
+        const separator = redirectTo.includes('?') ? '&' : '?'
+        window.location.href = `${redirectTo}${separator}t=${Date.now()}`
       }, 800)
     } catch {
       toast.error('Error al iniciar sesion')
