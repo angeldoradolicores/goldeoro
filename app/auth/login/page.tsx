@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
+import { useAuthStore, useCartStore, useFavoritesStore } from "@/lib/store"
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isOAuthLoading, setIsOAuthLoading] = useState<string | null>(null)
+
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/'
@@ -39,6 +41,31 @@ function LoginForm() {
           ? 'Email o contrasena incorrectos' 
           : error.message)
         return
+      }
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .maybeSingle()
+          
+        const is_admin = !!profile?.is_admin
+        
+        // Update global stores immediately
+        useAuthStore.getState().setUser(user)
+        useAuthStore.getState().setIsAdmin(is_admin)
+        useAuthStore.getState().setInitialized(true)
+        useCartStore.getState().syncCart()
+        useFavoritesStore.getState().syncFavorites()
+
+        if (is_admin) {
+          toast.success('Bienvenido al Panel de Administrador')
+          router.push('/admin')
+          router.refresh()
+          return
+        }
       }
 
       toast.success('Bienvenido de vuelta!')
@@ -198,7 +225,7 @@ function LoginForm() {
                   <Loader2 className="w-6 h-6 animate-spin" />
                 ) : (
                   <>
-                    Iniciar Sesion
+                    Ingresar
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -269,6 +296,8 @@ function LoginForm() {
                 </Button>
               </div>
             </div>
+
+
 
             <p className="mt-8 text-center text-muted-foreground">
               No tienes cuenta?{" "}

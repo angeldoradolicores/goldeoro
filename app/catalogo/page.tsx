@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Search, SlidersHorizontal, Grid3X3, LayoutList, X, Sparkles, Filter } from 'lucide-react'
 import { mockProducts, type Product } from '@/lib/store'
 import { Navbar } from '@/components/navbar'
@@ -22,7 +23,10 @@ import {
 
 const categories = ['Todos', 'Urban', 'Streetwear', 'Premium', 'Sport', 'Classic']
 
-export default function CatalogoPage() {
+function CatalogoContent() {
+  const searchParams = useSearchParams()
+  const filter = searchParams.get('filter')
+
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [sortBy, setSortBy] = useState('featured')
@@ -30,6 +34,15 @@ export default function CatalogoPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Listen to filter search param changes to automatically update sorting
+  useEffect(() => {
+    if (filter === 'new') {
+      setSortBy('newest')
+    } else if (filter === 'bestsellers') {
+      setSortBy('featured')
+    }
+  }, [filter])
 
   // Fetch products from API or use mock data
   useEffect(() => {
@@ -70,6 +83,14 @@ export default function CatalogoPage() {
 
     // Sorting
     switch (sortBy) {
+      case 'newest':
+        filtered.sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0
+          if (dateA !== dateB) return dateB - dateA
+          return Number(b.id) - Number(a.id)
+        })
+        break
       case 'price-asc':
         filtered.sort((a, b) => a.price - b.price)
         break
@@ -220,6 +241,7 @@ export default function CatalogoPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="featured">Destacados</SelectItem>
+                <SelectItem value="newest">Novedades</SelectItem>
                 <SelectItem value="price-asc">Precio: Menor a Mayor</SelectItem>
                 <SelectItem value="price-desc">Precio: Mayor a Menor</SelectItem>
                 <SelectItem value="name">Nombre</SelectItem>
@@ -357,5 +379,23 @@ export default function CatalogoPage() {
       <CartDrawer />
       <ChatBot />
     </main>
+  )
+}
+
+export default function CatalogoPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-background flex flex-col justify-between">
+        <Navbar />
+        <section className="pt-32 pb-16 relative overflow-hidden flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl font-black text-foreground">Cargando Catálogo...</h1>
+          </div>
+        </section>
+        <Footer />
+      </main>
+    }>
+      <CatalogoContent />
+    </Suspense>
   )
 }

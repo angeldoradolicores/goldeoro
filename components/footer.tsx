@@ -43,31 +43,16 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-6">
               <span className="text-3xl font-display font-bold text-gradient-gold tracking-wider">
-                LUXURY
+                URBAN
               </span>
               <span className="block text-sm tracking-[0.4em] text-muted-foreground -mt-1">
-                HATS
+                CROWN
               </span>
             </Link>
             <p className="text-muted-foreground mb-6 max-w-sm leading-relaxed">
-              La tienda mas exclusiva de gorras urbanas premium en Colombia. 
-              Calidad, estilo y distincion en cada pieza.
+              La tienda más exclusiva de gorras urbanas premium en Colombia. 
+              Calidad, estilo y distinción en cada pieza.
             </p>
-
-            {/* Newsletter */}
-            <div className="mb-6">
-              <h4 className="font-semibold mb-3">Suscribete al Newsletter</h4>
-              <div className="flex gap-2">
-                <Input
-                  type="email"
-                  placeholder="Tu email"
-                  className="bg-secondary border-border/50"
-                />
-                <Button className="btn-luxury shrink-0">
-                  Suscribir
-                </Button>
-              </div>
-            </div>
 
             {/* Social Links */}
             <div className="flex items-center gap-4">
@@ -140,11 +125,11 @@ export function Footer() {
             <div className="mt-6 space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="w-4 h-4 text-primary" />
-                <span>+57 300 123 4567</span>
+                <span>+57 310 899 9049</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="w-4 h-4 text-primary" />
-                <span>info@luxuryhats.co</span>
+                <span>urbancrowncol4@gmail.com</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4 text-primary" />
@@ -157,7 +142,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border/30 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            2024 Luxury Hats. Todos los derechos reservados.
+            © 2026 Urban Crown. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6">
             <Link href="/privacidad" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

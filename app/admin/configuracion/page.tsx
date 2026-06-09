@@ -35,11 +35,11 @@ export default function ConfiguracionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label>Nombre de la Tienda</Label>
-            <Input defaultValue="Luxury Hats" className="mt-1 bg-secondary border-border/50" />
+            <Input defaultValue="Urban Crown" className="mt-1 bg-secondary border-border/50" />
           </div>
           <div>
             <Label>Email de Contacto</Label>
-            <Input defaultValue="info@luxuryhats.co" className="mt-1 bg-secondary border-border/50" />
+            <Input defaultValue="info@urbancrown.co" className="mt-1 bg-secondary border-border/50" />
           </div>
           <div>
             <Label>Telefono</Label>
@@ -47,12 +47,12 @@ export default function ConfiguracionPage() {
           </div>
           <div>
             <Label>Direccion</Label>
-            <Input defaultValue="Bogota, Colombia" className="mt-1 bg-secondary border-border/50" />
+            <Input defaultValue="Medellín, Colombia" className="mt-1 bg-secondary border-border/50" />
           </div>
           <div className="md:col-span-2">
             <Label>Descripcion</Label>
             <Textarea 
-              defaultValue="La tienda mas exclusiva de gorras urbanas premium en Colombia."
+              defaultValue="La tienda más exclusiva de gorras urbanas premium en Colombia."
               className="mt-1 bg-secondary border-border/50"
               rows={3}
             />

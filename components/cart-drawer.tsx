@@ -77,7 +77,7 @@ export function CartDrawer() {
                 <div className="space-y-4">
                   {items.map((item, index) => (
                     <motion.div
-                      key={`${item.product.id}-${item.selectedColor}-${item.selectedSize}`}
+                      key={`${item.product.id}-${item.selectedColor}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -100 }}
@@ -87,7 +87,7 @@ export function CartDrawer() {
                       {/* Image */}
                       <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0">
                         <Image
-                          src={item.product.images[0]}
+                          src={item.product.images?.[0] || '/images/placeholder-hat.jpg'}
                           alt={item.product.name}
                           fill
                           className="object-cover"
@@ -98,7 +98,7 @@ export function CartDrawer() {
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium truncate">{item.product.name}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {item.selectedColor} / {item.selectedSize}
+                          {item.selectedColor}
                         </p>
                         <p className="text-sm font-semibold text-primary mt-1">
                           {formatPrice(item.product.price)}

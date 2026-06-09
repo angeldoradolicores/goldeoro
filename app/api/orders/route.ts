@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -12,6 +13,7 @@ export async function POST(request: Request) {
     } = body
 
     const supabase = await createClient()
+    const supabaseAdmin = createAdminClient()
 
     // Get current user if logged in
     const { data: { user } } = await supabase.auth.getUser()
@@ -22,24 +24,33 @@ export async function POST(request: Request) {
 
     const total = subtotal + (shippingCost || 0)
 
+    // Generate order number
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    const randomStr = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
+    const orderNumber = `LH-${dateStr}-${randomStr}`
+
     // Create order in database
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
+        order_number: orderNumber,
         user_id: user?.id || null,
         status: 'pending',
         subtotal,
         shipping_cost: shippingCost || 0,
         total,
+        shipping_method: body.shippingMethod || 'standard',
+        shipping_address: {
+          name: shippingInfo.name,
+          phone: shippingInfo.phone,
+          email: shippingInfo.email,
+          address: shippingInfo.address,
+          city: shippingInfo.city,
+          state: shippingInfo.state,
+          postal_code: shippingInfo.postalCode || '',
+          country: 'Colombia'
+        },
         payment_method: paymentMethod || 'wompi',
-        shipping_name: shippingInfo.name,
-        shipping_phone: shippingInfo.phone,
-        shipping_email: shippingInfo.email,
-        shipping_address: shippingInfo.address,
-        shipping_city: shippingInfo.city,
-        shipping_state: shippingInfo.state,
-        shipping_postal_code: shippingInfo.postalCode || '',
-        shipping_country: 'Colombia',
         notes: shippingInfo.notes || '',
       })
       .select()
@@ -61,7 +72,7 @@ export async function POST(request: Request) {
       size?: string
     }) => ({
       order_id: order.id,
-      product_id: item.productId,
+      product_id: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.productId) ? item.productId : null,
       product_name: item.productName,
       product_image: item.productImage || '',
       price: item.price,
@@ -70,38 +81,49 @@ export async function POST(request: Request) {
       size: item.size || '',
     }))
 
-    const { error: itemsError } = await supabase
+    const { error: itemsError } = await supabaseAdmin
       .from('order_items')
       .insert(orderItems)
 
     if (itemsError) {
       console.error('[v0] Order items error:', itemsError)
       // Rollback order
-      await supabase.from('orders').delete().eq('id', order.id)
-      return NextResponse.json({ error: 'Error al crear los items de la orden' }, { status: 500 })
+      await supabaseAdmin.from('orders').delete().eq('id', order.id)
+      return NextResponse.json({ error: 'Error al crear los items de la orden: ' + itemsError.message }, { status: 500 })
     }
 
     // Update product stock
     for (const item of items) {
-      await supabase.rpc('decrement_stock', { 
-        product_id: item.productId, 
-        quantity: item.quantity 
-      }).catch(() => {
+      try {
+        await supabaseAdmin.rpc('decrement_stock', { 
+          product_id: item.productId, 
+          quantity: item.quantity 
+        })
+      } catch {
         // If RPC doesn't exist, do it manually
-        supabase
+        await supabaseAdmin
           .from('products')
-          .update({ stock: supabase.rpc('greatest', { a: 0, b: `stock - ${item.quantity}` }) })
+          .select('stock')
           .eq('id', item.productId)
-      })
+          .single()
+          .then(async ({ data }) => {
+            if (data) {
+              await supabaseAdmin
+                .from('products')
+                .update({ stock: Math.max(0, data.stock - item.quantity) })
+                .eq('id', item.productId)
+            }
+          })
+      }
     }
 
     // Generate Wompi checkout URL
-    const wompiPublicKey = process.env.WOMPI_PUBLIC_KEY || 'pub_test_XXXXXXXXXXXXXXXXXX'
+    const wompiPublicKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY || process.env.WOMPI_PUBLIC_KEY || 'pub_test_XXXXXXXXXXXXXXXXXX'
     const amountInCents = total * 100
     const reference = order.id
     const redirectUrl = encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/checkout/confirmacion?ref=${order.id}`)
 
-    const checkoutUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=${amountInCents}&reference=${reference}&redirect-url=${redirectUrl}&customer-data:email=${shippingInfo.email}&customer-data:full-name=${encodeURIComponent(shippingInfo.name)}&customer-data:phone-number=${shippingInfo.phone}`
+    const checkoutUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=${amountInCents}&reference=${reference}&redirect-url=${redirectUrl}&customer-data:email=${encodeURIComponent(shippingInfo.email || '')}&customer-data:full-name=${encodeURIComponent(shippingInfo.name || '')}&customer-data:phone-number=${encodeURIComponent(shippingInfo.phone || '')}`
 
     return NextResponse.json({
       success: true,
@@ -144,7 +166,7 @@ export async function GET(request: Request) {
           .from('profiles')
           .select('is_admin')
           .eq('id', user?.id || '')
-          .single()
+          .maybeSingle()
 
         if (!profile?.is_admin) {
           return NextResponse.json({ error: 'No autorizado' }, { status: 403 })

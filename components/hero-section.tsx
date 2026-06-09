@@ -3,11 +3,17 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, Star, Sparkles } from 'lucide-react'
 import Link from 'next/link'
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"]
@@ -65,7 +71,7 @@ export function HeroSection() {
         />
 
         {/* Floating stars */}
-        {[...Array(12)].map((_, i) => (
+        {mounted && [...Array(12)].map((_, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0 }}

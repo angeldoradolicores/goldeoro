@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { createClient } from '@/lib/supabase/client'
 
 const sidebarLinks = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -31,6 +32,55 @@ const sidebarLinks = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
+  const [bellRing, setBellRing] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    let mounted = true
+
+    // Fetch initial pending count
+    const fetchPending = async () => {
+      const { count } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+      if (mounted && count !== null) {
+        setPendingCount(count)
+      }
+    }
+    fetchPending()
+
+    // Subscribe to real-time inserts on orders table
+    const channel = supabase
+      .channel('admin-orders-bell')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'orders' },
+        (payload) => {
+          if (!mounted) return
+          if (payload.new?.status === 'pending') {
+            setPendingCount((prev) => prev + 1)
+            // Ring animation
+            setBellRing(true)
+            setTimeout(() => setBellRing(false), 1000)
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders' },
+        () => {
+          if (mounted) fetchPending()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      mounted = false
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -160,12 +210,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            {/* Bell with real-time pending count */}
+            <Link href="/admin/pedidos">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                title={`${pendingCount} pedido(s) pendiente(s)`}
+              >
+                <motion.div
+                  animate={bellRing ? { rotate: [0, -15, 15, -10, 10, -5, 5, 0] } : {}}
+                  transition={{ duration: 0.6 }}
+                >
+                  <Bell className="w-5 h-5" />
+                </motion.div>
+                {pendingCount > 0 && (
+                  <motion.span
+                    key={pendingCount}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center"
+                  >
+                    {pendingCount > 99 ? '99+' : pendingCount}
+                  </motion.span>
+                )}
+              </Button>
+            </Link>
             <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-border">
               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                 <span className="text-xs font-bold text-primary">AD</span>

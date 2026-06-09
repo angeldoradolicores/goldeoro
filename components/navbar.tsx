@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ShoppingBag, User, Search, Crown, Sparkles, LogOut } from 'lucide-react'
-import { useCartStore } from '@/lib/store'
+import { useCartStore, useFavoritesStore, useAuthStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { User as SupabaseUser } from '@supabase/supabase-js'
@@ -20,9 +20,9 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [user, setUser] = useState<SupabaseUser | null>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const { toggleCart, itemCount } = useCartStore()
+  
+  const { user, isAdmin, isInitialized, setUser, setIsAdmin, setInitialized, logout } = useAuthStore()
+  const { toggleCart, itemCount, clearCart } = useCartStore()
   const count = itemCount()
 
   useEffect(() => {
@@ -37,6 +37,8 @@ export function Navbar() {
     const supabase = createClient()
     
     const getUser = async () => {
+      if (isInitialized) return // Skip if we already checked auth
+      
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
       
@@ -45,29 +47,46 @@ export function Navbar() {
           .from('profiles')
           .select('is_admin')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
         
         setIsAdmin(profile?.is_admin || false)
+        
+        // Sync cart and favorites on load
+        useCartStore.getState().syncCart()
+        useFavoritesStore.getState().syncFavorites()
       }
+      setInitialized(true)
     }
 
     getUser()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user || null)
       if (!session?.user) {
         setIsAdmin(false)
+        useCartStore.getState().clearCart()
+        useFavoritesStore.getState().clearFavorites()
+      } else {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', session.user.id)
+          .maybeSingle()
+        
+        setIsAdmin(profile?.is_admin || false)
+        
+        // Sync/load cart and favorites
+        useCartStore.getState().syncCart()
+        useFavoritesStore.getState().syncFavorites()
       }
+      setInitialized(true)
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [isInitialized, setUser, setIsAdmin, setInitialized])
 
   const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    setUser(null)
-    setIsAdmin(false)
+    await logout()
     window.location.href = '/'
   }
 
@@ -106,10 +125,10 @@ export function Navbar() {
                 </motion.div>
                 <div className="flex flex-col">
                   <span className="text-xl md:text-2xl font-black text-gradient-neon tracking-tight">
-                    LUXURY
+                    URBAN CROWN
                   </span>
-                  <span className="text-[10px] tracking-[0.3em] text-muted-foreground -mt-1">
-                    HATS MEDELLIN
+                  <span className="text-[10px] tracking-[0.3em] text-gold -mt-1 uppercase font-semibold">
+                    Luxury Streetwear
                   </span>
                 </div>
               </motion.div>
@@ -167,23 +186,16 @@ export function Navbar() {
                       <User className="w-5 h-5" />
                     </motion.button>
                   </Link>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleLogout}
-                    className="p-2 text-foreground/60 hover:text-destructive transition-colors"
-                  >
-                    <LogOut className="w-5 h-5" />
-                  </motion.button>
                 </div>
               ) : (
                 <Link href="/auth/login">
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="p-2 text-foreground/80 hover:text-neon-cyan transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold uppercase tracking-wider bg-neon-pink/10 text-neon-pink rounded-full border border-neon-pink/40 hover:bg-neon-pink/20 transition-colors"
                   >
-                    <User className="w-5 h-5" />
+                    <User className="w-4 h-4" />
+                    Ingresar
                   </motion.button>
                 </Link>
               )}
@@ -247,7 +259,7 @@ export function Navbar() {
                 <div className="flex items-center gap-2">
                   <Crown className="w-6 h-6 text-neon-pink" />
                   <span className="text-xl font-black text-gradient-neon">
-                    LUXURY HATS
+                    URBAN CROWN
                   </span>
                 </div>
                 <Button
@@ -302,7 +314,7 @@ export function Navbar() {
                     <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button className="w-full btn-neon-cyan py-6">
                         <User className="w-4 h-4 mr-2" />
-                        Iniciar Sesion
+                        Ingresar
                       </Button>
                     </Link>
                   </motion.div>

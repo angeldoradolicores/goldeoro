@@ -16,7 +16,7 @@ export async function GET() {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.is_admin) {
       return NextResponse.json({ error: 'Acceso denegado', products: [] }, { status: 403 })
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.is_admin) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
@@ -86,7 +86,6 @@ export async function POST(request: Request) {
         images: body.images || [],
         videos: body.videos || [],
         colors: body.colors || ['Negro'],
-        sizes: body.sizes || ['M'],
       })
       .select()
       .single()
@@ -118,7 +117,7 @@ export async function PUT(request: Request) {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.is_admin) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
@@ -144,7 +143,6 @@ export async function PUT(request: Request) {
         images: body.images || [],
         videos: body.videos || [],
         colors: body.colors || ['Negro'],
-        sizes: body.sizes || ['M'],
       })
       .eq('id', body.id)
       .select()
@@ -177,7 +175,7 @@ export async function DELETE(request: Request) {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.is_admin) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })

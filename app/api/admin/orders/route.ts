@@ -15,7 +15,7 @@ export async function GET() {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.is_admin) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
@@ -54,7 +54,7 @@ export async function PUT(request: Request) {
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (!profile?.is_admin) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })

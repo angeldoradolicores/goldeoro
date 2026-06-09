@@ -11,11 +11,11 @@ export default function ContactoPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       {/* Hero */}
       <section className="pt-32 pb-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-gold/5 via-transparent to-transparent" />
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -44,20 +44,20 @@ export default function ContactoPage() {
               className="bg-card/50 backdrop-blur border border-border rounded-3xl p-8"
             >
               <h2 className="text-2xl font-bold text-foreground mb-6">Envianos un mensaje</h2>
-              
+
               <form className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Nombre</label>
-                    <Input 
-                      placeholder="Tu nombre" 
+                    <Input
+                      placeholder="Tu nombre"
                       className="h-14 bg-background/50 border-border rounded-xl focus:border-gold"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Apellido</label>
-                    <Input 
-                      placeholder="Tu apellido" 
+                    <Input
+                      placeholder="Tu apellido"
                       className="h-14 bg-background/50 border-border rounded-xl focus:border-gold"
                     />
                   </div>
@@ -65,18 +65,18 @@ export default function ContactoPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Email</label>
-                  <Input 
+                  <Input
                     type="email"
-                    placeholder="tu@email.com" 
+                    placeholder="tu@email.com"
                     className="h-14 bg-background/50 border-border rounded-xl focus:border-gold"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Telefono</label>
-                  <Input 
+                  <Input
                     type="tel"
-                    placeholder="+57 300 123 4567" 
+                    placeholder="+57 300 123 4567"
                     className="h-14 bg-background/50 border-border rounded-xl focus:border-gold"
                   />
                 </div>
@@ -95,7 +95,7 @@ export default function ContactoPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Mensaje</label>
-                  <textarea 
+                  <textarea
                     placeholder="Escribe tu mensaje aqui..."
                     rows={5}
                     className="w-full px-4 py-3 bg-background/50 border border-border rounded-xl focus:outline-none focus:border-gold text-foreground resize-none"
@@ -117,10 +117,9 @@ export default function ContactoPage() {
               {/* Info Cards */}
               <div className="space-y-4">
                 {[
-                  { icon: MapPin, title: "Direccion", info: "Calle 85 #15-30, Bogota, Colombia" },
-                  { icon: Phone, title: "Telefono", info: "+57 (1) 234 5678" },
-                  { icon: Mail, title: "Email", info: "contacto@luxuryhats.com" },
-                  { icon: Clock, title: "Horario", info: "Lun - Vie: 9am - 6pm | Sab: 10am - 4pm" },
+                  { icon: Phone, title: "Telefono", info: "3108999049" },
+                  { icon: Mail, title: "Email", info: "urbancrowncol4@gmail.com" },
+                  { icon: Clock, title: "Horario", info: "Lun - Vie: 8am - 6pm | Sab: 9am - 7pm" },
                 ].map((item, index) => (
                   <div
                     key={index}
@@ -143,8 +142,6 @@ export default function ContactoPage() {
                 <div className="flex gap-4">
                   {[
                     { icon: Instagram, label: "Instagram", href: "#" },
-                    { icon: Facebook, label: "Facebook", href: "#" },
-                    { icon: Twitter, label: "Twitter", href: "#" },
                   ].map((social, index) => (
                     <a
                       key={index}
@@ -157,15 +154,7 @@ export default function ContactoPage() {
                 </div>
               </div>
 
-              {/* Map Placeholder */}
-              <div className="aspect-video bg-card/50 backdrop-blur border border-border rounded-2xl overflow-hidden relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="w-12 h-12 text-gold/30 mx-auto mb-2" />
-                    <p className="text-muted-foreground">Mapa interactivo</p>
-                  </div>
-                </div>
-              </div>
+
             </motion.div>
           </div>
         </div>

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
-import Link from 'next/link'
+import Image from 'next/image';
+import departmentsData from '../../departments.json';
+import citiesData from '../../cities.json';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Truck, CreditCard, MapPin, CheckCircle, Minus, Plus, Trash2, Package, Loader2, Smartphone, Building2 } from 'lucide-react'
 import { useCartStore } from '@/lib/store'
@@ -30,15 +32,23 @@ function formatPrice(price: number) {
 }
 
 const colombianCities = [
-  'Bogota', 'Medellin', 'Cali', 'Barranquilla', 'Cartagena', 
+  'Bogota', 'Medellin', 'Cali', 'Barranquilla', 'Cartagena',
   'Bucaramanga', 'Pereira', 'Manizales', 'Santa Marta', 'Cucuta',
   'Ibague', 'Villavicencio', 'Pasto', 'Monteria', 'Neiva'
 ]
 
+// Mapping of departments to their municipalities (cities) generated from JSON data
+const departmentMunicipalities: Record<string, string[]> = {};
+
+departmentsData.data.forEach((dept: { id: number; name: string }) => {
+  const towns = citiesData.data
+    .filter((c: { departmentId: number; name: string }) => c.departmentId === dept.id)
+    .map((c: { name: string }) => c.name);
+  departmentMunicipalities[dept.name] = towns;
+});
+
 const shippingOptions = [
-  { id: 'interrapidisimo', name: 'InterRapidisimo', days: '2-3 dias', price: 15000, logo: '/images/interrapidisimo.png' },
-  { id: 'enviar', name: 'Envia Standard', days: '3-5 dias', price: 12000, logo: '/images/envia.png' },
-  { id: 'express', name: 'Envia Express', days: '1-2 dias', price: 25000, logo: '/images/envia.png' },
+  { id: 'interrapidisimo', name: 'InterRapidisimo', days: '2-3 dias', price: 17000, logo: '/images/interrapidisimo.png' },
   { id: 'recoger', name: 'Recoger en Tienda', days: 'Disponible en 24h', price: 0, logo: null },
 ]
 
@@ -67,7 +77,8 @@ export default function CheckoutPage() {
     address: '',
     postalCode: '',
   })
-  const [selectedShipping, setSelectedShipping] = useState('')
+  const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [municipalities, setMunicipalities] = useState<string[]>([]);
   const [selectedPayment, setSelectedPayment] = useState('CARD')
   const [cardData, setCardData] = useState({
     number: '',
@@ -78,6 +89,7 @@ export default function CheckoutPage() {
   })
   const [nequiPhone, setNequiPhone] = useState('')
 
+  const [selectedShipping, setSelectedShipping] = useState('')
   const shippingCost = shippingOptions.find(s => s.id === selectedShipping)?.price || 0
   const discountAmount = appliedPromo?.discount || 0
   const finalTotal = cartTotal + shippingCost - discountAmount
@@ -120,8 +132,20 @@ export default function CheckoutPage() {
 
   // Complete order
   const handleCompleteOrder = async () => {
-    if (!shippingData.fullName || !shippingData.email || !shippingData.phone || !shippingData.city || !shippingData.address) {
+    if (!shippingData.fullName || !shippingData.email || !shippingData.phone || !selectedDepartment || !shippingData.city || !shippingData.address) {
       toast.error('Por favor completa todos los campos de envio')
+      setStep(2)
+      return
+    }
+    // Simple email format validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shippingData.email)) {
+      toast.error('Correo electrónico no válido')
+      setStep(2)
+      return
+    }
+    // Simple phone validation (digits only, length 7-15)
+    if (!/^\d{7,15}$/.test(shippingData.phone.replace(/\D/g, ''))) {
+      toast.error('Número de celular no válido')
       setStep(2)
       return
     }
@@ -148,7 +172,7 @@ export default function CheckoutPage() {
       const orderItems = items.map(item => ({
         productId: item.product.id,
         productName: item.product.name,
-        productImage: item.product.images[0],
+        productImage: item.product.images?.[0] || '/images/placeholder-hat.jpg',
         price: item.product.price,
         quantity: item.quantity,
         color: item.selectedColor,
@@ -166,10 +190,11 @@ export default function CheckoutPage() {
             email: shippingData.email,
             address: shippingData.address,
             city: shippingData.city,
-            state: shippingData.city,
+            state: selectedDepartment,
             postalCode: shippingData.postalCode || '000000',
             notes: '',
           },
+          shippingMethod: selectedShipping,
           shippingCost,
           paymentMethod: selectedPayment,
         }),
@@ -260,11 +285,10 @@ export default function CheckoutPage() {
                   disabled={s.num > step}
                   className={`flex items-center gap-2 ${s.num <= step ? 'text-primary' : 'text-muted-foreground'}`}
                 >
-                  <span className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
-                    s.num < step ? 'bg-primary text-primary-foreground' : 
-                    s.num === step ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' : 
-                    'bg-secondary'
-                  }`}>
+                  <span className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all ${s.num < step ? 'bg-primary text-primary-foreground' :
+                      s.num === step ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' :
+                        'bg-secondary'
+                    }`}>
                     {s.num < step ? <CheckCircle className="w-5 h-5" /> : s.num}
                   </span>
                   <span className="hidden sm:inline font-medium">{s.label}</span>
@@ -294,12 +318,12 @@ export default function CheckoutPage() {
                     </h2>
                     {items.map((item) => (
                       <div
-                        key={`${item.product.id}-${item.selectedColor}-${item.selectedSize}`}
+                        key={`${item.product.id}-${item.selectedColor}`}
                         className="flex gap-4 p-4 rounded-xl bg-card border border-border/50"
                       >
                         <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0">
                           <Image
-                            src={item.product.images[0]}
+                            src={item.product.images?.[0] || '/images/placeholder-hat.jpg'}
                             alt={item.product.name}
                             fill
                             className="object-cover"
@@ -308,7 +332,7 @@ export default function CheckoutPage() {
                         <div className="flex-1">
                           <h3 className="font-semibold">{item.product.name}</h3>
                           <p className="text-sm text-muted-foreground">
-                            {item.selectedColor} / {item.selectedSize}
+                            {item.selectedColor}
                           </p>
                           <p className="text-primary font-semibold mt-1">
                             {formatPrice(item.product.price)}
@@ -390,15 +414,40 @@ export default function CheckoutPage() {
                           required
                         />
                       </div>
-                      <div>
-                        <Label>Ciudad *</Label>
-                        <Select value={shippingData.city} onValueChange={(value) => setShippingData({ ...shippingData, city: value })}>
+                      <div className="md:col-span-2">
+                        <Label>Departamento *</Label>
+                        <Select
+                          value={selectedDepartment}
+                          onValueChange={(value) => {
+                            setSelectedDepartment(value);
+                            setMunicipalities(departmentMunicipalities[value] || []);
+                            // Reset city when department changes
+                            setShippingData({ ...shippingData, city: '' });
+                          }}
+                        >
                           <SelectTrigger className="mt-1 bg-secondary border-border/50">
-                            <SelectValue placeholder="Selecciona tu ciudad" />
+                            <SelectValue placeholder="Selecciona tu departamento" />
                           </SelectTrigger>
                           <SelectContent>
-                            {colombianCities.map((city) => (
-                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            {Object.keys(departmentMunicipalities).map((dept) => (
+                              <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label>Municipio *</Label>
+                        <Select
+                          value={shippingData.city}
+                          onValueChange={(value) => setShippingData({ ...shippingData, city: value })}
+                          disabled={!selectedDepartment}
+                        >
+                          <SelectTrigger className="mt-1 bg-secondary border-border/50">
+                            <SelectValue placeholder="Selecciona tu municipio" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {municipalities.map((mun) => (
+                              <SelectItem key={mun} value={mun}>{mun}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -434,11 +483,10 @@ export default function CheckoutPage() {
                           {shippingOptions.map((option) => (
                             <div
                               key={option.id}
-                              className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${
-                                selectedShipping === option.id 
-                                  ? 'border-primary bg-primary/5' 
+                              className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${selectedShipping === option.id
+                                  ? 'border-primary bg-primary/5'
                                   : 'border-border/50 hover:border-primary/50'
-                              }`}
+                                }`}
                               onClick={() => setSelectedShipping(option.id)}
                             >
                               <div className="flex items-center gap-3">
@@ -461,8 +509,8 @@ export default function CheckoutPage() {
                       <Button variant="outline" onClick={() => setStep(1)} className="flex-1 border-border/50">
                         Atras
                       </Button>
-                      <Button 
-                        onClick={() => setStep(3)} 
+                      <Button
+                        onClick={() => setStep(3)}
                         className="flex-1 btn-luxury"
                         disabled={!shippingData.city || !selectedShipping || !shippingData.fullName || !shippingData.email || !shippingData.phone || !shippingData.address}
                       >
@@ -491,11 +539,10 @@ export default function CheckoutPage() {
                         {paymentMethods.map((method) => (
                           <div
                             key={method.id}
-                            className={`flex flex-col items-center p-4 rounded-xl border cursor-pointer transition-all ${
-                              selectedPayment === method.id 
-                                ? 'border-primary bg-primary/5' 
+                            className={`flex flex-col items-center p-4 rounded-xl border cursor-pointer transition-all ${selectedPayment === method.id
+                                ? 'border-primary bg-primary/5'
                                 : 'border-border/50 hover:border-primary/50'
-                            }`}
+                              }`}
                             onClick={() => setSelectedPayment(method.id)}
                           >
                             <RadioGroupItem value={method.id} id={method.id} className="sr-only" />
@@ -617,8 +664,8 @@ export default function CheckoutPage() {
                       <Button variant="outline" onClick={() => setStep(2)} className="flex-1 border-border/50">
                         Atras
                       </Button>
-                      <Button 
-                        onClick={handleCompleteOrder} 
+                      <Button
+                        onClick={handleCompleteOrder}
                         disabled={isLoading}
                         className="flex-1 btn-luxury"
                       >
@@ -702,8 +749,8 @@ export default function CheckoutPage() {
                       placeholder="LUXURY30"
                       disabled={!!appliedPromo}
                     />
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="border-border/50 shrink-0"
                       onClick={handleApplyPromo}
                       disabled={isApplyingPromo || !!appliedPromo}

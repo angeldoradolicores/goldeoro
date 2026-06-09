@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, X, Send, Bot, User, Sparkles } from 'lucide-react'
+import Image from 'next/image'
+import { MessageCircle, X, Send, Bot, User, Sparkles, Crown } from 'lucide-react'
 import { useChatStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -64,7 +65,7 @@ export function ChatBot() {
     { label: 'Productos', message: 'Que productos tienen?' },
     { label: 'Envios', message: 'Como funcionan los envios?' },
     { label: 'Promociones', message: 'Tienen promociones activas?' },
-    { label: 'Tallas', message: 'Como elijo mi talla?' },
+    { label: 'Mas Vendidas', message: 'Cuáles son las gorras más vendidas?' },
   ]
 
   const handleQuickAction = (message: string) => {
@@ -97,10 +98,14 @@ export function ChatBot() {
               initial={{ rotate: 90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: -90, opacity: 0 }}
-              className="relative"
+              className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-full"
             >
-              <MessageCircle className="w-6 h-6" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background animate-pulse" />
+              <Image
+                src="/logo.png"
+                alt="Logo Urban Crown"
+                fill
+                className="object-cover"
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -119,14 +124,21 @@ export function ChatBot() {
             {/* Header */}
             <div className="p-4 border-b border-border bg-secondary/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-full border border-gold/40 relative overflow-hidden bg-background shrink-0">
+                  <Image
+                    src="/logo.png"
+                    alt="Logo Urban Crown"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold">Luxury Assistant</h3>
+                  <h3 className="font-bold flex items-center gap-1.5 text-foreground tracking-wide text-sm md:text-base">
+                    CROWN ASISTENTE
+                  </h3>
                   <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-green-500" />
-                    <p className="text-xs text-muted-foreground">En linea - Respuesta inmediata</p>
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <p className="text-xs text-muted-foreground">Tu asesor de estilo Urban Crown</p>
                   </div>
                 </div>
               </div>
@@ -136,9 +148,16 @@ export function ChatBot() {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 && (
                 <div className="text-center py-6">
-                  <Bot className="w-12 h-12 mx-auto text-primary/30 mb-4" />
+                  <div className="w-16 h-16 mx-auto relative overflow-hidden rounded-full border border-border/50 mb-4 bg-background">
+                    <Image
+                      src="/logo.png"
+                      alt="Logo Urban Crown"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                   <p className="text-muted-foreground text-sm mb-4">
-                    Hola! Soy tu asistente de Luxury Hats. Preguntame sobre productos, precios, envios o promociones.
+                    ¡Hola! Soy CROWN ASISTENTE, tu asesor de estilo en Urban Crown. Pregúntame sobre productos, precios, envíos o promociones.
                   </p>
                   
                   {/* Quick Actions */}

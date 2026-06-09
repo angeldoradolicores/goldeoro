@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 
-const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY!
-const WOMPI_PRIVATE_KEY = process.env.WOMPI_PRIVATE_KEY!
+const WOMPI_PUBLIC_KEY = process.env.WOMPI_PUBLIC_KEY || process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY || ''
+const WOMPI_PRIVATE_KEY = process.env.WOMPI_PRIVATE_KEY || ''
 const WOMPI_INTEGRITY_KEY = process.env.WOMPI_INTEGRITY_KEY || 'prod_integrity_VVnqeLsOqKVJ1aJL2xLaM9xKjS85RLXV'
 
 const WOMPI_API_URL = 'https://api.wompi.co/v1'

@@ -18,13 +18,13 @@ const permanentMarker = Permanent_Marker({
 })
 
 export const metadata: Metadata = {
-  title: 'Luxury Hats Medellin | Street Culture Premium Caps',
-  description: 'Gorras exclusivas nacidas en las calles de Medellin. Cada pieza es una obra de arte urbano que define tu estilo. Envios a toda Colombia.',
-  keywords: ['gorras', 'streetwear', 'urban', 'luxury', 'premium', 'caps', 'Medellin', 'Colombia', 'street culture'],
-  authors: [{ name: 'Luxury Hats Medellin' }],
+  title: 'Urban Crown | Street Culture Premium Caps & Luxury Streetwear',
+  description: 'Gorras exclusivas que fusionan el lujo contemporáneo con la esencia de la cultura streetwear. Diseños seleccionados para quienes valoran la autenticidad.',
+  keywords: ['gorras', 'streetwear', 'urban', 'luxury', 'premium', 'caps', 'Urban Crown', 'Colombia', 'street culture'],
+  authors: [{ name: 'Urban Crown' }],
   openGraph: {
-    title: 'Luxury Hats Medellin | Street Culture',
-    description: 'Gorras exclusivas nacidas en las calles de Medellin',
+    title: 'Urban Crown | Street Culture & Luxury Hats',
+    description: 'Donde el lujo y la calle se encuentran. Colecciones exclusivas.',
     type: 'website',
   },
 }

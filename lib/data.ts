@@ -143,7 +143,7 @@ export const mockProducts: Product[] = [
     price: 149000,
     images: ["/placeholder.svg"],
     category: "dad-hat",
-    brand: "Luxury Hats",
+    brand: "Urban Crown",
     colors: ["Beige", "Negro", "Blanco", "Verde Oliva"],
     sizes: ["Ajustable"],
     stock: 65,
@@ -213,7 +213,7 @@ export const mockProducts: Product[] = [
     price: 119000,
     images: ["/placeholder.svg"],
     category: "trucker",
-    brand: "Luxury Hats",
+    brand: "Urban Crown",
     colors: ["Negro/Blanco", "Azul/Blanco", "Rojo/Blanco"],
     sizes: ["Ajustable"],
     stock: 78,
@@ -237,7 +237,7 @@ export const brands = [
   "New Era",
   "Mitchell & Ness",
   "47 Brand",
-  "Luxury Hats",
+  "Urban Crown",
 ]
 
 export const shippingOptions = [
@@ -274,8 +274,8 @@ export const shippingOptions = [
 // Chatbot responses
 export const chatbotResponses = {
   greetings: [
-    "Hola! Bienvenido a Luxury Hats. Como puedo ayudarte hoy?",
-    "Hola! Soy el asistente virtual de Luxury Hats. En que puedo servirte?",
+    "Hola! Bienvenido a Urban Crown. Como puedo ayudarte hoy?",
+    "Hola! Soy el asistente virtual de Urban Crown. En que puedo servirte?",
   ],
   shipping: [
     "Ofrecemos envio a todo Colombia. Los tiempos de entrega son: InterRapidisimo (2-3 dias), Envia Standard (3-5 dias), y Envia Express (1-2 dias). El envio es gratis en compras mayores a $200.000.",

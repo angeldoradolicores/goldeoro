@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { createClient } from './supabase/client'
+import { User as SupabaseUser } from '@supabase/supabase-js'
 
 // Product interface for database format
 export interface Product {
@@ -49,6 +51,7 @@ interface CartStore {
   setCartOpen: (open: boolean) => void
   total: () => number
   itemCount: () => number
+  syncCart: () => Promise<void>
 }
 
 interface ChatStore {
@@ -60,47 +63,279 @@ interface ChatStore {
   clearMessages: () => void
 }
 
+interface FavoritesStore {
+  items: Product[]
+  toggleFavorite: (product: Product) => Promise<void>
+  isFavorite: (productId: string) => boolean
+  syncFavorites: () => Promise<void>
+  clearFavorites: () => void
+}
+
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
   isOpen: false,
-  addItem: (product, color, size, quantity = 1) => set((state) => {
-    const existingItem = state.items.find(
+  addItem: (product, color, size, quantity = 1) => {
+    let newItems = []
+    const existingItem = get().items.find(
       (i) => i.product.id === product.id && 
              i.selectedColor === color && 
              i.selectedSize === size
     )
     if (existingItem) {
-      return {
-        items: state.items.map((i) =>
-          i.product.id === product.id &&
-          i.selectedColor === color &&
-          i.selectedSize === size
-            ? { ...i, quantity: i.quantity + quantity }
-            : i
-        ),
-        isOpen: true, // Open cart drawer when adding
+      newItems = get().items.map((i) =>
+        i.product.id === product.id &&
+        i.selectedColor === color &&
+        i.selectedSize === size
+          ? { ...i, quantity: i.quantity + quantity }
+          : i
+      )
+    } else {
+      newItems = [...get().items, { product, quantity, selectedColor: color, selectedSize: size }]
+    }
+
+    set({ items: newItems, isOpen: true })
+
+    // Sync to Supabase in background
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        const item = newItems.find(
+          (i) => i.product.id === product.id && 
+                 i.selectedColor === color && 
+                 i.selectedSize === size
+        )
+        if (item) {
+          supabase.from('cart_items').upsert({
+            user_id: session.user.id,
+            product_id: product.id,
+            quantity: item.quantity,
+            selected_color: color,
+            selected_size: size
+          }, {
+            onConflict: 'user_id,product_id,selected_color,selected_size'
+          }).then(({ error }) => {
+            if (error) console.error('Error syncing cart item upsert:', error.message)
+          })
+        }
       }
-    }
-    return { 
-      items: [...state.items, { product, quantity, selectedColor: color, selectedSize: size }],
-      isOpen: true, // Open cart drawer when adding
-    }
-  }),
-  removeItem: (productId) => set((state) => ({
-    items: state.items.filter((i) => i.product.id !== productId),
-  })),
-  updateQuantity: (productId, quantity) => set((state) => ({
-    items: quantity === 0
-      ? state.items.filter((i) => i.product.id !== productId)
-      : state.items.map((i) =>
+    })
+  },
+  removeItem: (productId) => {
+    const newItems = get().items.filter((i) => i.product.id !== productId)
+    set({ items: newItems })
+
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        supabase
+          .from('cart_items')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('product_id', productId)
+          .then(({ error }) => {
+            if (error) console.error('Error syncing cart item removal:', error.message)
+          })
+      }
+    })
+  },
+  updateQuantity: (productId, quantity) => {
+    const newItems = quantity === 0
+      ? get().items.filter((i) => i.product.id !== productId)
+      : get().items.map((i) =>
           i.product.id === productId ? { ...i, quantity } : i
-        ),
-  })),
-  clearCart: () => set({ items: [] }),
+        )
+    set({ items: newItems })
+
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        if (quantity === 0) {
+          supabase
+            .from('cart_items')
+            .delete()
+            .eq('user_id', session.user.id)
+            .eq('product_id', productId)
+            .then(({ error }) => {
+              if (error) console.error('Error syncing cart item removal:', error.message)
+            })
+        } else {
+          // Find the exact item to update
+          const item = newItems.find((i) => i.product.id === productId)
+          if (item) {
+            supabase
+              .from('cart_items')
+              .update({ quantity })
+              .eq('user_id', session.user.id)
+              .eq('product_id', productId)
+              .then(({ error }) => {
+                if (error) console.error('Error syncing cart item quantity:', error.message)
+              })
+          }
+        }
+      }
+    })
+  },
+  clearCart: () => {
+    set({ items: [] })
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        supabase
+          .from('cart_items')
+          .delete()
+          .eq('user_id', session.user.id)
+          .then(({ error }) => {
+            if (error) console.error('Error clearing cart in DB:', error.message)
+          })
+      }
+    })
+  },
   toggleCart: () => set((state) => ({ isOpen: !state.isOpen })),
   setCartOpen: (open) => set({ isOpen: open }),
   total: () => get().items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
   itemCount: () => get().items.reduce((acc, item) => acc + item.quantity, 0),
+  syncCart: async () => {
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+
+    const userId = session.user.id
+    const localItems = get().items
+
+    if (localItems.length > 0) {
+      // Merge local items to Supabase
+      for (const item of localItems) {
+        await supabase
+          .from('cart_items')
+          .upsert({
+            user_id: userId,
+            product_id: item.product.id,
+            quantity: item.quantity,
+            selected_color: item.selectedColor,
+            selected_size: item.selectedSize
+          }, {
+            onConflict: 'user_id,product_id,selected_color,selected_size'
+          })
+      }
+    }
+
+    // Fetch final merged cart from Supabase
+    const { data: dbItems, error } = await supabase
+      .from('cart_items')
+      .select(`
+        quantity,
+        selected_color,
+        selected_size,
+        product:products(*)
+      `)
+      .eq('user_id', userId)
+
+    if (error) {
+      console.warn('Cart sync skipped (run supabase-missing-tables.sql):', error.message)
+      return
+    }
+
+    if (dbItems) {
+      const mapped = dbItems
+        .filter((item: any) => item.product)
+        .map((item: any) => ({
+          product: {
+            id: item.product.id,
+            name: item.product.name,
+            slug: item.product.slug,
+            description: item.product.description,
+            price: item.product.price,
+            original_price: item.product.original_price,
+            images: item.product.images || [],
+            category: item.product.category || 'Premium',
+            colors: item.product.colors || [],
+            sizes: item.product.sizes || [],
+            stock: item.product.stock || 0,
+            featured: item.product.featured || false,
+          } as Product,
+          quantity: item.quantity,
+          selectedColor: item.selected_color,
+          selectedSize: item.selected_size
+        }))
+      set({ items: mapped })
+    }
+  }
+}))
+
+export const useFavoritesStore = create<FavoritesStore>((set, get) => ({
+  items: [],
+  toggleFavorite: async (product) => {
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+
+    const isFav = get().isFavorite(product.id)
+    let newItems: Product[] = []
+
+    if (isFav) {
+      newItems = get().items.filter(item => item.id !== product.id)
+      set({ items: newItems })
+      if (session) {
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('product_id', product.id)
+        if (error) console.warn('Favorites delete error (table may not exist yet):', error.message)
+      }
+    } else {
+      newItems = [...get().items, product]
+      set({ items: newItems })
+      if (session) {
+        const { error } = await supabase
+          .from('favorites')
+          .upsert({
+            user_id: session.user.id,
+            product_id: product.id
+          }, { onConflict: 'user_id,product_id' })
+        if (error) console.warn('Favorites upsert error (table may not exist yet):', error.message)
+      }
+    }
+  },
+  isFavorite: (productId) => {
+    return get().items.some(item => item.id === productId)
+  },
+  syncFavorites: async () => {
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+
+    const { data: dbFavs, error } = await supabase
+      .from('favorites')
+      .select('product:products(*)')
+      .eq('user_id', session.user.id)
+
+    if (error) {
+      // Silently skip if table doesn't exist yet - user needs to run the SQL
+      console.warn('Favorites sync skipped (run supabase-missing-tables.sql):', error.message)
+      return
+    }
+
+    if (dbFavs) {
+      const mapped = dbFavs
+        .filter((f: any) => f.product)
+        .map((f: any) => ({
+          id: f.product.id,
+          name: f.product.name,
+          slug: f.product.slug,
+          description: f.product.description,
+          price: f.product.price,
+          original_price: f.product.original_price,
+          images: f.product.images || [],
+          category: f.product.category || 'Premium',
+          colors: f.product.colors || [],
+          sizes: f.product.sizes || [],
+          stock: f.product.stock || 0,
+          featured: f.product.featured || false,
+        } as Product))
+      set({ items: mapped })
+    }
+  },
+  clearFavorites: () => set({ items: [] })
 }))
 
 export const useChatStore = create<ChatStore>((set) => ({
@@ -112,6 +347,32 @@ export const useChatStore = create<ChatStore>((set) => ({
     messages: [...state.messages, { role, content, timestamp: new Date() }],
   })),
   clearMessages: () => set({ messages: [] }),
+}))
+
+interface AuthStore {
+  user: SupabaseUser | null
+  isAdmin: boolean
+  isInitialized: boolean
+  setUser: (user: SupabaseUser | null) => void
+  setIsAdmin: (isAdmin: boolean) => void
+  setInitialized: (initialized: boolean) => void
+  logout: () => Promise<void>
+}
+
+export const useAuthStore = create<AuthStore>((set) => ({
+  user: null,
+  isAdmin: false,
+  isInitialized: false,
+  setUser: (user) => set({ user }),
+  setIsAdmin: (isAdmin) => set({ isAdmin }),
+  setInitialized: (initialized) => set({ isInitialized: initialized }),
+  logout: async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    set({ user: null, isAdmin: false })
+    useCartStore.getState().clearCart()
+    useFavoritesStore.getState().clearFavorites()
+  }
 }))
 
 // Mock products for frontend demo

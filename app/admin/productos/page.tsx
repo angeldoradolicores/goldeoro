@@ -66,7 +66,6 @@ interface Product {
   images: string[]
   videos: string[]
   colors: string[]
-  sizes: string[]
   created_at: string
 }
 
@@ -427,12 +426,32 @@ function ProductModal({
     featured: false,
     is_promotion: false,
     colors: ['Negro'],
-    sizes: ['M'],
     images: [],
     videos: [],
   })
   const [imageUrl, setImageUrl] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [uploadingVideo, setUploadingVideo] = useState(false)
+
+  // Formatting helpers
+  const formatNumberInput = (val: string) => {
+    // Remove all non-digits
+    const clean = val.replace(/\D/g, '')
+    if (!clean) return ''
+    // Remove leading zeros
+    const noLeadingZeros = parseInt(clean, 10).toString()
+    // Add thousands separators
+    return noLeadingZeros.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  }
+
+  const parseFormattedNumber = (val: string) => {
+    return parseInt(val.replace(/\./g, ''), 10) || 0
+  }
+
+  const [displayPrice, setDisplayPrice] = useState('')
+  const [displayOriginalPrice, setDisplayOriginalPrice] = useState('')
+  const [displayStock, setDisplayStock] = useState('')
 
   useEffect(() => {
     if (product) {
@@ -446,10 +465,12 @@ function ProductModal({
         featured: product.featured,
         is_promotion: product.is_promotion,
         colors: product.colors || ['Negro'],
-        sizes: product.sizes || ['M'],
         images: product.images || [],
         videos: product.videos || [],
       })
+      setDisplayPrice(product.price ? formatNumberInput(product.price.toString()) : '')
+      setDisplayOriginalPrice(product.original_price ? formatNumberInput(product.original_price.toString()) : '')
+      setDisplayStock(product.stock !== undefined ? formatNumberInput(product.stock.toString()) : '')
     } else {
       setFormData({
         name: '',
@@ -461,10 +482,12 @@ function ProductModal({
         featured: false,
         is_promotion: false,
         colors: ['Negro'],
-        sizes: ['M'],
         images: [],
         videos: [],
       })
+      setDisplayPrice('')
+      setDisplayOriginalPrice('')
+      setDisplayStock('')
     }
     setImageUrl('')
     setVideoUrl('')
@@ -490,6 +513,50 @@ function ProductModal({
       ...formData,
       images: formData.images?.filter((_, i) => i !== index)
     })
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (type === 'image') setUploadingImage(true)
+    else setUploadingVideo(true)
+
+    try {
+      const data = new FormData()
+      data.append('file', file)
+
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: data,
+      })
+      
+      const result = await response.json()
+      
+      if (response.ok && result.url) {
+        if (type === 'image') {
+          setFormData(prev => ({
+            ...prev,
+            images: [...(prev.images || []), result.url]
+          }))
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            videos: [...(prev.videos || []), result.url]
+          }))
+        }
+      } else {
+        console.error('Error uploading file:', result.error)
+      }
+    } catch (error) {
+      console.error('Upload failed', error)
+    } finally {
+      if (type === 'image') setUploadingImage(false)
+      else setUploadingVideo(false)
+    }
+    
+    // Reset file input
+    e.target.value = ''
   }
 
   const addVideo = () => {
@@ -533,6 +600,19 @@ function ProductModal({
                 <Button type="button" onClick={addImage} variant="outline">
                   <Plus className="w-4 h-4" />
                 </Button>
+                <div className="relative">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e, 'image')}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    disabled={uploadingImage}
+                  />
+                  <Button type="button" variant="outline" disabled={uploadingImage}>
+                    {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                    {uploadingImage ? '' : 'Subir'}
+                  </Button>
+                </div>
               </div>
               {formData.images && formData.images.length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -569,6 +649,19 @@ function ProductModal({
                 <Button type="button" onClick={addVideo} variant="outline">
                   <Plus className="w-4 h-4" />
                 </Button>
+                <div className="relative">
+                  <Input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => handleFileUpload(e, 'video')}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                    disabled={uploadingVideo}
+                  />
+                  <Button type="button" variant="outline" disabled={uploadingVideo}>
+                    {uploadingVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                    {uploadingVideo ? '' : 'Subir'}
+                  </Button>
+                </div>
               </div>
               {formData.videos && formData.videos.length > 0 && (
                 <div className="space-y-2">
@@ -615,23 +708,29 @@ function ProductModal({
             <div>
               <Label>Precio (COP)</Label>
               <Input
-                type="number"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                type="text"
+                value={displayPrice}
+                onChange={(e) => {
+                  const formatted = formatNumberInput(e.target.value)
+                  setDisplayPrice(formatted)
+                  setFormData({ ...formData, price: parseFormattedNumber(formatted) })
+                }}
                 className="mt-1 bg-secondary border-border/50"
                 required
-                min={0}
               />
             </div>
             <div>
               <Label>Precio Original (Promocion)</Label>
               <Input
-                type="number"
-                value={formData.original_price || ''}
-                onChange={(e) => setFormData({ ...formData, original_price: Number(e.target.value) || undefined })}
+                type="text"
+                value={displayOriginalPrice}
+                onChange={(e) => {
+                  const formatted = formatNumberInput(e.target.value)
+                  setDisplayOriginalPrice(formatted)
+                  setFormData({ ...formData, original_price: formatted ? parseFormattedNumber(formatted) : undefined })
+                }}
                 className="mt-1 bg-secondary border-border/50"
                 placeholder="Opcional"
-                min={0}
               />
             </div>
             <div>
@@ -655,17 +754,20 @@ function ProductModal({
             <div>
               <Label>Stock</Label>
               <Input
-                type="number"
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
+                type="text"
+                value={displayStock}
+                onChange={(e) => {
+                  const formatted = formatNumberInput(e.target.value)
+                  setDisplayStock(formatted)
+                  setFormData({ ...formData, stock: parseFormattedNumber(formatted) })
+                }}
                 className="mt-1 bg-secondary border-border/50"
                 required
-                min={0}
               />
             </div>
           </div>
 
-          {/* Colors & Sizes */}
+          {/* Colors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Colores (separados por coma)</Label>
@@ -677,18 +779,6 @@ function ProductModal({
                 })}
                 className="mt-1 bg-secondary border-border/50"
                 placeholder="Negro, Blanco, Dorado"
-              />
-            </div>
-            <div>
-              <Label>Tallas (separadas por coma)</Label>
-              <Input
-                value={formData.sizes?.join(', ')}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  sizes: e.target.value.split(',').map(s => s.trim()).filter(Boolean) 
-                })}
-                className="mt-1 bg-secondary border-border/50"
-                placeholder="S, M, L, XL"
               />
             </div>
           </div>

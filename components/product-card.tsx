@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingBag, Star, Heart, Eye, Sparkles } from 'lucide-react'
-import { useCartStore } from '@/lib/store'
+import { useCartStore, useFavoritesStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -12,14 +12,14 @@ import { useState } from 'react'
 export interface Product {
   id: string
   name: string
-  slug: string
+  slug?: string
   description: string
   price: number
-  original_price: number | null
+  original_price?: number | null
   category: string
   stock: number
   featured: boolean
-  is_promotion: boolean
+  is_promotion?: boolean
   images: string[]
   videos?: string[]
   colors: string[]
@@ -42,29 +42,34 @@ function formatPrice(price: number) {
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addItem } = useCartStore()
+  const { toggleFavorite, isFavorite } = useFavoritesStore()
   const [isHovered, setIsHovered] = useState(false)
-  const [isWishlisted, setIsWishlisted] = useState(false)
+
+  const isWishlisted = isFavorite(product.id)
+
+  const discount = product.original_price
+    ? Math.round((1 - product.price / product.original_price) * 100)
+    : 0
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    
-    addItem(product, product.colors[0] || 'Negro', product.sizes[0] || 'M')
-    toast.success(`${product.name} agregado al carrito`, {
-      icon: <ShoppingBag className="w-4 h-4" />,
+    addItem(product as any, product.colors?.[0] || '', product.sizes?.[0] || '', 1)
+    toast.success('Agregado al carrito', {
+      description: product.name,
     })
   }
 
-  const handleWishlist = (e: React.MouseEvent) => {
+  const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setIsWishlisted(!isWishlisted)
-    toast.success(isWishlisted ? 'Removido de favoritos' : 'Agregado a favoritos')
+    await toggleFavorite(product as any)
+    if (!isWishlisted) {
+      toast.success('Agregado a favoritos')
+    } else {
+      toast.info('Eliminado de favoritos')
+    }
   }
-
-  const discount = product.original_price 
-    ? Math.round((1 - product.price / product.original_price) * 100)
-    : 0
 
   return (
     <motion.div
@@ -73,8 +78,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className="group"
     >
-      <Link href={`/producto/${product.slug}`}>
-        <div 
+      <Link href={`/producto/${product.slug || product.id}`}>
+        <div
           className="relative rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 transition-all duration-500 hover-lift"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -82,15 +87,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           {/* Image Container */}
           <div className="relative aspect-square overflow-hidden">
             <Image
-              src={product.images[0] || '/images/placeholder-hat.jpg'}
+              src={product.images?.[0] || '/images/placeholder-hat.jpg'}
               alt={product.name}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-110"
             />
-            
+
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
+
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2">
               {product.is_promotion && discount > 0 && (
@@ -124,7 +129,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 </motion.span>
               )}
             </div>
-            
+
             {/* Quick Actions */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -142,17 +147,20 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               >
                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
               </motion.button>
-              <Link href={`/producto/${product.slug}`}>
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="w-10 h-10 rounded-full glass flex items-center justify-center text-foreground/70 hover:text-neon-cyan transition-colors"
-                >
-                  <Eye className="w-5 h-5" />
-                </motion.div>
-              </Link>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="w-10 h-10 rounded-full glass flex items-center justify-center text-foreground/70 hover:text-neon-cyan transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  window.location.href = `/producto/${product.slug || product.id}`
+                }}
+              >
+                <Eye className="w-5 h-5" />
+              </motion.div>
             </motion.div>
-            
+
             {/* Add to Cart Button */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -170,19 +178,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               </Button>
             </motion.div>
           </div>
-          
+
           {/* Content */}
           <div className="p-4">
             {/* Category */}
             <span className="text-xs font-semibold uppercase tracking-wider text-neon-cyan">
               {product.category}
             </span>
-            
+
             {/* Name */}
             <h3 className="font-bold text-lg mt-1 mb-2 group-hover:text-primary transition-colors line-clamp-1">
               {product.name}
             </h3>
-            
+
             {/* Rating - Static for demo */}
             <div className="flex items-center gap-1 mb-3">
               {[...Array(5)].map((_, i) => (
@@ -193,28 +201,28 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               ))}
               <span className="text-xs text-muted-foreground ml-1">(128)</span>
             </div>
-            
+
             {/* Colors */}
-            {product.colors.length > 0 && (
+            {product.colors?.length > 0 && (
               <div className="flex items-center gap-1 mb-3">
                 {product.colors.slice(0, 4).map((color, i) => (
                   <span
                     key={i}
                     className="w-4 h-4 rounded-full border border-border/50"
-                    style={{ 
+                    style={{
                       backgroundColor: getColorHex(color),
                     }}
                     title={color}
                   />
                 ))}
-                {product.colors.length > 4 && (
+                {product.colors?.length > 4 && (
                   <span className="text-xs text-muted-foreground">
                     +{product.colors.length - 4}
                   </span>
                 )}
               </div>
             )}
-            
+
             {/* Price */}
             <div className="flex items-center gap-3">
               <span className="text-xl font-black text-neon-pink">

@@ -100,6 +100,7 @@ export default function RegistroPage() {
     }
   }
 
+
   const passwordStrength = () => {
     const { password } = formData
     let strength = 0
