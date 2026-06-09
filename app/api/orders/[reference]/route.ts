@@ -10,17 +10,20 @@ export async function GET(
     const { reference } = await params
     const supabase = await createClient()
 
-    // Get order by reference
-    const { data: order, error } = await supabase
+    // Get order by reference — try UUID first (Wompi returns the order UUID as reference)
+    // then fall back to order_number (LH-YYYYMMDD-XXXX format)
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reference)
+    
+    const query = supabase
       .from('orders')
-      .select(`
-        *,
-        items:order_items(*)
-      `)
-      .eq('order_number', reference)
-      .single()
+      .select(`*, items:order_items(*)`)
+    
+    const { data: order, error } = isUUID
+      ? await query.eq('id', reference).maybeSingle()
+      : await query.eq('order_number', reference).maybeSingle()
 
     if (error || !order) {
+      console.error('[orders/reference] Not found:', reference, error?.message)
       return NextResponse.json({ error: 'Orden no encontrada' }, { status: 404 })
     }
 

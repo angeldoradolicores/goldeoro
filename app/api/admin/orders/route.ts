@@ -24,8 +24,11 @@ export async function GET() {
     const { data: orders, error } = await supabase
       .from('orders')
       .select(`
-        *,
-        items:order_items(*)
+        id, order_number, created_at, status, subtotal, shipping_cost, total,
+        shipping_method, payment_method, shipping_address,
+        tracking_number, carrier, tracking_photo_url, admin_note,
+        shipped_at, delivered_at, user_id,
+        items:order_items(id, product_name, quantity, price, color, size, product_image)
       `)
       .order('created_at', { ascending: false })
 
@@ -33,7 +36,7 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(orders)
+    return NextResponse.json({ orders: orders || [] })
   } catch (error) {
     console.error('[v0] Admin orders error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
