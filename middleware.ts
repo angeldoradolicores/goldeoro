@@ -30,7 +30,8 @@ export async function middleware(request: NextRequest) {
   )
 
   // Refresh the session — this keeps the user logged in across navigations
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user ?? null
 
   // Protect /admin routes
   if (request.nextUrl.pathname.startsWith('/admin') && !user) {
