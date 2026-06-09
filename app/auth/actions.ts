@@ -3,6 +3,24 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
+
+async function getSiteUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL
+  }
+  try {
+    const headersList = await headers()
+    const host = headersList.get('host')
+    if (host) {
+      const protocol = host.includes('localhost') || host.includes('127.0.0.1') ? 'http' : 'https'
+      return `${protocol}://${host}`
+    }
+  } catch (e) {
+    console.error('[auth] Failed to get host header:', e)
+  }
+  return 'http://localhost:3000'
+}
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient()
@@ -11,6 +29,8 @@ export async function signUp(formData: FormData) {
   const password = formData.get('password') as string
   const fullName = formData.get('fullName') as string
 
+  const siteUrl = await getSiteUrl()
+
   const { error } = await supabase.auth.signUp({
     email,
     password,
@@ -18,7 +38,7 @@ export async function signUp(formData: FormData) {
       data: {
         full_name: fullName,
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+      emailRedirectTo: `${siteUrl}/auth/callback`,
     },
   })
 
@@ -51,11 +71,12 @@ export async function signIn(formData: FormData) {
 
 export async function signInWithProvider(provider: 'google' | 'facebook') {
   const supabase = await createClient()
+  const siteUrl = await getSiteUrl()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+      redirectTo: `${siteUrl}/auth/callback`,
     },
   })
 
@@ -77,9 +98,10 @@ export async function signOut() {
 
 export async function resetPassword(email: string) {
   const supabase = await createClient()
+  const siteUrl = await getSiteUrl()
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/reset-password`,
+    redirectTo: `${siteUrl}/auth/reset-password`,
   })
 
   if (error) {
