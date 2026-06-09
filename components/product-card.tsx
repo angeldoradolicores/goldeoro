@@ -3,9 +3,8 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ShoppingBag, Star, Heart, Eye, Sparkles } from 'lucide-react'
+import { ShoppingBag, Heart, Eye } from 'lucide-react'
 import { useCartStore, useFavoritesStore } from '@/lib/store'
-import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useState } from 'react'
 
@@ -40,6 +39,39 @@ function formatPrice(price: number) {
   }).format(price)
 }
 
+// Badge metálico
+function MetalBadge({ text, variant = 'gold' }: { text: string; variant?: 'gold' | 'chrome' | 'crimson' }) {
+  const styles = {
+    gold: {
+      background: 'linear-gradient(135deg, rgba(176,141,87,0.15), rgba(200,164,77,0.1))',
+      border: '1px solid rgba(200,164,77,0.4)',
+      color: '#D4AF37',
+    },
+    chrome: {
+      background: 'linear-gradient(135deg, rgba(192,192,192,0.1), rgba(139,139,139,0.08))',
+      border: '1px solid rgba(192,192,192,0.3)',
+      color: '#C0C0C0',
+    },
+    crimson: {
+      background: 'linear-gradient(135deg, rgba(180,30,30,0.15), rgba(150,20,20,0.1))',
+      border: '1px solid rgba(200,50,50,0.4)',
+      color: '#F87171',
+    },
+  }
+  return (
+    <span
+      className="inline-block px-2.5 py-1 text-[9px] font-bold uppercase"
+      style={{
+        fontFamily: 'var(--font-sans)',
+        letterSpacing: '0.18em',
+        ...styles[variant],
+      }}
+    >
+      {text}
+    </span>
+  )
+}
+
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addItem } = useCartStore()
   const { toggleFavorite, isFavorite } = useFavoritesStore()
@@ -55,9 +87,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.preventDefault()
     e.stopPropagation()
     addItem(product as any, product.colors?.[0] || '', product.sizes?.[0] || '', 1)
-    toast.success('Agregado al carrito', {
-      description: product.name,
-    })
+    toast.success('Agregado al carrito', { description: product.name })
   }
 
   const handleWishlist = async (e: React.MouseEvent) => {
@@ -73,168 +103,217 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
+      transition={{ duration: 0.7, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
       className="group"
     >
       <Link href={`/producto/${product.slug || product.id}`}>
         <div
-          className="relative rounded-2xl overflow-hidden bg-card border border-border/50 hover:border-primary/50 transition-all duration-500 hover-lift"
+          className="relative overflow-hidden transition-all duration-500"
+          style={{
+            background: '#0D0D0D',
+            border: isHovered ? '1px solid rgba(192,192,192,0.25)' : '1px solid #262626',
+            boxShadow: isHovered
+              ? '0 20px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(200,164,77,0.05)'
+              : '0 4px 16px rgba(0,0,0,0.4)',
+            transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
+          }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
           {/* Image Container */}
-          <div className="relative aspect-square overflow-hidden">
+          <div className="relative aspect-square overflow-hidden" style={{ background: '#171717' }}>
             <Image
               src={product.images?.[0] || '/images/placeholder-hat.jpg'}
               alt={product.name}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              className="object-cover transition-transform duration-700"
+              style={{
+                transform: isHovered ? 'scale(1.07)' : 'scale(1)',
+              }}
             />
 
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            {/* Overlay gradiente al hover */}
+            <div
+              className="absolute inset-0 transition-opacity duration-500"
+              style={{
+                background: 'linear-gradient(to top, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 40%, transparent 70%)',
+                opacity: isHovered ? 1 : 0,
+              }}
+            />
+
+            {/* Reflejo satinado superior */}
+            <div
+              className="absolute top-0 left-0 right-0"
+              style={{
+                height: '40%',
+                background: 'linear-gradient(to bottom, rgba(255,255,255,0.03) 0%, transparent 100%)',
+                pointerEvents: 'none',
+              }}
+            />
 
             {/* Badges */}
-            <div className="absolute top-3 left-3 flex flex-col gap-2">
+            <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+              {product.stock === 0 && (
+                <MetalBadge text="Agotado" variant="chrome" />
+              )}
               {product.is_promotion && discount > 0 && (
-                <motion.span
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  className="px-3 py-1 bg-neon-pink text-primary-foreground text-xs font-bold rounded-full shadow-lg glow-pink"
-                >
-                  -{discount}%
-                </motion.span>
+                <MetalBadge text={`-${discount}%`} variant="crimson" />
               )}
-              {product.featured && (
-                <motion.span
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="px-3 py-1 bg-neon-cyan text-primary-foreground text-xs font-bold rounded-full flex items-center gap-1"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  Featured
-                </motion.span>
+              {product.featured && product.stock > 0 && (
+                <MetalBadge text="Exclusivo" variant="gold" />
               )}
-              {product.stock < 5 && product.stock > 0 && (
-                <motion.span
-                  initial={{ x: -50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="px-3 py-1 bg-neon-orange text-primary-foreground text-xs font-bold rounded-full"
-                >
-                  Ultimas {product.stock}!
-                </motion.span>
+              {product.stock > 0 && product.stock < 5 && (
+                <MetalBadge text={`Últimas ${product.stock}`} variant="crimson" />
               )}
             </div>
 
-            {/* Quick Actions */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 20 }}
-              transition={{ duration: 0.3 }}
-              className="absolute top-3 right-3 flex flex-col gap-2"
+            {/* Quick Actions (derecha) */}
+            <div
+              className="absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300"
+              style={{ opacity: isHovered ? 1 : 0, transform: isHovered ? 'translateX(0)' : 'translateX(8px)' }}
             >
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+              <button
                 onClick={handleWishlist}
-                className={`w-10 h-10 rounded-full glass flex items-center justify-center transition-colors ${
-                  isWishlisted ? 'text-neon-pink' : 'text-foreground/70 hover:text-neon-pink'
-                }`}
+                className="w-9 h-9 flex items-center justify-center transition-all duration-200"
+                style={{
+                  background: 'rgba(13,13,13,0.85)',
+                  backdropFilter: 'blur(8px)',
+                  border: isWishlisted ? '1px solid rgba(200,164,77,0.5)' : '1px solid #333',
+                  color: isWishlisted ? '#D4AF37' : '#8B8B8B',
+                }}
               >
-                <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-              </motion.button>
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="w-10 h-10 rounded-full glass flex items-center justify-center text-foreground/70 hover:text-neon-cyan transition-colors cursor-pointer"
+                <Heart className="w-4 h-4" style={{ fill: isWishlisted ? 'currentColor' : 'none' }} />
+              </button>
+              <button
+                className="w-9 h-9 flex items-center justify-center transition-all duration-200"
+                style={{
+                  background: 'rgba(13,13,13,0.85)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid #333',
+                  color: '#8B8B8B',
+                }}
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
                   window.location.href = `/producto/${product.slug || product.id}`
                 }}
               >
-                <Eye className="w-5 h-5" />
-              </motion.div>
-            </motion.div>
+                <Eye className="w-4 h-4" />
+              </button>
+            </div>
 
-            {/* Add to Cart Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 20 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="absolute bottom-4 left-4 right-4"
+            {/* Add to Cart (bottom, aparece en hover) */}
+            <div
+              className="absolute bottom-0 left-0 right-0 transition-all duration-400"
+              style={{
+                opacity: isHovered ? 1 : 0,
+                transform: isHovered ? 'translateY(0)' : 'translateY(12px)',
+              }}
             >
-              <Button
+              <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="w-full btn-luxury py-6 text-sm"
+                className="w-full py-3.5 flex items-center justify-center gap-2.5 text-[10px] font-bold uppercase transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  letterSpacing: '0.2em',
+                  background: product.stock === 0
+                    ? 'rgba(38,38,38,0.95)'
+                    : 'linear-gradient(135deg, #C8A44D 0%, #B08D57 100%)',
+                  color: product.stock === 0 ? '#8B8B8B' : '#050505',
+                  backdropFilter: 'blur(8px)',
+                }}
               >
-                <ShoppingBag className="w-4 h-4 mr-2" />
+                <ShoppingBag className="w-3.5 h-3.5" />
                 {product.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
-              </Button>
-            </motion.div>
+              </button>
+            </div>
           </div>
 
           {/* Content */}
-          <div className="p-4">
+          <div className="p-4 pb-5">
             {/* Category */}
-            <span className="text-xs font-semibold uppercase tracking-wider text-neon-cyan">
+            <span
+              className="text-[9px] font-semibold uppercase block mb-2"
+              style={{
+                fontFamily: 'var(--font-sans)',
+                letterSpacing: '0.3em',
+                color: '#8B8B8B',
+              }}
+            >
               {product.category}
             </span>
 
             {/* Name */}
-            <h3 className="font-bold text-lg mt-1 mb-2 group-hover:text-primary transition-colors line-clamp-1">
+            <h3
+              className="font-semibold text-sm mb-3 leading-snug transition-colors duration-300"
+              style={{
+                fontFamily: 'var(--font-cinzel)',
+                color: isHovered ? '#F5F5F5' : '#C0C0C0',
+                letterSpacing: '0.04em',
+              }}
+            >
               {product.name}
             </h3>
 
-            {/* Rating - Static for demo */}
-            <div className="flex items-center gap-1 mb-3">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3.5 h-3.5 ${i < 4 ? 'text-neon-yellow fill-current' : 'text-muted-foreground/30'}`}
-                />
-              ))}
-              <span className="text-xs text-muted-foreground ml-1">(128)</span>
-            </div>
-
             {/* Colors */}
             {product.colors?.length > 0 && (
-              <div className="flex items-center gap-1 mb-3">
-                {product.colors.slice(0, 4).map((color, i) => (
+              <div className="flex items-center gap-1.5 mb-3">
+                {product.colors.slice(0, 5).map((color, i) => (
                   <span
                     key={i}
-                    className="w-4 h-4 rounded-full border border-border/50"
+                    className="w-3 h-3 rounded-full"
                     style={{
                       backgroundColor: getColorHex(color),
+                      border: '1px solid rgba(255,255,255,0.15)',
                     }}
                     title={color}
                   />
                 ))}
-                {product.colors?.length > 4 && (
-                  <span className="text-xs text-muted-foreground">
-                    +{product.colors.length - 4}
+                {product.colors?.length > 5 && (
+                  <span className="text-[10px]" style={{ color: '#8B8B8B' }}>
+                    +{product.colors.length - 5}
                   </span>
                 )}
               </div>
             )}
 
             {/* Price */}
-            <div className="flex items-center gap-3">
-              <span className="text-xl font-black text-neon-pink">
+            <div className="flex items-baseline gap-2.5">
+              <span
+                className="text-base font-bold"
+                style={{
+                  fontFamily: 'var(--font-cinzel)',
+                  background: 'linear-gradient(135deg, #B08D57, #D4AF37)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
                 {formatPrice(product.price)}
               </span>
               {product.original_price && product.original_price > product.price && (
-                <span className="text-sm text-muted-foreground line-through">
+                <span
+                  className="text-xs line-through"
+                  style={{ color: '#555' }}
+                >
                   {formatPrice(product.original_price)}
                 </span>
               )}
             </div>
           </div>
+
+          {/* Bottom separator / highlight bar */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-px transition-all duration-500"
+            style={{
+              background: isHovered
+                ? 'linear-gradient(to right, transparent, rgba(200,164,77,0.5), transparent)'
+                : 'linear-gradient(to right, transparent, rgba(38,38,38,0.8), transparent)',
+            }}
+          />
         </div>
       </Link>
     </motion.div>
@@ -244,24 +323,24 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 function getColorHex(colorName: string): string {
   const colorMap: Record<string, string> = {
     'Negro': '#1a1a1a',
-    'Blanco': '#ffffff',
-    'Rojo': '#ef4444',
-    'Azul': '#3b82f6',
-    'Verde': '#22c55e',
-    'Amarillo': '#eab308',
-    'Naranja': '#f97316',
-    'Morado': '#a855f7',
-    'Rosa': '#ec4899',
+    'Blanco': '#f5f5f5',
+    'Rojo': '#991b1b',
+    'Azul': '#1e3a5f',
+    'Verde': '#14532d',
+    'Amarillo': '#ca8a04',
+    'Naranja': '#c2410c',
+    'Morado': '#581c87',
+    'Rosa': '#9d174d',
     'Gris': '#6b7280',
-    'Cafe': '#92400e',
+    'Cafe': '#78350f',
     'Beige': '#d4a574',
-    'Celeste': '#67e8f9',
+    'Celeste': '#164e63',
     'Navy': '#1e3a5f',
     'Vinotinto': '#7c2d12',
-    'Dorado': '#d4af37',
-    'Plateado': '#c0c0c0',
+    'Dorado': '#b08d57',
+    'Plateado': '#8b8b8b',
   }
-  return colorMap[colorName] || '#6b7280'
+  return colorMap[colorName] || '#4b5563'
 }
 
 interface ProductGridProps {
@@ -271,7 +350,7 @@ interface ProductGridProps {
 
 export function ProductGrid({ products, className = '' }: ProductGridProps) {
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ${className}`}>
+    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ${className}`}>
       {products.map((product, index) => (
         <ProductCard key={product.id} product={product} index={index} />
       ))}

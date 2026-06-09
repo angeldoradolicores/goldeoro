@@ -7,43 +7,43 @@ import { Truck, Shield, CreditCard, Headphones, Star, Award } from 'lucide-react
 const features = [
   {
     icon: Truck,
-    title: 'Envio Nacional',
-    description: 'Envios a toda Colombia con Interrapidisimo y Enviar. Cotiza tu envio al instante.',
+    title: 'Envío Nacional',
+    description: 'Envíos a toda Colombia con Interrapidísimo y Enviar. Cotiza tu envío al instante.',
   },
   {
     icon: Shield,
-    title: 'Garantia de Calidad',
-    description: 'Todas nuestras gorras cuentan con garantia de autenticidad y calidad premium.',
+    title: 'Garantía de Calidad',
+    description: 'Todas nuestras gorras cuentan con garantía de autenticidad y calidad premium.',
   },
   {
     icon: CreditCard,
     title: 'Pago Seguro',
-    description: 'Multiples metodos de pago. Tarjetas, PSE, Nequi, Daviplata y mas.',
+    description: 'Múltiples métodos de pago: Tarjetas, PSE, Nequi, Daviplata y más.',
   },
   {
     icon: Headphones,
     title: 'Soporte 24/7',
-    description: 'Nuestro equipo esta disponible para ayudarte en cualquier momento.',
+    description: 'Nuestro equipo está disponible para ayudarte en cualquier momento.',
   },
 ]
 
 const testimonials = [
   {
-    name: 'Carlos Rodriguez',
+    name: 'Carlos Rodríguez',
     role: 'Influencer',
-    content: 'La calidad de las gorras es increible. El bordado en oro es simplemente espectacular. 100% recomendado.',
+    content: 'La calidad de las gorras es increíble. El bordado en oro es simplemente espectacular. 100% recomendado.',
     rating: 5,
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80',
   },
   {
-    name: 'Maria Gonzalez',
+    name: 'María González',
     role: 'Fashionista',
-    content: 'Por fin encontre una tienda que entiende el streetwear de lujo. Mis nuevas gorras favoritas.',
+    content: 'Por fin encontré una tienda que entiende el streetwear de lujo. Mis nuevas gorras favoritas.',
     rating: 5,
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
   },
   {
-    name: 'Andres Martinez',
+    name: 'Andrés Martínez',
     role: 'DJ Profesional',
     content: 'El servicio al cliente es excepcional y los productos son de primera. Ya tengo 5 gorras de esta tienda.',
     rating: 5,
@@ -51,51 +51,139 @@ const testimonials = [
   },
 ]
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] },
+  }),
+}
+
+// Componente de sección header compartido
+function SectionLabel({ eyebrow, title, highlight }: { eyebrow: string; title: string; highlight: string }) {
+  return (
+    <div className="text-center mb-16">
+      <div className="flex items-center justify-center gap-4 mb-5">
+        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, #C8A44D)' }} />
+        <span
+          className="text-[10px] font-semibold uppercase tracking-[0.45em]"
+          style={{ fontFamily: 'var(--font-sans)', color: '#C8A44D', letterSpacing: '0.45em' }}
+        >
+          {eyebrow}
+        </span>
+        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, #C8A44D)' }} />
+      </div>
+      <h2
+        className="text-3xl md:text-4xl lg:text-5xl font-black leading-tight"
+        style={{ fontFamily: 'var(--font-cinzel)', color: '#F5F5F5', letterSpacing: '-0.01em' }}
+      >
+        {title}{' '}
+        <span
+          style={{
+            background: 'linear-gradient(135deg, #B08D57 0%, #D4AF37 50%, #E6C989 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          {highlight}
+        </span>
+      </h2>
+    </div>
+  )
+}
+
 export function FeaturesSection() {
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const isInView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section ref={ref} className="py-24 bg-secondary/30 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-      </div>
+    <section
+      ref={ref}
+      className="py-28 relative overflow-hidden"
+      style={{ background: '#0D0D0D' }}
+    >
+      {/* Top border line */}
+      <div
+        className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(to right, transparent, rgba(38,38,38,1), transparent)' }}
+      />
 
-      <div className="container mx-auto px-4 relative">
-        {/* Section Header */}
+      <div className="container mx-auto px-4 lg:px-8 relative">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+          custom={0}
+          variants={fadeUp}
         >
-          <span className="text-sm font-medium text-primary tracking-wider uppercase">
-            Por Que Elegirnos
-          </span>
-          <h2 className="mt-4 text-4xl md:text-5xl font-display font-bold">
-            La Experiencia <span className="text-gradient-gold">Luxury</span>
-          </h2>
+          <SectionLabel
+            eyebrow="Por Qué Elegirnos"
+            title="La Experiencia"
+            highlight="Luxury"
+          />
         </motion.div>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px"
+          style={{ border: '1px solid #1a1a1a' }}
+        >
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              initial="hidden"
+              animate={isInView ? 'visible' : 'hidden'}
+              custom={index + 1}
+              variants={fadeUp}
               className="group"
             >
-              <div className="h-full p-6 rounded-2xl glass hover-lift cursor-default">
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <feature.icon className="w-7 h-7 text-primary" />
+              <div
+                className="h-full p-8 transition-all duration-500"
+                style={{
+                  background: '#0D0D0D',
+                  borderRight: index < 3 ? '1px solid #1a1a1a' : 'none',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLDivElement).style.background = '#171717'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLDivElement).style.background = '#0D0D0D'
+                }}
+              >
+                {/* Icono */}
+                <div className="mb-6">
+                  <div
+                    className="w-12 h-12 flex items-center justify-center mb-0"
+                    style={{ border: '1px solid #262626' }}
+                  >
+                    <feature.icon style={{ width: '20px', height: '20px', color: '#C8A44D' }} />
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+
+                {/* Número decorativo */}
+                <span
+                  className="block text-xs mb-4 font-black"
+                  style={{
+                    fontFamily: 'var(--font-cinzel)',
+                    color: '#1a1a1a',
+                    fontSize: '3rem',
+                    lineHeight: 1,
+                    letterSpacing: '-0.02em',
+                    userSelect: 'none',
+                  }}
+                >
+                  0{index + 1}
+                </span>
+
+                <h3
+                  className="text-sm font-bold mb-3 uppercase tracking-[0.1em]"
+                  style={{ fontFamily: 'var(--font-cinzel)', color: '#C0C0C0', letterSpacing: '0.1em' }}
+                >
+                  {feature.title}
+                </h3>
+                <p
+                  className="text-xs leading-relaxed"
+                  style={{ fontFamily: 'var(--font-sans)', color: '#555', lineHeight: 1.7 }}
+                >
                   {feature.description}
                 </p>
               </div>
@@ -103,65 +191,101 @@ export function FeaturesSection() {
           ))}
         </div>
       </div>
+
+      {/* Bottom border */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(to right, transparent, rgba(38,38,38,1), transparent)' }}
+      />
     </section>
   )
 }
 
 export function TestimonialsSection() {
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const isInView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section ref={ref} className="py-24 relative overflow-hidden">
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
+    <section ref={ref} className="py-28 relative overflow-hidden" style={{ background: '#050505' }}>
+      <div className="container mx-auto px-4 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+          custom={0}
+          variants={fadeUp}
         >
-          <span className="text-sm font-medium text-primary tracking-wider uppercase">
-            Testimonios
-          </span>
-          <h2 className="mt-4 text-4xl md:text-5xl font-display font-bold">
-            Lo Que Dicen <span className="text-gradient-gold">Nuestros Clientes</span>
-          </h2>
+          <SectionLabel
+            eyebrow="Testimonios"
+            title="Lo Que Dicen"
+            highlight="Nuestros Clientes"
+          />
         </motion.div>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ border: '1px solid #1a1a1a' }}>
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.name}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="group"
+              initial="hidden"
+              animate={isInView ? 'visible' : 'hidden'}
+              custom={index + 1}
+              variants={fadeUp}
             >
-              <div className="h-full p-6 rounded-2xl bg-card border border-border/50 hover-lift">
-                {/* Rating */}
-                <div className="flex items-center gap-1 mb-4">
+              <div
+                className="h-full p-8 transition-all duration-500"
+                style={{
+                  background: '#0D0D0D',
+                  borderRight: index < 2 ? '1px solid #1a1a1a' : 'none',
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = '#171717'}
+                onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = '#0D0D0D'}
+              >
+                {/* Stars */}
+                <div className="flex items-center gap-1 mb-6">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                    <Star key={i} style={{ width: '12px', height: '12px', fill: '#C8A44D', color: '#C8A44D' }} />
                   ))}
                 </div>
 
-                {/* Content */}
-                <p className="text-foreground/90 leading-relaxed mb-6">
-                  {`"${testimonial.content}"`}
+                {/* Quote mark */}
+                <div
+                  className="text-4xl font-black leading-none mb-3 select-none"
+                  style={{ fontFamily: 'Georgia', color: '#1a1a1a' }}
+                >
+                  "
+                </div>
+
+                <p
+                  className="text-sm leading-relaxed mb-8"
+                  style={{ fontFamily: 'var(--font-sans)', color: '#8B8B8B', lineHeight: 1.8 }}
+                >
+                  {testimonial.content}
                 </p>
 
                 {/* Author */}
-                <div className="flex items-center gap-3">
-                  <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-primary/30"
-                  />
+                <div className="flex items-center gap-3 pt-5" style={{ borderTop: '1px solid #1a1a1a' }}>
+                  <div
+                    className="w-10 h-10 overflow-hidden"
+                    style={{ border: '1px solid #262626' }}
+                  >
+                    <img
+                      src={testimonial.avatar}
+                      alt={testimonial.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <div>
-                    <p className="font-semibold">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    <p
+                      className="text-xs font-semibold tracking-[0.08em]"
+                      style={{ fontFamily: 'var(--font-cinzel)', color: '#C0C0C0' }}
+                    >
+                      {testimonial.name}
+                    </p>
+                    <p
+                      className="text-[10px] mt-0.5 uppercase tracking-[0.2em]"
+                      style={{ fontFamily: 'var(--font-sans)', color: '#555', letterSpacing: '0.2em' }}
+                    >
+                      {testimonial.role}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -175,24 +299,39 @@ export function TestimonialsSection() {
 
 export function BrandsSection() {
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const isInView = useInView(ref, { once: true, margin: '-60px' })
 
   return (
-    <section ref={ref} className="py-16 border-y border-border/30">
+    <section
+      ref={ref}
+      className="py-14"
+      style={{
+        background: '#0D0D0D',
+        borderTop: '1px solid #1a1a1a',
+        borderBottom: '1px solid #1a1a1a',
+      }}
+    >
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-wrap items-center justify-center gap-8 md:gap-16"
+          transition={{ duration: 0.8 }}
+          className="flex flex-wrap items-center justify-center gap-10 md:gap-20"
         >
           {['SUPREME', 'NEW ERA', 'NIKE', 'ADIDAS', 'JORDAN'].map((brand, index) => (
             <motion.span
               key={brand}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : { opacity: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="text-2xl md:text-3xl font-bold text-muted-foreground/30 hover:text-primary/50 transition-colors cursor-default"
+              className="text-lg md:text-2xl font-black uppercase tracking-[0.25em] cursor-default transition-colors duration-300"
+              style={{
+                fontFamily: 'var(--font-cinzel)',
+                color: '#1a1a1a',
+                letterSpacing: '0.25em',
+              }}
+              onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#C8A44D'}
+              onMouseLeave={e => (e.currentTarget as HTMLSpanElement).style.color = '#1a1a1a'}
             >
               {brand}
             </motion.span>
@@ -205,61 +344,130 @@ export function BrandsSection() {
 
 export function PromoBanner() {
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const isInView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section ref={ref} className="py-24 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 -z-10">
+    <section ref={ref} className="py-28 relative overflow-hidden" style={{ background: '#050505' }}>
+      {/* Background texture imagen con overlay fuerte */}
+      <div className="absolute inset-0 z-0">
         <img
           src="https://images.unsplash.com/photo-1556306535-0f09a537f0a3?w=1920&q=80"
           alt="Promo background"
-          className="w-full h-full object-cover opacity-20"
+          className="w-full h-full object-cover"
+          style={{ opacity: 0.06 }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background" />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to right, #050505 0%, rgba(5,5,5,0.85) 50%, #050505 100%)' }}
+        />
       </div>
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
-              <Award className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium">Oferta Especial</span>
+            {/* Badge */}
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, #C8A44D)' }} />
+              <Award style={{ width: '14px', height: '14px', color: '#C8A44D' }} />
+              <span
+                className="text-[10px] font-semibold uppercase tracking-[0.45em]"
+                style={{ fontFamily: 'var(--font-sans)', color: '#C8A44D', letterSpacing: '0.45em' }}
+              >
+                Oferta Especial
+              </span>
+              <Award style={{ width: '14px', height: '14px', color: '#C8A44D' }} />
+              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, #C8A44D)' }} />
             </div>
 
-            <h2 className="text-4xl md:text-6xl font-display font-bold mb-4">
-              <span className="text-gradient-gold">30% OFF</span> en tu Primera Compra
+            <h2
+              className="text-4xl md:text-6xl lg:text-7xl font-black leading-none mb-4"
+              style={{ fontFamily: 'var(--font-cinzel)', letterSpacing: '-0.01em' }}
+            >
+              <span
+                style={{
+                  background: 'linear-gradient(135deg, #B08D57 0%, #D4AF37 40%, #E6C989 60%, #C8A44D 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                30% OFF
+              </span>
             </h2>
 
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Usa el codigo <span className="font-mono text-primary font-bold">LUXURY30</span> al 
-              finalizar tu compra y obtén un 30% de descuento en toda tu orden.
+            <p
+              className="text-xl md:text-2xl font-light mb-4"
+              style={{ fontFamily: 'var(--font-cinzel)', color: '#F5F5F5', letterSpacing: '0.05em' }}
+            >
+              en tu Primera Compra
             </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="inline-flex items-center gap-4 p-4 rounded-2xl glass"
+            <p
+              className="text-sm mb-10 leading-relaxed"
+              style={{ fontFamily: 'var(--font-sans)', color: '#8B8B8B' }}
             >
-              <div className="text-center px-4">
-                <span className="block text-3xl font-bold text-gradient-gold">24</span>
-                <span className="text-xs text-muted-foreground">Horas</span>
-              </div>
-              <span className="text-2xl text-muted-foreground">:</span>
-              <div className="text-center px-4">
-                <span className="block text-3xl font-bold text-gradient-gold">59</span>
-                <span className="text-xs text-muted-foreground">Minutos</span>
-              </div>
-              <span className="text-2xl text-muted-foreground">:</span>
-              <div className="text-center px-4">
-                <span className="block text-3xl font-bold text-gradient-gold">59</span>
-                <span className="text-xs text-muted-foreground">Segundos</span>
-              </div>
+              Usa el código{' '}
+              <span
+                className="font-bold px-3 py-1"
+                style={{
+                  fontFamily: 'var(--font-cinzel)',
+                  color: '#D4AF37',
+                  border: '1px solid rgba(200,164,77,0.3)',
+                  background: 'rgba(200,164,77,0.06)',
+                  letterSpacing: '0.15em',
+                }}
+              >
+                LUXURY30
+              </span>
+              {' '}al finalizar tu compra y obtén 30% de descuento en toda tu orden.
+            </p>
+
+            {/* Countdown boxes */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="inline-flex items-center gap-px"
+              style={{ border: '1px solid #1a1a1a' }}
+            >
+              {[
+                { value: '24', label: 'Horas' },
+                { value: '59', label: 'Min' },
+                { value: '59', label: 'Seg' },
+              ].map((unit, i) => (
+                <div key={unit.label}>
+                  <div
+                    className="px-7 py-5 text-center"
+                    style={{
+                      background: '#0D0D0D',
+                      borderRight: i < 2 ? '1px solid #1a1a1a' : 'none',
+                    }}
+                  >
+                    <span
+                      className="block text-2xl font-black mb-1"
+                      style={{
+                        fontFamily: 'var(--font-cinzel)',
+                        background: 'linear-gradient(135deg, #B08D57, #D4AF37)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                      }}
+                    >
+                      {unit.value}
+                    </span>
+                    <span
+                      className="text-[9px] uppercase tracking-[0.3em]"
+                      style={{ fontFamily: 'var(--font-sans)', color: '#555', letterSpacing: '0.3em' }}
+                    >
+                      {unit.label}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </motion.div>
           </motion.div>
         </div>

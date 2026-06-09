@@ -3,15 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ShoppingBag, User, Search, Crown, Sparkles, LogOut } from 'lucide-react'
+import { Menu, X, ShoppingBag, User, Crown, LogOut } from 'lucide-react'
 import { useCartStore, useFavoritesStore, useAuthStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
-import { User as SupabaseUser } from '@supabase/supabase-js'
 
 const navLinks = [
   { href: '/', label: 'Inicio' },
-  { href: '/catalogo', label: 'Catalogo' },
+  { href: '/catalogo', label: 'Colección' },
   { href: '/promociones', label: 'Ofertas' },
   { href: '/pedidos', label: 'Mis Pedidos' },
   { href: '/nosotros', label: 'Nosotros' },
@@ -21,14 +20,14 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  
+
   const { user, isAdmin, isInitialized, setUser, setIsAdmin, setInitialized, logout } = useAuthStore()
   const { toggleCart, itemCount, clearCart } = useCartStore()
   const count = itemCount()
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+      setIsScrolled(window.scrollY > 60)
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
@@ -36,23 +35,18 @@ export function Navbar() {
 
   useEffect(() => {
     const supabase = createClient()
-    
+
     const getUser = async () => {
-      if (isInitialized) return // Skip if we already checked auth
-      
+      if (isInitialized) return
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
-      
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
           .eq('id', user.id)
           .maybeSingle()
-        
         setIsAdmin(profile?.is_admin || false)
-        
-        // Sync cart and favorites on load
         useCartStore.getState().syncCart()
         useFavoritesStore.getState().syncFavorites()
       }
@@ -73,10 +67,7 @@ export function Navbar() {
           .select('is_admin')
           .eq('id', session.user.id)
           .maybeSingle()
-        
         setIsAdmin(profile?.is_admin || false)
-        
-        // Sync/load cart and favorites
         useCartStore.getState().syncCart()
         useFavoritesStore.getState().syncFavorites()
       }
@@ -94,58 +85,61 @@ export function Navbar() {
   return (
     <>
       <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled ? 'glass py-3' : 'bg-transparent py-5'
+        initial={{ y: -80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
+          isScrolled
+            ? 'bg-carbon/95 backdrop-blur-2xl border-b border-steel/50 py-3 shadow-[0_4px_32px_rgba(0,0,0,0.6)]'
+            : 'bg-transparent py-5'
         }`}
+        style={{ backgroundColor: isScrolled ? 'rgba(13,13,13,0.96)' : 'transparent' }}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 lg:px-8">
           <nav className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="relative z-10">
+
+            {/* ── Logo ──────────────────────────────── */}
+            <Link href="/" className="relative z-10 group">
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex flex-col"
               >
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                  className="relative"
+                <span
+                  className="text-xl md:text-2xl font-black tracking-[0.22em] text-white-diamond uppercase"
+                  style={{ fontFamily: 'var(--font-cinzel), serif', letterSpacing: '0.22em' }}
                 >
-                  <Crown className="w-8 h-8 text-neon-pink" />
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="absolute -top-1 -right-1"
-                  >
-                    <Sparkles className="w-3 h-3 text-neon-yellow" />
-                  </motion.div>
-                </motion.div>
-                <div className="flex flex-col">
-                  <span className="text-xl md:text-2xl font-black text-gradient-neon tracking-tight">
-                    URBAN CROWN
-                  </span>
-                  <span className="text-[10px] tracking-[0.3em] text-gold -mt-1 uppercase font-semibold">
-                    Luxury Streetwear
-                  </span>
-                </div>
+                  URBAN CROWN
+                </span>
+                <span
+                  className="text-[9px] tracking-[0.5em] uppercase mt-0.5 text-gold-action"
+                  style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.45em' }}
+                >
+                  Luxury Streetwear
+                </span>
+                {/* Gold underline on hover */}
+                <motion.div
+                  className="h-px bg-gradient-to-r from-transparent via-gold-action to-transparent mt-1"
+                  initial={{ scaleX: 0, opacity: 0 }}
+                  whileHover={{ scaleX: 1, opacity: 1 }}
+                  transition={{ duration: 0.4 }}
+                />
               </motion.div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-8">
+            {/* ── Desktop Nav ─────────────────────── */}
+            <div className="hidden lg:flex items-center gap-10">
               {navLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
                   <motion.span
-                    className="relative text-sm font-semibold text-foreground/80 hover:text-primary transition-colors uppercase tracking-wide"
-                    whileHover={{ y: -2 }}
+                    className="relative text-xs font-semibold text-titanium hover:text-white-diamond transition-colors duration-300 uppercase tracking-[0.15em]"
+                    style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.15em' }}
+                    whileHover={{ y: -1 }}
                   >
                     {link.label}
                     <motion.span
-                      className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gradient-to-r from-neon-pink to-neon-cyan"
+                      className="absolute -bottom-1 left-0 h-px bg-gradient-to-r from-gold-action to-old-gold"
+                      initial={{ width: 0 }}
                       whileHover={{ width: '100%' }}
                       transition={{ duration: 0.3 }}
                     />
@@ -154,24 +148,18 @@ export function Navbar() {
               ))}
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 text-foreground/80 hover:text-neon-cyan transition-colors"
-              >
-                <Search className="w-5 h-5" />
-              </motion.button>
+            {/* ── Actions ─────────────────────────── */}
+            <div className="flex items-center gap-4">
 
               {user ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   {isAdmin && (
                     <Link href="/admin">
                       <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="hidden sm:flex items-center gap-1 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-neon-pink/20 text-neon-pink rounded-full border border-neon-pink/30 hover:bg-neon-pink/30 transition-colors"
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] border border-steel text-titanium hover:border-gold-action hover:text-gold-action rounded-sm transition-all duration-300"
+                        style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.15em' }}
                       >
                         <Crown className="w-3 h-3" />
                         Admin
@@ -180,60 +168,71 @@ export function Navbar() {
                   )}
                   <Link href="/perfil">
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="p-2 text-neon-green hover:text-neon-cyan transition-colors"
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.92 }}
+                      className="p-2 text-titanium hover:text-white-diamond transition-colors duration-300"
                     >
-                      <User className="w-5 h-5" />
+                      <User className="w-4.5 h-4.5" style={{ width: '18px', height: '18px' }} />
                     </motion.button>
                   </Link>
                 </div>
               ) : (
                 <Link href="/auth/login">
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold uppercase tracking-wider bg-neon-pink/10 text-neon-pink rounded-full border border-neon-pink/40 hover:bg-neon-pink/20 transition-colors"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] border border-steel text-titanium hover:border-chrome hover:text-white-diamond rounded-sm transition-all duration-300"
+                    style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.15em' }}
                   >
-                    <User className="w-4 h-4" />
+                    <User className="w-3.5 h-3.5" />
                     Ingresar
                   </motion.button>
                 </Link>
               )}
 
+              {/* Cart */}
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
                 onClick={toggleCart}
-                className="relative p-2 text-foreground/80 hover:text-neon-pink transition-colors"
+                className="relative p-2 text-titanium hover:text-white-diamond transition-colors duration-300"
               >
-                <ShoppingBag className="w-5 h-5" />
-                {count > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-neon-pink text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center glow-pink"
-                  >
-                    {count}
-                  </motion.span>
-                )}
+                <ShoppingBag style={{ width: '18px', height: '18px' }} />
+                <AnimatePresence>
+                  {count > 0 && (
+                    <motion.span
+                      key="badge"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center text-[9px] font-bold rounded-full"
+                      style={{
+                        background: 'linear-gradient(135deg, #C8A44D, #B08D57)',
+                        color: '#050505',
+                        fontFamily: 'var(--font-sans)',
+                      }}
+                    >
+                      {count}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </motion.button>
 
-              {/* Mobile Menu Button */}
+              {/* Mobile Menu Trigger */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden text-titanium hover:text-white-diamond hover:bg-steel/30"
                 onClick={() => setIsMobileMenuOpen(true)}
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-5 h-5" />
               </Button>
             </div>
           </nav>
         </div>
       </motion.header>
 
-      {/* Mobile Menu */}
+      {/* ── Mobile Menu ───────────────────────────────── */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -242,84 +241,130 @@ export function Navbar() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 lg:hidden"
           >
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-background/95 backdrop-blur-xl"
+              className="absolute inset-0"
+              style={{ background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(8px)' }}
               onClick={() => setIsMobileMenuOpen(false)}
             />
+
+            {/* Drawer */}
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-card border-l border-border/50 p-6 graffiti-bg"
+              transition={{ type: 'spring', damping: 30, stiffness: 250 }}
+              className="absolute right-0 top-0 bottom-0 w-[82%] max-w-sm flex flex-col"
+              style={{
+                background: '#0D0D0D',
+                borderLeft: '1px solid #262626',
+              }}
             >
-              <div className="flex justify-between items-center mb-10">
-                <div className="flex items-center gap-2">
-                  <Crown className="w-6 h-6 text-neon-pink" />
-                  <span className="text-xl font-black text-gradient-neon">
+              {/* Header */}
+              <div className="flex justify-between items-center p-6 border-b border-steel">
+                <div className="flex flex-col">
+                  <span
+                    className="text-base font-black tracking-[0.2em] text-white-diamond"
+                    style={{ fontFamily: 'var(--font-cinzel)' }}
+                  >
                     URBAN CROWN
+                  </span>
+                  <span className="text-[9px] tracking-[0.4em] text-gold-action mt-0.5 uppercase"
+                    style={{ fontFamily: 'var(--font-sans)' }}>
+                    Luxury Streetwear
                   </span>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-titanium hover:text-white-diamond"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5" />
                 </Button>
               </div>
-              <div className="flex flex-col gap-2">
+
+              {/* Links */}
+              <div className="flex-1 flex flex-col justify-center px-6 gap-1">
                 {navLinks.map((link, index) => (
                   <motion.div
                     key={link.href}
-                    initial={{ opacity: 0, x: 30 }}
+                    initial={{ opacity: 0, x: 24 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.07, duration: 0.4 }}
                   >
                     <Link
                       href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block py-4 text-lg font-bold uppercase tracking-wider text-foreground/80 hover:text-neon-pink transition-colors border-b border-border/30"
+                      className="block py-4 text-sm font-semibold uppercase tracking-[0.2em] text-titanium hover:text-white-diamond transition-colors border-b border-steel/40"
+                      style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.2em' }}
                     >
                       {link.label}
                     </Link>
                   </motion.div>
                 ))}
-                
+
                 {user && isAdmin && (
                   <motion.div
-                    initial={{ opacity: 0, x: 30 }}
+                    initial={{ opacity: 0, x: 24 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: navLinks.length * 0.1 }}
-                    className="pt-4"
+                    transition={{ delay: navLinks.length * 0.07 }}
+                    className="pt-6"
                   >
                     <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button className="w-full btn-luxury py-6">
-                        <Crown className="w-4 h-4 mr-2" />
+                      <button className="w-full py-3.5 text-xs font-bold uppercase tracking-[0.2em] border border-gold-action text-gold-action hover:bg-gold-action hover:text-obsidian transition-all duration-300 rounded-sm"
+                        style={{ fontFamily: 'var(--font-sans)' }}>
+                        <Crown className="w-3.5 h-3.5 inline mr-2" />
                         Panel Admin
-                      </Button>
+                      </button>
                     </Link>
                   </motion.div>
                 )}
 
                 {!user && (
                   <motion.div
-                    initial={{ opacity: 0, x: 30 }}
+                    initial={{ opacity: 0, x: 24 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: navLinks.length * 0.1 }}
-                    className="pt-4"
+                    transition={{ delay: navLinks.length * 0.07 }}
+                    className="pt-6"
                   >
                     <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button className="w-full btn-neon-cyan py-6">
-                        <User className="w-4 h-4 mr-2" />
+                      <button className="w-full py-3.5 text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-gold-action to-old-gold text-obsidian rounded-sm transition-all duration-300"
+                        style={{ fontFamily: 'var(--font-sans)' }}>
+                        <User className="w-3.5 h-3.5 inline mr-2" />
                         Ingresar
-                      </Button>
+                      </button>
                     </Link>
                   </motion.div>
                 )}
+
+                {user && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="pt-2"
+                  >
+                    <button
+                      onClick={() => { handleLogout(); setIsMobileMenuOpen(false) }}
+                      className="flex items-center gap-2 text-xs text-titanium hover:text-white-diamond transition-colors py-3 uppercase tracking-[0.15em]"
+                      style={{ fontFamily: 'var(--font-sans)' }}
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      Cerrar Sesión
+                    </button>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Footer mobile */}
+              <div className="p-6 border-t border-steel/40">
+                <p className="text-[10px] text-steel tracking-[0.3em] uppercase" style={{ fontFamily: 'var(--font-sans)' }}>
+                  © 2026 Urban Crown
+                </p>
               </div>
             </motion.div>
           </motion.div>

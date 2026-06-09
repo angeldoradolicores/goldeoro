@@ -1,19 +1,20 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Crown, Target, Heart, Award, Shield, Target as VisionIcon, CheckCircle, ChevronRight, Truck } from "lucide-react"
+import { Crown, Target, Award, Shield, Eye, CheckCircle } from "lucide-react"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 
 export default function NosotrosPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-obsidian text-foreground">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-gold/5 via-transparent to-transparent" />
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-gold/10 rounded-full blur-3xl animate-pulse" />
+      <section className="pt-40 pb-20 relative overflow-hidden bg-obsidian border-b border-steel/10">
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(200,164,77,0.02)_0%,transparent_70%)] animate-pulse" />
+        </div>
         
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
           <motion.div
@@ -21,11 +22,11 @@ export default function NosotrosPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <Crown className="w-20 h-20 text-gold mx-auto mb-6 drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]" />
-            <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4 text-gradient-neon uppercase">
-              Urban Crown
+            <Crown className="w-16 h-16 text-gold-action mx-auto mb-6" />
+            <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight mb-4 text-gradient-gold uppercase">
+              URBAN CROWN
             </h1>
-            <p className="text-xl md:text-2xl text-gold font-medium tracking-wide uppercase">
+            <p className="text-sm md:text-base text-titanium uppercase tracking-[0.3em] font-sans font-light">
               Donde el lujo y la calle se encuentran
             </p>
           </motion.div>
@@ -33,19 +34,18 @@ export default function NosotrosPage() {
       </section>
 
       {/* Nuestra Historia */}
-      <section className="py-16 relative">
+      <section className="py-24 relative bg-obsidian">
         <div className="container mx-auto px-4 max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="glass-card p-8 md:p-12 rounded-3xl border border-border/60 hover:border-gold/30 transition-all duration-300 relative overflow-hidden group"
+            transition={{ duration: 0.8 }}
+            className="bg-carbon p-8 md:p-12 border border-steel/30 rounded-none relative overflow-hidden shadow-2xl"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl group-hover:bg-gold/10 transition-colors" />
-            <span className="text-xs font-bold uppercase tracking-widest text-gold mb-2 block">Nuestra Historia</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-6">Urban Crown</h2>
-            <div className="space-y-6 text-muted-foreground text-base md:text-lg leading-relaxed">
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-action mb-3 block">Nuestra Historia</span>
+            <h2 className="text-2xl md:text-3xl font-display font-semibold text-white-diamond mb-6 uppercase">MANIFIESTO</h2>
+            <div className="space-y-6 text-titanium text-sm md:text-base leading-relaxed font-sans font-light">
               <p>
                 Urban Crown nace de la pasión por la moda urbana y la búsqueda constante de productos que combinen diseño, exclusividad y personalidad.
               </p>
@@ -61,54 +61,54 @@ export default function NosotrosPage() {
       </section>
 
       {/* Nuestra Misión & Visión */}
-      <section className="py-16 bg-card/20 border-y border-border/30 relative">
+      <section className="py-24 bg-carbon border-y border-steel/20 relative">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="grid md:grid-cols-2 gap-8">
             {/* Mision */}
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
+              initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="p-8 bg-card/40 border border-border/40 rounded-3xl flex flex-col justify-between"
+              transition={{ duration: 0.8 }}
+              className="p-8 bg-graphite border border-steel/30 rounded-none flex flex-col justify-between shadow-xl"
             >
               <div>
-                <div className="w-12 h-12 bg-gold/10 border border-gold/30 rounded-xl flex items-center justify-center mb-6">
-                  <Target className="w-6 h-6 text-gold" />
+                <div className="w-10 h-10 bg-carbon border border-steel/40 rounded-none flex items-center justify-center mb-6">
+                  <Target className="w-5 h-5 text-gold-action" />
                 </div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-gold mb-2">Nuestra Misión</h3>
-                <h4 className="text-2xl font-bold text-foreground mb-4">Elevar el estilo urbano a un nuevo nivel</h4>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-action mb-2">Nuestra Misión</h3>
+                <h4 className="text-xl md:text-2xl font-display font-semibold text-white-diamond mb-4">ELEVAR EL ESTILO URBANO</h4>
+                <p className="text-sm text-titanium leading-relaxed font-light">
                   En Urban Crown trabajamos para ofrecer gorras y accesorios que representen la combinación perfecta entre la elegancia contemporánea y la esencia de la cultura urbana.
                 </p>
-                <p className="text-muted-foreground leading-relaxed mt-4">
+                <p className="text-sm text-titanium leading-relaxed mt-4 font-light">
                   Nuestra misión es brindar productos cuidadosamente seleccionados que permitan a cada cliente expresar su personalidad con autenticidad, confianza y distinción.
                 </p>
               </div>
-              <p className="text-gold font-semibold italic mt-6 text-sm">"Creemos que el verdadero estilo no sigue tendencias; las define."</p>
+              <p className="text-gold-action font-medium italic mt-8 text-xs tracking-wider font-display">"Creemos que el verdadero estilo no sigue tendencias; las define."</p>
             </motion.div>
 
             {/* Vision */}
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="p-8 bg-card/40 border border-border/40 rounded-3xl flex flex-col justify-between"
+              transition={{ duration: 0.8 }}
+              className="p-8 bg-graphite border border-steel/30 rounded-none flex flex-col justify-between shadow-xl"
             >
               <div>
-                <div className="w-12 h-12 bg-neon-cyan/10 border border-neon-cyan/30 rounded-xl flex items-center justify-center mb-6">
-                  <VisionIcon className="w-6 h-6 text-neon-cyan" />
+                <div className="w-10 h-10 bg-carbon border border-steel/40 rounded-none flex items-center justify-center mb-6">
+                  <Eye className="w-5 h-5 text-chrome" />
                 </div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-neon-cyan mb-2">Nuestra Visión</h3>
-                <h4 className="text-2xl font-bold text-foreground mb-4">Liderar la cultura streetwear</h4>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-chrome mb-2">Nuestra Visión</h3>
+                <h4 className="text-xl md:text-2xl font-display font-semibold text-white-diamond mb-4">LIDERAR LA CULTURA STREETWEAR</h4>
+                <p className="text-sm text-titanium leading-relaxed font-light">
                   Convertirnos en una marca referente de moda urbana en Colombia, reconocida por la calidad de nuestros productos, la confianza de nuestros clientes y la capacidad de fusionar el lujo contemporáneo con la esencia de la cultura streetwear.
                 </p>
               </div>
-              <div className="border-t border-border/40 pt-6 mt-6">
-                <p className="text-sm text-muted-foreground font-semibold flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-neon-cyan" /> Marca referente en Colombia
+              <div className="border-t border-steel/20 pt-6 mt-8">
+                <p className="text-xs text-chrome font-semibold flex items-center gap-2 uppercase tracking-widest">
+                  <CheckCircle className="w-4 h-4 text-gold-action" /> MARCA REFERENTE EN COLOMBIA
                 </p>
               </div>
             </motion.div>
@@ -117,74 +117,78 @@ export default function NosotrosPage() {
       </section>
 
       {/* Nuestros Valores */}
-      <section className="py-20">
+      <section className="py-24 bg-obsidian">
         <div className="container mx-auto px-4 max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-16"
           >
-            <span className="text-xs font-bold uppercase tracking-widest text-gold mb-2 block">Los pilares de Urban Crown</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-foreground">Nuestros Valores</h2>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-action mb-2 block">Los pilares de la marca</span>
+            <h2 className="text-3xl font-display font-bold text-white-diamond uppercase">Nuestros Valores</h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: "Calidad", desc: "Seleccionamos productos con altos estándares de diseño y fabricación para garantizar una experiencia satisfactoria.", color: "border-gold/30 bg-gold/5 text-gold" },
-              { title: "Autenticidad", desc: "Creemos en la importancia de expresar una identidad propia a través de cada detalle.", color: "border-neon-pink/30 bg-neon-pink/5 text-neon-pink" },
-              { title: "Exclusividad", desc: "Buscamos modelos y diseños que destaquen por su carácter y diferenciación.", color: "border-neon-cyan/30 bg-neon-cyan/5 text-neon-cyan" },
-              { title: "Confianza", desc: "Construimos relaciones duraderas con nuestros clientes mediante transparencia, responsabilidad y excelente servicio.", color: "border-neon-green/30 bg-neon-green/5 text-neon-green" },
-              { title: "Innovación", desc: "Nos mantenemos en constante evolución para ofrecer propuestas alineadas con las nuevas tendencias de la moda urbana.", color: "border-neon-yellow/30 bg-neon-yellow/5 text-neon-yellow" }
-            ].map((v, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className={`p-6 border rounded-2xl ${v.color.split(' ').slice(0, 2).join(' ')}`}
-              >
-                <h4 className={`text-lg font-bold mb-2 ${v.color.split(' ').pop()}`}>{v.title}</h4>
-                <p className="text-muted-foreground text-sm leading-relaxed">{v.desc}</p>
-              </motion.div>
-            ))}
+              { title: "CALIDAD ABSOLUTA", desc: "Seleccionamos productos con altos estándares de diseño y fabricación para garantizar una durabilidad y estética impecables.", icon: Award },
+              { title: "AUTENTICIDAD", desc: "Creemos en la importancia de expresar una identidad propia y honesta a través de cada detalle.", icon: Shield },
+              { title: "EXCLUSIVIDAD", desc: "Buscamos modelos y diseños únicos que destaquen por su carácter exclusivo y diferenciación.", icon: Crown },
+              { title: "CONFIANZA", desc: "Construimos relaciones duraderas basadas en la transparencia, responsabilidad y un servicio al cliente impecable.", icon: Target },
+              { title: "EVOLUCIÓN", desc: "Nos mantenemos a la vanguardia de la moda para ofrecer propuestas alineadas con la cultura urbana global.", icon: Eye }
+            ].map((v, i) => {
+              const Icon = v.icon
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05, duration: 0.6 }}
+                  className="p-8 bg-carbon border border-steel/30 rounded-none shadow-xl"
+                >
+                  <Icon className="w-6 h-6 text-gold-action mb-4" />
+                  <h4 className="text-sm font-display font-semibold mb-2 text-white-diamond tracking-wider uppercase">{v.title}</h4>
+                  <p className="text-titanium text-xs leading-relaxed font-sans font-light">{v.desc}</p>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>
 
       {/* Por qué elegir Urban Crown */}
-      <section className="py-20 bg-card/10 border-t border-border/30">
+      <section className="py-24 bg-carbon border-t border-steel/20">
         <div className="container mx-auto px-4 max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-extrabold text-foreground">¿Por qué elegir Urban Crown?</h2>
+            <h2 className="text-3xl font-display font-bold text-white-diamond uppercase">¿Por qué elegir Urban Crown?</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: "Diseños Seleccionados", desc: "Una colección pensada para quienes valoran la calidad, el estilo y la exclusividad." },
-              { title: "Atención Personalizada", desc: "Brindamos asesoría cercana para ayudarte a encontrar el producto ideal." },
-              { title: "Envíos Seguros", desc: "Realizamos envíos a nivel nacional con seguimiento y acompañamiento durante el proceso." },
-              { title: "Experiencia de Compra Confiable", desc: "Nos enfocamos en ofrecer un servicio transparente y una atención orientada a la satisfacción de nuestros clientes." },
-              { title: "Estilo que Destaca", desc: "Cada producto forma parte de una propuesta diseñada para quienes buscan diferenciarse sin perder autenticidad." }
+              { title: "Diseños Seleccionados", desc: "Una colección pensada para quienes valoran la calidad, el estilo y la exclusividad urbana." },
+              { title: "Atención Premium", desc: "Brindamos asesoría cercana y personalizada para ayudarte a encontrar la pieza ideal." },
+              { title: "Envíos Certificados", desc: "Realizamos envíos a nivel nacional con seguimiento y acompañamiento total en el proceso." },
+              { title: "Satisfacción Garantizada", desc: "Nos enfocamos en ofrecer un servicio impecable y una atención orientada a la perfección." },
+              { title: "Estilo Distintivo", desc: "Cada producto forma parte de una propuesta de diseño para quienes buscan diferenciarse con clase." }
             ].map((choice, idx) => (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.05 }}
-                className="p-6 bg-card/50 border border-border/50 rounded-2xl hover:border-gold/30 transition-all duration-300"
+                transition={{ delay: idx * 0.05, duration: 0.6 }}
+                className="p-6 bg-graphite border border-steel/30 rounded-none hover:border-gold-action/30 transition-all duration-300"
               >
-                <h4 className="font-bold text-foreground text-lg mb-2 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-gold" /> {choice.title}
+                <h4 className="font-display font-semibold text-white-diamond text-sm mb-2 flex items-center gap-2 uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 bg-gold-action" /> {choice.title}
                 </h4>
-                <p className="text-muted-foreground text-sm leading-relaxed">{choice.desc}</p>
+                <p className="text-titanium text-xs leading-relaxed font-sans font-light">{choice.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -192,16 +196,15 @@ export default function NosotrosPage() {
       </section>
 
       {/* Footer Tagline */}
-      <section className="py-16 text-center border-t border-border/30 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-gold/5 via-transparent to-transparent" />
+      <section className="py-20 text-center border-t border-steel/20 relative overflow-hidden bg-obsidian">
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-xl md:text-2xl font-bold text-gold uppercase tracking-widest mb-2">Urban Crown</h3>
-            <p className="text-lg text-muted-foreground font-semibold">Donde el lujo y la calle se encuentran.</p>
+            <h3 className="text-lg font-display font-bold text-gold-action uppercase tracking-[0.3em] mb-3">URBAN CROWN</h3>
+            <p className="text-sm text-titanium font-sans font-light uppercase tracking-widest">Donde el lujo y la calle se encuentran.</p>
           </motion.div>
         </div>
       </section>

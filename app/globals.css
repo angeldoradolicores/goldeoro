@@ -4,58 +4,84 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Urban Medellin Theme - Neon & Dark */
-  --background: oklch(0.06 0.02 280);
-  --foreground: oklch(0.95 0.01 280);
-  --card: oklch(0.1 0.02 280);
-  --card-foreground: oklch(0.95 0.01 280);
-  --popover: oklch(0.08 0.02 280);
-  --popover-foreground: oklch(0.95 0.01 280);
-  --primary: oklch(0.7 0.25 330);
-  --primary-foreground: oklch(0.1 0.01 280);
-  --secondary: oklch(0.15 0.02 280);
-  --secondary-foreground: oklch(0.9 0.01 280);
-  --muted: oklch(0.18 0.02 280);
-  --muted-foreground: oklch(0.6 0.02 280);
-  --accent: oklch(0.65 0.3 160);
-  --accent-foreground: oklch(0.1 0.01 280);
-  --destructive: oklch(0.55 0.25 25);
-  --destructive-foreground: oklch(0.95 0.01 280);
-  --border: oklch(0.22 0.03 280);
-  --input: oklch(0.12 0.02 280);
-  --ring: oklch(0.7 0.25 330);
-  --chart-1: oklch(0.7 0.25 330);
-  --chart-2: oklch(0.65 0.3 160);
-  --chart-3: oklch(0.7 0.2 60);
-  --chart-4: oklch(0.6 0.25 280);
-  --chart-5: oklch(0.55 0.2 200);
-  --radius: 1rem;
-  
-  /* Urban Neon Variables */
-  --neon-pink: oklch(0.7 0.25 330);
-  --neon-cyan: oklch(0.65 0.3 200);
-  --neon-green: oklch(0.65 0.3 160);
-  --neon-yellow: oklch(0.85 0.2 95);
-  --neon-purple: oklch(0.55 0.3 300);
-  --neon-orange: oklch(0.7 0.25 50);
-  --glass: oklch(0.12 0.02 280 / 0.7);
-  --glass-border: oklch(0.5 0.2 330 / 0.3);
-  
-  --sidebar: oklch(0.08 0.02 280);
-  --sidebar-foreground: oklch(0.95 0.01 280);
-  --sidebar-primary: oklch(0.7 0.25 330);
-  --sidebar-primary-foreground: oklch(0.1 0.01 280);
-  --sidebar-accent: oklch(0.15 0.02 280);
-  --sidebar-accent-foreground: oklch(0.95 0.01 280);
-  --sidebar-border: oklch(0.22 0.03 280);
-  --sidebar-ring: oklch(0.7 0.25 330);
+  /* ═══════════════════════════════════════════
+     URBAN CROWN — LUXURY PALETTE
+     Inspirado en Ferrari, Chrome Hearts, Amiri
+  ═══════════════════════════════════════════ */
+
+  /* Bases — Negro absoluto a carbón */
+  --obsidian:  #050505;
+  --carbon:    #0D0D0D;
+  --graphite:  #171717;
+  --steel:     #262626;
+  --iron:      #333333;
+
+  /* Cromado / Diamante */
+  --chrome:         #C0C0C0;
+  --titanium:       #8B8B8B;
+  --white-diamond:  #F5F5F5;
+  --crystal:        #DDE8F5;
+  --silver-light:   #E8E8E8;
+
+  /* Colección Dorada / Religiosa */
+  --old-gold:      #B08D57;
+  --imperial-gold: #D4AF37;
+  --champagne:     #E6C989;
+  --ivory:         #F3EAD7;
+  --gold-action:   #C8A44D;
+
+  /* Semánticos Tailwind */
+  --background: var(--carbon);
+  --foreground: var(--white-diamond);
+  --card:              var(--graphite);
+  --card-foreground:   var(--white-diamond);
+  --popover:           var(--graphite);
+  --popover-foreground: var(--white-diamond);
+  --primary:            var(--gold-action);
+  --primary-foreground: var(--obsidian);
+  --secondary:          var(--steel);
+  --secondary-foreground: var(--chrome);
+  --muted:              var(--steel);
+  --muted-foreground:   var(--titanium);
+  --accent:             var(--old-gold);
+  --accent-foreground:  var(--obsidian);
+  --destructive:        oklch(0.55 0.25 25);
+  --destructive-foreground: var(--white-diamond);
+  --border:  var(--steel);
+  --input:   var(--graphite);
+  --ring:    var(--gold-action);
+  --radius: 0.5rem;
+
+  /* Legacy neon vars mapped to luxury equivalents (backward compat) */
+  --neon-pink:   var(--old-gold);
+  --neon-cyan:   var(--chrome);
+  --neon-green:  var(--imperial-gold);
+  --neon-yellow: var(--champagne);
+  --neon-purple: var(--titanium);
+  --neon-orange: var(--gold-action);
+  --gold:        var(--gold-action);
+
+  /* Glass luxury */
+  --glass: oklch(0.08 0 0 / 0.85);
+  --glass-border: oklch(0.7 0 0 / 0.15);
+
+  /* Sidebar */
+  --sidebar: var(--obsidian);
+  --sidebar-foreground: var(--white-diamond);
+  --sidebar-primary: var(--gold-action);
+  --sidebar-primary-foreground: var(--obsidian);
+  --sidebar-accent: var(--steel);
+  --sidebar-accent-foreground: var(--white-diamond);
+  --sidebar-border: var(--steel);
+  --sidebar-ring: var(--gold-action);
 }
 
 @theme inline {
-  --font-sans: 'Inter', 'Geist', system-ui, sans-serif;
+  --font-sans: 'Montserrat', 'Inter', system-ui, sans-serif;
   --font-mono: 'Geist Mono', monospace;
-  --font-display: 'Inter', sans-serif;
-  --font-graffiti: 'Permanent Marker', cursive;
+  --font-display: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+  --font-graffiti: 'Cinzel', serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -75,23 +101,38 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-neon-pink: var(--neon-pink);
-  --color-neon-cyan: var(--neon-cyan);
-  --color-neon-green: var(--neon-green);
-  --color-neon-yellow: var(--neon-yellow);
-  --color-neon-purple: var(--neon-purple);
-  --color-neon-orange: var(--neon-orange);
+
+  /* Luxury color tokens */
+  --color-obsidian: var(--obsidian);
+  --color-carbon: var(--carbon);
+  --color-graphite: var(--graphite);
+  --color-steel: var(--steel);
+  --color-chrome: var(--chrome);
+  --color-titanium: var(--titanium);
+  --color-white-diamond: var(--white-diamond);
+  --color-crystal: var(--crystal);
+  --color-old-gold: var(--old-gold);
+  --color-imperial-gold: var(--imperial-gold);
+  --color-champagne: var(--champagne);
+  --color-ivory: var(--ivory);
+  --color-gold-action: var(--gold-action);
+  --color-gold: var(--gold-action);
   --color-glass: var(--glass);
   --color-glass-border: var(--glass-border);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Legacy neon aliases */
+  --color-neon-pink:   var(--old-gold);
+  --color-neon-cyan:   var(--chrome);
+  --color-neon-green:  var(--imperial-gold);
+  --color-neon-yellow: var(--champagne);
+  --color-neon-purple: var(--titanium);
+  --color-neon-orange: var(--gold-action);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
+
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -108,300 +149,392 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-color: var(--carbon);
   }
-  
+
   html {
     scroll-behavior: smooth;
   }
-  
+
+  /* ─── Scrollbar cromada ─────────────────── */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
-  
   ::-webkit-scrollbar-track {
-    background: var(--background);
+    background: var(--obsidian);
   }
-  
   ::-webkit-scrollbar-thumb {
-    background: var(--neon-pink);
-    border-radius: 4px;
+    background: var(--steel);
+    border-radius: 3px;
+    transition: background 0.3s;
   }
-  
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--neon-cyan);
+    background: var(--titanium);
   }
 }
 
 @layer utilities {
-  /* Glassmorphism Urban */
-  .glass {
-    background: var(--glass);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-  }
-  
-  /* Neon gradient text */
-  .text-gradient-neon {
-    background: linear-gradient(135deg, var(--neon-pink), var(--neon-cyan), var(--neon-green));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+
+  /* ═══════════════════════════════════════════
+     TEXTO / GRADIENTES
+  ═══════════════════════════════════════════ */
 
   .text-gradient-gold {
-    background: linear-gradient(135deg, var(--neon-yellow), var(--neon-orange), var(--neon-pink));
+    background: linear-gradient(135deg, var(--old-gold) 0%, var(--imperial-gold) 50%, var(--champagne) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
-  /* Neon glow effects */
-  .glow-pink {
-    box-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-pink), 0 0 60px var(--neon-pink);
-  }
-  
-  .glow-cyan {
-    box-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
-  }
-  
-  .glow-green {
-    box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
+
+  .text-gradient-chrome {
+    background: linear-gradient(135deg, var(--titanium) 0%, var(--white-diamond) 50%, var(--titanium) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  .text-glow-pink {
-    text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink);
+  /* Legacy compat: remap neon gradient to gold */
+  .text-gradient-neon {
+    background: linear-gradient(135deg, var(--old-gold) 0%, var(--imperial-gold) 50%, var(--champagne) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  .text-glow-cyan {
-    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+  /* ═══════════════════════════════════════════
+     GLASS LUXURY
+  ═══════════════════════════════════════════ */
+
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(24px) saturate(120%);
+    -webkit-backdrop-filter: blur(24px) saturate(120%);
+    border: 1px solid var(--glass-border);
   }
-  
-  /* Neon shimmer animation */
-  .shimmer {
-    background: linear-gradient(
-      90deg,
-      var(--neon-pink) 0%,
-      var(--neon-cyan) 50%,
-      var(--neon-pink) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 3s infinite;
+
+  .glass-luxury {
+    background: oklch(0.06 0 0 / 0.92);
+    backdrop-filter: blur(32px) saturate(150%);
+    -webkit-backdrop-filter: blur(32px) saturate(150%);
+    border: 1px solid oklch(0.7 0 0 / 0.1);
   }
-  
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-  
-  /* Urban button */
+
+  /* ═══════════════════════════════════════════
+     BOTONES LUXURY
+  ═══════════════════════════════════════════ */
+
   .btn-luxury {
-    background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-    color: white;
+    background: linear-gradient(135deg, var(--gold-action) 0%, var(--old-gold) 100%);
+    color: var(--obsidian);
+    font-family: var(--font-sans);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 20px var(--neon-pink);
-  }
-  
-  .btn-luxury:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 30px var(--neon-pink), 0 0 60px var(--neon-pink);
+    letter-spacing: 0.15em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
   }
 
-  .btn-neon-cyan {
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-green));
-    color: var(--background);
-    font-weight: 700;
+  .btn-luxury:hover {
+    background: linear-gradient(135deg, var(--imperial-gold) 0%, var(--champagne) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px oklch(0.72 0.12 75 / 0.4);
+  }
+
+  .btn-imperial {
+    background: transparent;
+    color: var(--gold-action);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    border: 1px solid var(--gold-action);
     transition: all 0.3s ease;
-    box-shadow: 0 4px 20px var(--neon-cyan);
+  }
+
+  .btn-imperial:hover {
+    background: var(--gold-action);
+    color: var(--obsidian);
+    transform: translateY(-2px);
+  }
+
+  .btn-chrome {
+    background: transparent;
+    color: var(--chrome);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 1px solid var(--steel);
+    transition: all 0.25s ease;
+  }
+
+  .btn-chrome:hover {
+    border-color: var(--chrome);
+    color: var(--white-diamond);
+    transform: translateY(-1px);
+  }
+
+  /* Legacy compat */
+  .btn-neon-cyan {
+    background: transparent;
+    color: var(--chrome);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 1px solid var(--steel);
+    transition: all 0.25s ease;
   }
 
   .btn-neon-cyan:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 30px var(--neon-cyan);
+    border-color: var(--chrome);
+    color: var(--white-diamond);
   }
-  
-  /* Hover lift effect */
+
+  .btn-neon-pink {
+    background: linear-gradient(135deg, var(--gold-action), var(--old-gold));
+    color: var(--obsidian);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    transition: all 0.25s ease;
+  }
+
+  .btn-neon-pink:hover {
+    background: linear-gradient(135deg, var(--imperial-gold), var(--champagne));
+    transform: translateY(-2px);
+  }
+
+  /* ═══════════════════════════════════════════
+     HOVER EFFECTS
+  ═══════════════════════════════════════════ */
+
   .hover-lift {
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
   }
-  
+
   .hover-lift:hover {
-    transform: translateY(-12px) rotateX(5deg);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px var(--neon-pink);
-  }
-  
-  /* Graffiti texture overlay */
-  .graffiti-bg {
-    position: relative;
-  }
-  
-  .graffiti-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: 
-      radial-gradient(circle at 20% 80%, var(--neon-pink) 0%, transparent 30%),
-      radial-gradient(circle at 80% 20%, var(--neon-cyan) 0%, transparent 30%),
-      radial-gradient(circle at 50% 50%, var(--neon-purple) 0%, transparent 40%);
-    opacity: 0.1;
-    pointer-events: none;
-    z-index: 0;
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px oklch(0 0 0 / 0.6), 0 0 1px oklch(0.7 0 0 / 0.2);
   }
 
-  /* Spray paint splatter effect */
-  .spray-effect {
-    position: relative;
+  /* ═══════════════════════════════════════════
+     SHIMMER DORADO
+  ═══════════════════════════════════════════ */
+
+  .shimmer-gold {
+    background: linear-gradient(
+      90deg,
+      var(--old-gold) 0%,
+      var(--imperial-gold) 30%,
+      var(--champagne) 50%,
+      var(--imperial-gold) 70%,
+      var(--old-gold) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-gold 3s ease-in-out infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  .spray-effect::after {
-    content: '';
-    position: absolute;
-    inset: -20px;
-    background-image: 
-      radial-gradient(circle at 10% 20%, var(--neon-pink) 0, transparent 8px),
-      radial-gradient(circle at 90% 30%, var(--neon-cyan) 0, transparent 6px),
-      radial-gradient(circle at 30% 80%, var(--neon-green) 0, transparent 10px),
-      radial-gradient(circle at 70% 70%, var(--neon-yellow) 0, transparent 7px),
-      radial-gradient(circle at 50% 10%, var(--neon-purple) 0, transparent 5px);
-    opacity: 0.6;
-    pointer-events: none;
-    z-index: -1;
+  @keyframes shimmer-gold {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 
-  /* Animated border */
+  /* Legacy shimmer mapped to gold */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--old-gold) 0%,
+      var(--imperial-gold) 50%,
+      var(--old-gold) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-gold 3s ease-in-out infinite;
+  }
+
+  /* ═══════════════════════════════════════════
+     ANIMATED BORDER DORADO
+  ═══════════════════════════════════════════ */
+
   .border-animate {
     position: relative;
-    background: var(--card);
+    background: var(--graphite);
     border-radius: var(--radius);
   }
 
   .border-animate::before {
     content: '';
     position: absolute;
-    inset: -2px;
-    background: linear-gradient(45deg, var(--neon-pink), var(--neon-cyan), var(--neon-green), var(--neon-yellow), var(--neon-pink));
-    background-size: 400% 400%;
-    border-radius: calc(var(--radius) + 2px);
+    inset: -1px;
+    background: linear-gradient(135deg, var(--steel), var(--titanium), var(--gold-action), var(--steel));
+    background-size: 300% 300%;
+    border-radius: calc(var(--radius) + 1px);
     z-index: -1;
-    animation: gradient-border 4s ease infinite;
+    animation: border-gold 6s ease infinite;
   }
 
-  @keyframes gradient-border {
+  @keyframes border-gold {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
   }
 
-  /* Pulse glow */
-  .pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite;
-  }
+  /* ═══════════════════════════════════════════
+     NOISE / TEXTURA SATINADA
+  ═══════════════════════════════════════════ */
 
-  @keyframes pulse-glow {
-    0%, 100% { 
-      box-shadow: 0 0 20px var(--neon-pink), 0 0 40px transparent;
-    }
-    50% { 
-      box-shadow: 0 0 30px var(--neon-pink), 0 0 60px var(--neon-pink);
-    }
-  }
-
-  /* Star twinkle */
-  .star {
-    animation: twinkle 2s ease-in-out infinite;
-  }
-
-  @keyframes twinkle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  /* Floating animation */
-  .float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    33% { transform: translateY(-15px) rotate(2deg); }
-    66% { transform: translateY(-8px) rotate(-1deg); }
-  }
-
-  /* Glitch effect */
-  .glitch {
-    position: relative;
-  }
-
-  .glitch::before,
-  .glitch::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .glitch::before {
-    animation: glitch-1 0.3s infinite linear alternate-reverse;
-    color: var(--neon-cyan);
-    z-index: -1;
-  }
-
-  .glitch::after {
-    animation: glitch-2 0.3s infinite linear alternate-reverse;
-    color: var(--neon-pink);
-    z-index: -2;
-  }
-
-  @keyframes glitch-1 {
-    0% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 0); }
-    20% { clip-path: inset(60% 0 20% 0); transform: translate(3px, 0); }
-    40% { clip-path: inset(40% 0 40% 0); transform: translate(-3px, 0); }
-    60% { clip-path: inset(80% 0 10% 0); transform: translate(3px, 0); }
-    80% { clip-path: inset(10% 0 80% 0); transform: translate(-3px, 0); }
-    100% { clip-path: inset(50% 0 30% 0); transform: translate(3px, 0); }
-  }
-
-  @keyframes glitch-2 {
-    0% { clip-path: inset(60% 0 20% 0); transform: translate(3px, 0); }
-    20% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 0); }
-    40% { clip-path: inset(80% 0 10% 0); transform: translate(3px, 0); }
-    60% { clip-path: inset(40% 0 40% 0); transform: translate(-3px, 0); }
-    80% { clip-path: inset(50% 0 30% 0); transform: translate(3px, 0); }
-    100% { clip-path: inset(10% 0 80% 0); transform: translate(-3px, 0); }
-  }
-
-  /* Noise texture */
   .noise {
     position: relative;
   }
-  
+
   .noise::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.025;
     pointer-events: none;
     z-index: 1;
   }
 
-  /* Scanlines */
-  .scanlines::after {
+  /* ═══════════════════════════════════════════
+     GLOW EFFECTS LUXURY (muy sutiles)
+  ═══════════════════════════════════════════ */
+
+  .glow-gold {
+    box-shadow: 0 0 24px oklch(0.72 0.12 75 / 0.25);
+  }
+
+  .glow-chrome {
+    box-shadow: 0 0 20px oklch(0.7 0 0 / 0.15);
+  }
+
+  /* Legacy mapped */
+  .glow-pink {
+    box-shadow: 0 0 20px oklch(0.72 0.12 75 / 0.2);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px oklch(0.7 0 0 / 0.12);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px oklch(0.72 0.15 75 / 0.2);
+  }
+
+  .text-glow-pink {
+    text-shadow: 0 0 20px oklch(0.72 0.12 75 / 0.4);
+  }
+
+  .text-glow-cyan {
+    text-shadow: 0 0 20px oklch(0.7 0 0 / 0.3);
+  }
+
+  /* ═══════════════════════════════════════════
+     PULSO SUTIL
+  ═══════════════════════════════════════════ */
+
+  .pulse-glow {
+    animation: pulse-luxury 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-luxury {
+    0%, 100% { box-shadow: 0 0 12px oklch(0.72 0.12 75 / 0.15); }
+    50%       { box-shadow: 0 0 24px oklch(0.72 0.12 75 / 0.35); }
+  }
+
+  /* ═══════════════════════════════════════════
+     FLOATING (sutil)
+  ═══════════════════════════════════════════ */
+
+  .float {
+    animation: float-luxury 8s ease-in-out infinite;
+  }
+
+  @keyframes float-luxury {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+
+  /* ═══════════════════════════════════════════
+     STAR / DESTELLOS (mapeo legacy)
+  ═══════════════════════════════════════════ */
+
+  .star {
+    animation: twinkle-luxury 3s ease-in-out infinite;
+  }
+
+  @keyframes twinkle-luxury {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50%      { opacity: 1; transform: scale(1.15); }
+  }
+
+  /* ═══════════════════════════════════════════
+     SPRAY / GRAFFITI (se mantienen pero no 
+     se usan — evitar en nuevo código)
+  ═══════════════════════════════════════════ */
+
+  .graffiti-bg { position: relative; }
+  .graffiti-bg::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.1) 2px,
-      rgba(0, 0, 0, 0.1) 4px
-    );
+    background: radial-gradient(circle at 20% 80%, oklch(0.72 0.12 75 / 0.04) 0%, transparent 50%);
     pointer-events: none;
-    z-index: 2;
+    z-index: 0;
+  }
+
+  .spray-effect { position: relative; }
+  .spray-effect::after { display: none; }
+
+  /* ═══════════════════════════════════════════
+     GLITCH (desactivado — mantenido para compat)
+  ═══════════════════════════════════════════ */
+
+  .glitch { position: relative; }
+  .glitch::before, .glitch::after { display: none; }
+
+  /* ═══════════════════════════════════════════
+     SCANLINES (desactivadas)
+  ═══════════════════════════════════════════ */
+
+  .scanlines::after { display: none; }
+
+  /* ═══════════════════════════════════════════
+     SWING ANIMATION (para iconos)
+  ═══════════════════════════════════════════ */
+
+  @keyframes swing {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-8deg); }
+    75%      { transform: rotate(8deg); }
+  }
+
+  .animate-swing {
+    animation: swing 2.5s ease-in-out infinite;
+  }
+
+  /* ═══════════════════════════════════════════
+     GRADIENT BACKGROUNDS
+  ═══════════════════════════════════════════ */
+
+  .bg-gradient-neon {
+    background: linear-gradient(135deg, var(--gold-action), var(--old-gold));
+  }
+
+  .text-gold {
+    color: var(--gold-action);
+  }
+
+  /* ═══════════════════════════════════════════
+     SHADOW DORADA DEEP
+  ═══════════════════════════════════════════ */
+
+  .shadow-gold {
+    box-shadow: 0 8px 32px oklch(0.72 0.12 75 / 0.2), 0 2px 8px oklch(0 0 0 / 0.5);
+  }
+
+  .shadow-glow-pink {
+    box-shadow: 0 0 8px oklch(0.72 0.12 75 / 0.3);
   }
 }

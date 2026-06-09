@@ -1,29 +1,37 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Permanent_Marker } from 'next/font/google'
+import { Cinzel, Montserrat, Cormorant_Garamond } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const inter = Inter({ 
+const cinzel = Cinzel({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-cinzel',
   display: 'swap',
+  weight: ['400', '500', '600', '700', '800', '900'],
 })
 
-const permanentMarker = Permanent_Marker({ 
-  weight: '400',
+const montserrat = Montserrat({
   subsets: ['latin'],
-  variable: '--font-graffiti',
+  variable: '--font-sans',
   display: 'swap',
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+})
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-cormorant',
+  display: 'swap',
+  weight: ['300', '400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
-  title: 'Urban Crown | Street Culture Premium Caps & Luxury Streetwear',
+  title: 'Urban Crown | Luxury Streetwear Premium Caps',
   description: 'Gorras exclusivas que fusionan el lujo contemporáneo con la esencia de la cultura streetwear. Diseños seleccionados para quienes valoran la autenticidad.',
   keywords: ['gorras', 'streetwear', 'urban', 'luxury', 'premium', 'caps', 'Urban Crown', 'Colombia', 'street culture'],
   authors: [{ name: 'Urban Crown' }],
   openGraph: {
-    title: 'Urban Crown | Street Culture & Luxury Hats',
+    title: 'Urban Crown | Luxury Streetwear',
     description: 'Donde el lujo y la calle se encuentran. Colecciones exclusivas.',
     type: 'website',
   },
@@ -32,7 +40,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0a0a0f',
+  themeColor: '#0D0D0D',
 }
 
 export default function RootLayout({
@@ -41,16 +49,26 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${permanentMarker.variable} bg-background`}>
+    <html lang="es" className={`${cinzel.variable} ${montserrat.variable} ${cormorant.variable} bg-background`}>
+      <head>
+        <style>{`
+          :root {
+            --font-display: var(--font-cinzel);
+            --font-graffiti: var(--font-cinzel);
+          }
+        `}</style>
+      </head>
       <body className="font-sans antialiased min-h-screen">
         {children}
-        <Toaster 
+        <Toaster
           position="top-right"
           toastOptions={{
             style: {
-              background: 'hsl(var(--card))',
-              border: '1px solid hsl(var(--border))',
-              color: 'hsl(var(--foreground))',
+              background: '#171717',
+              border: '1px solid #262626',
+              color: '#F5F5F5',
+              fontFamily: 'Montserrat, sans-serif',
+              letterSpacing: '0.02em',
             },
           }}
         />

@@ -55,14 +55,12 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
     const fetchProduct = async () => {
       setLoading(true)
       try {
-        // Fetch by UUID or slug (the [slug] route handles both)
         const res = await fetch(`/api/products/${encodeURIComponent(id)}`)
         if (res.ok) {
           const data = await res.json()
           if (data.product) {
             setProduct(data.product)
             setSelectedColor(data.product.colors?.[0] || '')
-            // Fetch related products by category
             const catParam = encodeURIComponent(data.product.category || '')
             const related = await fetch(`/api/products?category=${catParam}&limit=5`)
             if (related.ok) {
@@ -94,19 +92,19 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      <main className="min-h-screen bg-obsidian flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-gold-action" />
       </main>
     )
   }
 
   if (!product) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-screen bg-obsidian flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Producto no encontrado</h1>
+          <h1 className="text-xl font-display font-semibold uppercase tracking-wider text-white-diamond mb-4">Producto no encontrado</h1>
           <Link href="/catalogo">
-            <Button className="btn-luxury">Volver al Catalogo</Button>
+            <Button className="btn-luxury rounded-none text-xs uppercase tracking-widest font-semibold px-8 py-4">Volver al Catálogo</Button>
           </Link>
         </div>
       </main>
@@ -117,34 +115,34 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
   const originalPrice = product.original_price || product.originalPrice
 
   return (
-    <main className="min-h-screen">
+    <div className="min-h-screen bg-obsidian text-foreground">
       <Navbar />
 
-      <section className="pt-28 pb-16">
-        <div className="container mx-auto px-4">
+      <main className="pt-36 pb-20">
+        <div className="container mx-auto px-4 max-w-7xl">
           {/* Breadcrumb */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
             <Link
               href="/catalogo"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-chrome hover:text-gold-action transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Volver al Catalogo
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Volver al Catálogo
             </Link>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Images */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
+              initial={{ opacity: 0, x: -25 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.8 }}
             >
-              <div className="relative aspect-square rounded-3xl overflow-hidden bg-card mb-4">
+              <div className="relative aspect-square rounded-none overflow-hidden bg-carbon border border-steel/30 shadow-2xl mb-4">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={selectedImage}
@@ -165,16 +163,16 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
                 </AnimatePresence>
 
                 {/* Badges */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
                   {isPromotion && (
-                    <Badge className="bg-destructive text-destructive-foreground">
+                    <span className="bg-destructive border border-destructive-foreground/10 text-white text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-none shadow-md">
                       Oferta
-                    </Badge>
+                    </span>
                   )}
                   {product.featured && (
-                    <Badge className="bg-primary text-primary-foreground">
+                    <span className="bg-gold-action text-obsidian text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-none shadow-md">
                       Destacado
-                    </Badge>
+                    </span>
                   )}
                 </div>
               </div>
@@ -186,10 +184,10 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                      className={`relative w-20 h-20 rounded-none overflow-hidden border transition-all ${
                         selectedImage === index
-                          ? 'border-primary'
-                          : 'border-transparent opacity-60 hover:opacity-100'
+                          ? 'border-gold-action'
+                          : 'border-steel/30 opacity-60 hover:opacity-100 bg-carbon'
                       }`}
                     >
                       <Image
@@ -205,13 +203,13 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
 
               {/* Videos */}
               {product.videos && product.videos.length > 0 && (
-                <div className="mt-4 space-y-3">
+                <div className="mt-6 space-y-4">
                   {product.videos.map((video, index) => (
                     <video
                       key={index}
                       src={video}
                       controls
-                      className="w-full rounded-xl"
+                      className="w-full rounded-none border border-steel/30"
                       preload="metadata"
                     />
                   ))}
@@ -221,53 +219,54 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
 
             {/* Details */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 25 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.8 }}
+              className="lg:pl-6"
             >
-              <span className="text-sm font-medium text-primary tracking-wider uppercase">
+              <span className="text-[10px] font-semibold text-gold-action tracking-[0.25em] uppercase font-sans">
                 {product.category}
               </span>
 
-              <h1 className="mt-2 text-4xl md:text-5xl font-display font-bold">
+              <h1 className="mt-3 text-3xl md:text-4xl font-display font-semibold text-white-diamond uppercase tracking-wide">
                 {product.name}
               </h1>
 
-              <div className="mt-4 flex items-center gap-4">
-                <span className="text-3xl font-bold text-gradient-gold">
+              <div className="mt-4 flex items-center gap-4 border-b border-steel/10 pb-6">
+                <span className="text-2xl font-bold text-gradient-gold">
                   {formatPrice(product.price)}
                 </span>
                 {originalPrice && (
                   <>
-                    <span className="text-xl text-muted-foreground line-through">
+                    <span className="text-lg text-titanium line-through font-light">
                       {formatPrice(originalPrice)}
                     </span>
-                    <Badge variant="destructive">
+                    <span className="bg-destructive/10 border border-destructive/20 text-destructive text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-none">
                       -{Math.round((1 - product.price / originalPrice) * 100)}%
-                    </Badge>
+                    </span>
                   </>
                 )}
               </div>
 
-              <p className="mt-6 text-muted-foreground leading-relaxed">
+              <p className="mt-6 text-titanium text-sm leading-relaxed font-sans font-light">
                 {product.description}
               </p>
 
               {/* Color Selection */}
               {product.colors && product.colors.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-sm font-medium mb-3">
-                    Color: <span className="text-primary">{selectedColor}</span>
+                <div className="mt-8 border-t border-steel/10 pt-6">
+                  <h3 className="text-xs uppercase tracking-wider font-semibold text-titanium mb-3">
+                    Color: <span className="text-gold-action">{selectedColor}</span>
                   </h3>
-                  <div className="flex gap-3 flex-wrap">
+                  <div className="flex gap-2 flex-wrap">
                     {product.colors.map((color) => (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 rounded-lg border transition-all ${
+                        className={`px-4 py-2 rounded-none border text-xs uppercase tracking-wider font-medium transition-all ${
                           selectedColor === color
-                            ? 'border-primary bg-primary/10 text-primary'
-                            : 'border-border hover:border-primary/50'
+                            ? 'border-gold-action bg-gold-action/10 text-gold-action'
+                            : 'border-steel/30 text-chrome hover:border-gold-action/50 hover:text-gold-action'
                         }`}
                       >
                         {color}
@@ -278,43 +277,45 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
               )}
 
               {/* Quantity */}
-              <div className="mt-6">
-                <h3 className="text-sm font-medium mb-3">Cantidad</h3>
-                <div className="inline-flex items-center gap-4 p-2 rounded-lg bg-secondary">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="w-8 text-center font-semibold">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                    className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+              <div className="mt-6 border-t border-steel/10 pt-6">
+                <h3 className="text-xs uppercase tracking-wider font-semibold text-titanium mb-3">Cantidad</h3>
+                <div className="flex items-center gap-4">
+                  <div className="inline-flex items-center gap-4 p-1 border border-steel/30 bg-graphite rounded-none">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-8 h-8 rounded-none bg-carbon border border-steel/20 flex items-center justify-center hover:bg-gold-action hover:text-obsidian transition-colors text-chrome"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="w-8 text-center text-xs font-semibold text-white-diamond font-sans">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                      className="w-8 h-8 rounded-none bg-carbon border border-steel/20 flex items-center justify-center hover:bg-gold-action hover:text-obsidian transition-colors text-chrome"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <span className="text-xs text-titanium font-sans font-light">
+                    {product.stock} piezas disponibles
+                  </span>
                 </div>
-                <span className="ml-4 text-sm text-muted-foreground">
-                  {product.stock} disponibles
-                </span>
               </div>
 
               {/* Actions */}
-              <div className="mt-8 flex gap-4">
+              <div className="mt-8 flex gap-3">
                 <Button
                   onClick={handleAddToCart}
-                  className="flex-1 btn-luxury py-6 text-lg"
+                  className="flex-1 btn-luxury py-6 text-xs uppercase tracking-[0.2em] font-semibold rounded-none"
                   disabled={addedToCart}
                 >
                   {addedToCart ? (
                     <>
-                      <Check className="w-5 h-5 mr-2" />
-                      Agregado!
+                      <Check className="w-4 h-4 mr-2 text-obsidian" />
+                      ¡Agregado!
                     </>
                   ) : (
                     <>
-                      <ShoppingBag className="w-5 h-5 mr-2" />
+                      <ShoppingBag className="w-4 h-4 mr-2 text-obsidian" />
                       Agregar al Carrito
                     </>
                   )}
@@ -322,31 +323,31 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
                 <Button
                   variant="outline"
                   size="icon"
-                  className={`w-14 h-14 border-border/50 transition-colors ${
-                    product && isFavorite(product.id) ? 'text-red-500 border-red-500/50 bg-red-500/10' : ''
+                  className={`w-14 h-14 border-steel/30 rounded-none transition-colors hover:border-gold-action/50 ${
+                    product && isFavorite(product.id) ? 'text-gold-action border-gold-action/50 bg-gold-action/5' : 'text-chrome'
                   }`}
                   onClick={handleToggleFavorite}
                 >
-                  <Heart className={`w-5 h-5 ${product && isFavorite(product.id) ? 'fill-current' : ''}`} />
+                  <Heart className={`w-4 h-4 ${product && isFavorite(product.id) ? 'fill-current text-gold-action' : ''}`} />
                 </Button>
-                <Button variant="outline" size="icon" className="w-14 h-14 border-border/50">
-                  <Share2 className="w-5 h-5" />
+                <Button variant="outline" size="icon" className="w-14 h-14 border-steel/30 rounded-none hover:border-gold-action/50 text-chrome">
+                  <Share2 className="w-4 h-4" />
                 </Button>
               </div>
 
-              {/* Features */}
-              <div className="mt-8 grid grid-cols-3 gap-4">
-                <div className="flex flex-col items-center text-center p-4 rounded-xl bg-secondary/50">
-                  <Truck className="w-6 h-6 text-primary mb-2" />
-                  <span className="text-xs text-muted-foreground">Envio Nacional</span>
+              {/* Trust Features */}
+              <div className="mt-10 grid grid-cols-3 gap-4 border-t border-steel/10 pt-8">
+                <div className="flex flex-col items-center text-center p-4 rounded-none bg-carbon border border-steel/30 shadow-lg">
+                  <Truck className="w-5 h-5 text-gold-action mb-2" />
+                  <span className="text-[10px] uppercase tracking-wider text-titanium font-medium">Envío Nacional</span>
                 </div>
-                <div className="flex flex-col items-center text-center p-4 rounded-xl bg-secondary/50">
-                  <Shield className="w-6 h-6 text-primary mb-2" />
-                  <span className="text-xs text-muted-foreground">Garantia</span>
+                <div className="flex flex-col items-center text-center p-4 rounded-none bg-carbon border border-steel/30 shadow-lg">
+                  <Shield className="w-5 h-5 text-gold-action mb-2" />
+                  <span className="text-[10px] uppercase tracking-wider text-titanium font-medium">Garantía</span>
                 </div>
-                <div className="flex flex-col items-center text-center p-4 rounded-xl bg-secondary/50">
-                  <RotateCcw className="w-6 h-6 text-primary mb-2" />
-                  <span className="text-xs text-muted-foreground">30 Dias Cambio</span>
+                <div className="flex flex-col items-center text-center p-4 rounded-none bg-carbon border border-steel/30 shadow-lg">
+                  <RotateCcw className="w-5 h-5 text-gold-action mb-2" />
+                  <span className="text-[10px] uppercase tracking-wider text-titanium font-medium">30 Días Cambio</span>
                 </div>
               </div>
             </motion.div>
@@ -355,31 +356,31 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
           {/* Related Products */}
           {relatedProducts.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-24"
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="mt-28 border-t border-steel/10 pt-16"
             >
-              <h2 className="text-2xl font-display font-bold mb-8">
-                Productos <span className="text-gradient-gold">Relacionados</span>
+              <h2 className="text-2xl font-display font-bold mb-10 text-white-diamond uppercase tracking-wider">
+                PRODUCTOS <span className="text-gradient-gold">RELACIONADOS</span>
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {relatedProducts.map((relatedProduct) => (
                   <Link key={relatedProduct.id} href={`/producto/${relatedProduct.id}`}>
-                    <div className="group rounded-2xl bg-card border border-border/50 overflow-hidden hover-lift">
-                      <div className="relative aspect-square">
+                    <div className="group bg-carbon border border-steel/30 rounded-none overflow-hidden shadow-lg transition-all hover:border-gold-action/25">
+                      <div className="relative aspect-square overflow-hidden bg-graphite">
                         <Image
                           src={relatedProduct.images?.[0] || '/images/placeholder-hat.jpg'}
                           alt={relatedProduct.name}
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       </div>
                       <div className="p-4">
-                        <h3 className="font-semibold group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-sm text-white-diamond group-hover:text-gold-action transition-colors truncate">
                           {relatedProduct.name}
                         </h3>
-                        <span className="text-lg font-bold text-gradient-gold">
+                        <span className="text-xs font-semibold text-gold-action mt-2 inline-block">
                           {formatPrice(relatedProduct.price)}
                         </span>
                       </div>
@@ -390,11 +391,11 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
             </motion.div>
           )}
         </div>
-      </section>
+      </main>
 
       <Footer />
       <CartDrawer />
       <ChatBot />
-    </main>
+    </div>
   )
 }

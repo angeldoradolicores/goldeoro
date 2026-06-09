@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCartStore } from '@/lib/store'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 function formatPrice(price: number) {
@@ -28,8 +27,10 @@ export function CartDrawer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             onClick={() => setCartOpen(false)}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+            className="fixed inset-0 z-50"
+            style={{ background: 'rgba(5,5,5,0.75)', backdropFilter: 'blur(8px)' }}
           />
 
           {/* Drawer */}
@@ -37,125 +38,282 @@ export function CartDrawer() {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-card border-l border-border z-50 flex flex-col"
+            transition={{ type: 'spring', damping: 32, stiffness: 260 }}
+            className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 flex flex-col"
+            style={{
+              background: 'rgba(10,10,10,0.97)',
+              backdropFilter: 'blur(32px)',
+              borderLeft: '1px solid #1a1a1a',
+            }}
           >
+            {/* Top accent line */}
+            <div
+              className="absolute top-0 left-0 right-0 h-px"
+              style={{ background: 'linear-gradient(to right, transparent, rgba(200,164,77,0.6), transparent)' }}
+            />
+
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-border">
-              <div className="flex items-center gap-3">
-                <ShoppingBag className="w-6 h-6 text-primary" />
-                <h2 className="text-xl font-semibold">Tu Carrito</h2>
-                <span className="px-2 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-full">
-                  {items.length} items
-                </span>
+            <div
+              className="flex items-center justify-between px-7 py-5"
+              style={{ borderBottom: '1px solid #1a1a1a' }}
+            >
+              <div className="flex items-center gap-4">
+                <ShoppingBag
+                  style={{ width: '18px', height: '18px', color: '#C8A44D' }}
+                />
+                <div>
+                  <h2
+                    className="text-sm font-bold tracking-[0.2em] uppercase text-white"
+                    style={{ fontFamily: 'var(--font-cinzel)', letterSpacing: '0.2em' }}
+                  >
+                    Tu Carrito
+                  </h2>
+                  {items.length > 0 && (
+                    <p
+                      className="text-[10px] mt-0.5 uppercase tracking-[0.2em]"
+                      style={{ fontFamily: 'var(--font-sans)', color: '#8B8B8B', letterSpacing: '0.2em' }}
+                    >
+                      {items.length} {items.length === 1 ? 'artículo' : 'artículos'}
+                    </p>
+                  )}
+                </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={() => setCartOpen(false)}
+                className="w-8 h-8 flex items-center justify-center transition-all duration-200"
+                style={{
+                  border: '1px solid #262626',
+                  color: '#8B8B8B',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#C0C0C0'
+                  ;(e.currentTarget as HTMLButtonElement).style.color = '#F5F5F5'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#262626'
+                  ;(e.currentTarget as HTMLButtonElement).style.color = '#8B8B8B'
+                }}
               >
-                <X className="w-5 h-5" />
-              </Button>
+                <X style={{ width: '14px', height: '14px' }} />
+              </button>
             </div>
 
             {/* Items */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto px-7 py-5">
               {items.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center">
-                  <ShoppingBag className="w-16 h-16 text-muted-foreground/30 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Tu carrito esta vacio</h3>
-                  <p className="text-muted-foreground text-sm mb-6">
-                    Agrega algunas gorras premium para comenzar
+                <div className="h-full flex flex-col items-center justify-center text-center py-16">
+                  <div
+                    className="w-16 h-16 flex items-center justify-center mb-6"
+                    style={{ border: '1px solid #262626' }}
+                  >
+                    <ShoppingBag style={{ width: '24px', height: '24px', color: '#333' }} />
+                  </div>
+                  <h3
+                    className="text-sm font-semibold mb-2 tracking-[0.1em] uppercase"
+                    style={{ fontFamily: 'var(--font-cinzel)', color: '#8B8B8B' }}
+                  >
+                    Carrito Vacío
+                  </h3>
+                  <p
+                    className="text-xs mb-8 leading-relaxed"
+                    style={{ fontFamily: 'var(--font-sans)', color: '#555', maxWidth: '200px' }}
+                  >
+                    Descubre nuestra colección y agrega tus piezas favoritas
                   </p>
                   <Link href="/catalogo">
-                    <Button onClick={() => setCartOpen(false)} className="btn-luxury">
-                      Explorar Catalogo
-                    </Button>
+                    <button
+                      onClick={() => setCartOpen(false)}
+                      className="px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300"
+                      style={{
+                        fontFamily: 'var(--font-sans)',
+                        background: 'linear-gradient(135deg, #C8A44D, #B08D57)',
+                        color: '#050505',
+                        letterSpacing: '0.2em',
+                      }}
+                    >
+                      Explorar Colección
+                    </button>
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {items.map((item, index) => (
-                    <motion.div
-                      key={`${item.product.id}-${item.selectedColor}`}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -100 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex gap-4 p-4 rounded-xl bg-secondary/50"
-                    >
-                      {/* Image */}
-                      <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0">
-                        <Image
-                          src={item.product.images?.[0] || '/images/placeholder-hat.jpg'}
-                          alt={item.product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-
-                      {/* Details */}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium truncate">{item.product.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {item.selectedColor}
-                        </p>
-                        <p className="text-sm font-semibold text-primary mt-1">
-                          {formatPrice(item.product.price)}
-                        </p>
-                      </div>
-
-                      {/* Quantity Controls */}
-                      <div className="flex flex-col items-end justify-between">
-                        <button
-                          onClick={() => removeItem(item.product.id)}
-                          className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                <div className="space-y-1">
+                  <AnimatePresence>
+                    {items.map((item, index) => (
+                      <motion.div
+                        key={`${item.product.id}-${item.selectedColor}`}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: 60 }}
+                        transition={{ delay: index * 0.04, duration: 0.3 }}
+                        className="flex gap-4 py-5"
+                        style={{ borderBottom: '1px solid #1a1a1a' }}
+                      >
+                        {/* Image */}
+                        <div
+                          className="relative w-[72px] h-[72px] shrink-0 overflow-hidden"
+                          style={{ background: '#171717', border: '1px solid #262626' }}
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                            className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                          >
-                            <Minus className="w-3 h-3" />
-                          </button>
-                          <span className="w-6 text-center text-sm font-medium">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                            className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                          >
-                            <Plus className="w-3 h-3" />
-                          </button>
+                          <Image
+                            src={item.product.images?.[0] || '/images/placeholder-hat.jpg'}
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
+                          />
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+
+                        {/* Details */}
+                        <div className="flex-1 min-w-0">
+                          <h4
+                            className="text-xs font-semibold leading-tight mb-1 truncate"
+                            style={{ fontFamily: 'var(--font-cinzel)', color: '#C0C0C0', letterSpacing: '0.04em' }}
+                          >
+                            {item.product.name}
+                          </h4>
+                          {item.selectedColor && (
+                            <p
+                              className="text-[10px] uppercase tracking-[0.15em] mb-2"
+                              style={{ fontFamily: 'var(--font-sans)', color: '#555', letterSpacing: '0.15em' }}
+                            >
+                              {item.selectedColor}
+                            </p>
+                          )}
+                          <p
+                            className="text-xs font-bold"
+                            style={{
+                              fontFamily: 'var(--font-cinzel)',
+                              background: 'linear-gradient(135deg, #B08D57, #D4AF37)',
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                              backgroundClip: 'text',
+                            }}
+                          >
+                            {formatPrice(item.product.price)}
+                          </p>
+                        </div>
+
+                        {/* Quantity & Remove */}
+                        <div className="flex flex-col items-end justify-between">
+                          <button
+                            onClick={() => removeItem(item.product.id)}
+                            className="transition-colors duration-200"
+                            style={{ color: '#333' }}
+                            onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = '#F87171'}
+                            onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = '#333'}
+                          >
+                            <Trash2 style={{ width: '12px', height: '12px' }} />
+                          </button>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                              className="w-6 h-6 flex items-center justify-center transition-all duration-200"
+                              style={{ border: '1px solid #262626', color: '#8B8B8B' }}
+                              onMouseEnter={e => {
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = '#C8A44D'
+                                ;(e.currentTarget as HTMLButtonElement).style.color = '#C8A44D'
+                              }}
+                              onMouseLeave={e => {
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = '#262626'
+                                ;(e.currentTarget as HTMLButtonElement).style.color = '#8B8B8B'
+                              }}
+                            >
+                              <Minus style={{ width: '10px', height: '10px' }} />
+                            </button>
+                            <span
+                              className="w-6 text-center text-xs font-medium"
+                              style={{ fontFamily: 'var(--font-sans)', color: '#F5F5F5' }}
+                            >
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                              className="w-6 h-6 flex items-center justify-center transition-all duration-200"
+                              style={{ border: '1px solid #262626', color: '#8B8B8B' }}
+                              onMouseEnter={e => {
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = '#C8A44D'
+                                ;(e.currentTarget as HTMLButtonElement).style.color = '#C8A44D'
+                              }}
+                              onMouseLeave={e => {
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = '#262626'
+                                ;(e.currentTarget as HTMLButtonElement).style.color = '#8B8B8B'
+                              }}
+                            >
+                              <Plus style={{ width: '10px', height: '10px' }} />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
               )}
             </div>
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="p-6 border-t border-border space-y-4">
-                {/* Subtotal */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>{formatPrice(cartTotal)}</span>
+              <div
+                className="px-7 py-6"
+                style={{ borderTop: '1px solid #1a1a1a' }}
+              >
+                {/* Pricing breakdown */}
+                <div className="space-y-2 mb-5">
+                  <div className="flex justify-between">
+                    <span
+                      className="text-[11px] uppercase tracking-[0.15em]"
+                      style={{ fontFamily: 'var(--font-sans)', color: '#8B8B8B' }}
+                    >
+                      Subtotal
+                    </span>
+                    <span
+                      className="text-[11px]"
+                      style={{ fontFamily: 'var(--font-sans)', color: '#C0C0C0' }}
+                    >
+                      {formatPrice(cartTotal)}
+                    </span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Envio</span>
-                    <span className="text-primary">Calcular al checkout</span>
+                  <div className="flex justify-between">
+                    <span
+                      className="text-[11px] uppercase tracking-[0.15em]"
+                      style={{ fontFamily: 'var(--font-sans)', color: '#8B8B8B' }}
+                    >
+                      Envío
+                    </span>
+                    <span
+                      className="text-[11px]"
+                      style={{ fontFamily: 'var(--font-sans)', color: '#C8A44D' }}
+                    >
+                      Se calcula al finalizar
+                    </span>
                   </div>
                 </div>
 
+                {/* Separador dorado */}
+                <div
+                  className="mb-5"
+                  style={{
+                    height: '1px',
+                    background: 'linear-gradient(to right, transparent, rgba(200,164,77,0.4), transparent)',
+                  }}
+                />
+
                 {/* Total */}
-                <div className="flex justify-between items-center pt-4 border-t border-border">
-                  <span className="text-lg font-semibold">Total</span>
-                  <span className="text-2xl font-bold text-gradient-gold">
+                <div className="flex justify-between items-center mb-6">
+                  <span
+                    className="text-xs font-semibold uppercase tracking-[0.2em]"
+                    style={{ fontFamily: 'var(--font-sans)', color: '#8B8B8B' }}
+                  >
+                    Total
+                  </span>
+                  <span
+                    className="text-lg font-black"
+                    style={{
+                      fontFamily: 'var(--font-cinzel)',
+                      background: 'linear-gradient(135deg, #B08D57, #D4AF37, #E6C989)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
                     {formatPrice(cartTotal)}
                   </span>
                 </div>
@@ -163,21 +321,49 @@ export function CartDrawer() {
                 {/* Actions */}
                 <div className="space-y-3">
                   <Link href="/checkout" className="block">
-                    <Button
+                    <button
                       onClick={() => setCartOpen(false)}
-                      className="w-full btn-luxury py-6 text-lg group"
+                      className="group w-full py-4 flex items-center justify-center gap-3 text-[11px] font-bold uppercase transition-all duration-300"
+                      style={{
+                        fontFamily: 'var(--font-sans)',
+                        letterSpacing: '0.2em',
+                        background: 'linear-gradient(135deg, #C8A44D 0%, #B08D57 100%)',
+                        color: '#050505',
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, #D4AF37 0%, #C8A44D 100%)'
+                        ;(e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(200, 164, 77, 0.35)'
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, #C8A44D 0%, #B08D57 100%)'
+                        ;(e.currentTarget as HTMLButtonElement).style.boxShadow = 'none'
+                      }}
                     >
                       Finalizar Compra
-                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    </button>
                   </Link>
-                  <Button
-                    variant="outline"
+
+                  <button
                     onClick={clearCart}
-                    className="w-full border-border/50"
+                    className="w-full py-3 text-[10px] font-semibold uppercase tracking-[0.2em] transition-all duration-200"
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      border: '1px solid #262626',
+                      color: '#555',
+                      letterSpacing: '0.2em',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = '#8B8B8B'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = '#8B8B8B'
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = '#262626'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = '#555'
+                    }}
                   >
                     Vaciar Carrito
-                  </Button>
+                  </button>
                 </div>
               </div>
             )}

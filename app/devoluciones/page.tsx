@@ -8,40 +8,42 @@ import { ChatBot } from "@/components/chatbot"
 
 export default function DevolucionesPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen bg-obsidian text-foreground flex flex-col">
       <Navbar />
 
-      <main className="flex-1 pt-32 pb-16">
+      <main className="flex-1 pt-40 pb-20">
         <div className="container mx-auto px-4 max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <span className="text-sm font-bold uppercase tracking-wider text-gold">Garantía Asegurada</span>
-            <h1 className="text-4xl md:text-6xl font-black mt-2 text-gradient-gold">DEVOLUCIONES & CAMBIOS</h1>
-            <p className="text-muted-foreground mt-4 text-lg">
-              Queremos que lleves tu corona con total orgullo. Conoce nuestra política de satisfacción y cambios gratis.
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-action block mb-2">Garantía Asegurada</span>
+            <h1 className="text-3xl md:text-5xl font-display font-bold mt-2 text-gradient-gold uppercase">DEVOLUCIONES & CAMBIOS</h1>
+            <p className="text-titanium mt-4 text-sm md:text-base font-sans font-light tracking-wide max-w-xl mx-auto leading-relaxed">
+              Queremos que lleves tu corona con total orgullo. Conoce nuestra política de satisfacción y cambios garantizados.
             </p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="p-8 rounded-3xl border border-border/60 bg-gradient-to-br from-gold/10 via-transparent to-transparent mb-12 text-center"
+            transition={{ delay: 0.1, duration: 0.8 }}
+            className="p-8 rounded-none border border-steel/30 bg-carbon mb-16 text-center shadow-2xl relative"
           >
-            <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center mx-auto mb-6">
-              <ShieldCheck className="w-8 h-8 text-gold" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gold-action" />
+            <div className="w-12 h-12 rounded-none bg-graphite border border-steel/30 flex items-center justify-center mx-auto mb-6">
+              <ShieldCheck className="w-6 h-6 text-gold-action" />
             </div>
-            <h3 className="text-2xl font-bold mb-3">Garantía de Satisfacción 100%</h3>
-            <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <h3 className="text-xl font-display font-semibold mb-3 text-white-diamond uppercase tracking-wide">Garantía de Satisfacción 100%</h3>
+            <p className="text-titanium text-xs md:text-sm max-w-xl mx-auto leading-relaxed font-sans font-light">
               Si tu gorra no te queda a la perfección, no estás conforme con la horma, o simplemente prefieres otra referencia, tienes 2 días hábiles desde la entrega para realizar tu cambio.
             </p>
           </motion.div>
 
-          <div className="space-y-8 mb-12">
-            <h2 className="text-2xl font-bold text-foreground">Condiciones para Cambios</h2>
+          <div className="space-y-8 mb-16">
+            <h2 className="text-xl font-display font-semibold text-white-diamond uppercase tracking-wider">Condiciones para Cambios</h2>
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 {
@@ -59,39 +61,48 @@ export default function DevolucionesPage() {
                   title: "Garantía por Defectos",
                   desc: "Si el producto presenta alguna falla de confección o costura, asumimos el 100% de los costos logísticos de reposición."
                 }
-              ].map((item, index) => (
-                <div key={index} className="p-6 rounded-2xl bg-card border border-border/40 hover:border-gold/30 transition-all duration-300">
-                  <item.icon className="w-8 h-8 text-gold mb-4" />
-                  <h4 className="font-bold mb-2">{item.title}</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-                </div>
-              ))}
+              ].map((item, index) => {
+                const Icon = item.icon
+                return (
+                  <div key={index} className="p-6 rounded-none bg-carbon border border-steel/30 hover:border-gold-action/30 transition-all duration-300 shadow-xl">
+                    <Icon className="w-6 h-6 text-gold-action mb-4" />
+                    <h4 className="font-display font-semibold text-sm mb-2 uppercase tracking-wide text-white-diamond">{item.title}</h4>
+                    <p className="text-xs text-titanium leading-relaxed font-sans font-light">{item.desc}</p>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="p-8 rounded-3xl border border-border/60 bg-secondary/30"
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="p-8 rounded-none border border-steel/30 bg-carbon shadow-2xl"
           >
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <Phone className="w-5 h-5 text-gold" />
-              ¿Cómo iniciar una devolución o cambio?
+            <h3 className="text-lg font-display font-semibold mb-4 flex items-center gap-3 uppercase tracking-wide text-white-diamond">
+              <Phone className="w-5 h-5 text-gold-action shrink-0" />
+              ¿Cómo iniciar un cambio?
             </h3>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Es muy simple. Escríbele a nuestro asesor personal por WhatsApp al número 3108999049 con los siguientes datos:
+            <p className="text-titanium text-sm leading-relaxed mb-6 font-sans font-light">
+              Es muy simple. Escríbele a nuestro asesor personal por WhatsApp al número +57 310 899 9049 con los siguientes datos:
             </p>
-            <ul className="list-disc list-inside space-y-2 text-muted-foreground text-sm md:text-base mb-6">
-              <li>Nombre completo y número de pedido.</li>
-              <li>Fotos de la gorra (para constatar que está con etiquetas y sin uso).</li>
-              <li>Referencia nueva por la cual deseas hacer el cambio.</li>
+            <ul className="list-none space-y-3 text-titanium text-xs md:text-sm mb-8 font-sans font-light">
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-gold-action" /> Nombre completo y número de pedido.
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-gold-action" /> Fotos de la gorra (para constatar que está con etiquetas y sin uso).
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-gold-action" /> Referencia nueva por la cual deseas hacer el cambio.
+              </li>
             </ul>
             <a
               href="https://wa.me/573108999049"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-6 py-3 bg-gold hover:bg-gold/90 text-background font-bold rounded-full transition-colors"
+              className="inline-flex items-center justify-center px-8 py-4 bg-gold-action hover:bg-gold-action/90 text-obsidian font-bold text-xs uppercase tracking-widest rounded-none shadow-md transition-all"
             >
               Iniciar Cambio por WhatsApp
             </a>

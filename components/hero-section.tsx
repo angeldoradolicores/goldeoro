@@ -1,230 +1,268 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { ArrowRight, Star, Sparkles } from 'lucide-react'
+import { ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useRef, useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+
+// Partícula brillante mínima
+function Particle({ delay, x, y }: { delay: number; x: string; y: string }) {
+  return (
+    <motion.div
+      className="absolute rounded-full pointer-events-none"
+      style={{
+        left: x,
+        top: y,
+        width: '2px',
+        height: '2px',
+        background: 'rgba(200, 164, 77, 0.6)',
+      }}
+      animate={{
+        opacity: [0, 1, 0],
+        scale: [0, 1.5, 0],
+      }}
+      transition={{
+        duration: 3 + Math.random() * 2,
+        repeat: Infinity,
+        delay,
+        ease: 'easeInOut',
+      }}
+    />
+  )
+}
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
-  
+
   useEffect(() => {
     setMounted(true)
   }, [])
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"]
+    offset: ['start start', 'end start'],
   })
 
-  const y = useTransform(scrollYProgress, [0, 1], [0, 200])
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8])
+  const y = useTransform(scrollYProgress, [0, 1], [0, 140])
+  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
+
+  // Posiciones estáticas para partículas (evita hidratación aleatoria)
+  const particles = [
+    { x: '12%', y: '18%', delay: 0 },
+    { x: '25%', y: '72%', delay: 0.5 },
+    { x: '38%', y: '30%', delay: 1.2 },
+    { x: '55%', y: '15%', delay: 0.8 },
+    { x: '67%', y: '60%', delay: 1.7 },
+    { x: '78%', y: '35%', delay: 0.3 },
+    { x: '88%', y: '78%', delay: 2.1 },
+    { x: '6%', y: '50%', delay: 1.4 },
+    { x: '42%', y: '85%', delay: 0.6 },
+    { x: '92%', y: '22%', delay: 1.0 },
+    { x: '50%', y: '55%', delay: 2.5 },
+    { x: '15%', y: '92%', delay: 0.9 },
+  ]
 
   return (
-    <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden noise graffiti-bg">
-      {/* Animated Background Elements */}
+    <section
+      ref={containerRef}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden noise"
+      style={{ backgroundColor: '#050505' }}
+    >
+      {/* ── Fondo: textura satinada + destellos ────────────── */}
       <div className="absolute inset-0 z-0">
-        {/* Main gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
-        
-        {/* Neon glow orbs */}
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.3, 0.6, 0.3],
+        {/* Gradiente radial central muy sutil */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              radial-gradient(ellipse 80% 60% at 50% 50%, rgba(13,13,13,1) 0%, rgba(5,5,5,1) 100%),
+              radial-gradient(ellipse 40% 40% at 20% 80%, rgba(176,141,87,0.04) 0%, transparent 70%),
+              radial-gradient(ellipse 40% 40% at 80% 20%, rgba(192,192,192,0.03) 0%, transparent 70%)
+            `,
           }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          className="absolute top-1/4 -right-32 w-[500px] h-[500px] rounded-full bg-neon-pink/20 blur-[100px]"
-        />
-        <motion.div
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.2, 0.5, 0.2],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: 1,
-          }}
-          className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full bg-neon-cyan/20 blur-[100px]"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.4, 1],
-            opacity: [0.15, 0.35, 0.15],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: 2,
-          }}
-          className="absolute top-1/2 left-1/3 w-[300px] h-[300px] rounded-full bg-neon-green/15 blur-[80px]"
         />
 
-        {/* Floating stars */}
-        {mounted && [...Array(12)].map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: [0.3, 1, 0.3],
-              scale: [0.8, 1.2, 0.8],
-            }}
-            transition={{
-              duration: 2 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 3,
-            }}
-            className="absolute"
-            style={{
-              left: `${10 + Math.random() * 80}%`,
-              top: `${10 + Math.random() * 80}%`,
-            }}
-          >
-            <Star 
-              className="text-neon-yellow" 
-              size={8 + Math.random() * 12} 
-              fill="currentColor"
-            />
-          </motion.div>
+        {/* Línea horizontal sutil de "reflejo" */}
+        <div
+          className="absolute left-0 right-0"
+          style={{
+            top: '45%',
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(200,164,77,0.06) 30%, rgba(192,192,192,0.08) 50%, rgba(200,164,77,0.06) 70%, transparent 100%)',
+          }}
+        />
+
+        {/* Partículas brillantes estáticas */}
+        {mounted && particles.map((p, i) => (
+          <Particle key={i} x={p.x} y={p.y} delay={p.delay} />
         ))}
 
-        {/* Graffiti lines */}
-        <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 1920 1080">
-          <motion.path
-            d="M0 600 Q 400 400, 800 600 T 1600 600"
-            stroke="url(#gradient1)"
-            strokeWidth="3"
-            fill="none"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 3, delay: 0.5 }}
-          />
-          <motion.path
-            d="M100 800 Q 500 600, 900 700 T 1700 500"
-            stroke="url(#gradient2)"
-            strokeWidth="2"
-            fill="none"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 3, delay: 1 }}
-          />
-          <defs>
-            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="var(--neon-pink)" />
-              <stop offset="50%" stopColor="var(--neon-cyan)" />
-              <stop offset="100%" stopColor="var(--neon-green)" />
-            </linearGradient>
-            <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="var(--neon-cyan)" />
-              <stop offset="100%" stopColor="var(--neon-purple)" />
-            </linearGradient>
-          </defs>
-        </svg>
+        {/* Humo sutil en esquinas */}
+        <div
+          className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(200,164,77,0.04) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+        <div
+          className="absolute -top-10 -right-10 w-80 h-80 rounded-full"
+          style={{
+            background: 'radial-gradient(circle, rgba(192,192,192,0.03) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+          }}
+        />
       </div>
 
-      {/* Content */}
-      <motion.div 
-        style={{ y, opacity, scale }}
-        className="container mx-auto px-4 relative z-10"
+      {/* ── Contenido ──────────────────────────────────────── */}
+      <motion.div
+        style={{ y, opacity }}
+        className="container mx-auto px-4 lg:px-8 relative z-10"
       >
         <div className="max-w-5xl mx-auto text-center">
-          {/* Badge */}
+
+          {/* Eyebrow label */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass border-animate mb-8"
+            className="flex items-center justify-center gap-4 mb-10"
           >
-            <motion.span
-              animate={{ scale: [1, 1.3, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
+            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to right, transparent, #C8A44D)' }} />
+            <span
+              className="text-[10px] font-semibold tracking-[0.5em] uppercase"
+              style={{
+                fontFamily: 'var(--font-sans)',
+                color: '#C8A44D',
+                letterSpacing: '0.5em',
+              }}
             >
-              <Sparkles className="w-4 h-4 text-neon-yellow" />
-            </motion.span>
-            <span className="text-sm font-bold tracking-wider text-foreground uppercase">
-              Coleccion Medellin 2024
+              Colección 2024
             </span>
-            <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
+            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to left, transparent, #C8A44D)' }} />
           </motion.div>
 
-          {/* Main Title with Glitch Effect */}
+          {/* Título principal — Cinzel, fade secuencial */}
+          <div className="mb-8 overflow-hidden">
+            <motion.h1
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                fontFamily: 'var(--font-cinzel)',
+                fontSize: 'clamp(3.5rem, 10vw, 9rem)',
+                fontWeight: 900,
+                lineHeight: 0.92,
+                letterSpacing: '-0.02em',
+                color: '#F5F5F5',
+              }}
+            >
+              URBAN
+            </motion.h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                fontFamily: 'var(--font-cinzel)',
+                fontSize: 'clamp(3.5rem, 10vw, 9rem)',
+                fontWeight: 900,
+                lineHeight: 0.92,
+                letterSpacing: '-0.02em',
+                background: 'linear-gradient(135deg, #B08D57 0%, #D4AF37 40%, #E6C989 60%, #C8A44D 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              CROWN
+            </motion.h1>
+          </div>
+
+          {/* Separador */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="mb-8"
-          >
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black leading-none tracking-tighter">
-              <motion.span 
-                className="block text-foreground"
-                initial={{ x: -100, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-              >
-                STREET
-              </motion.span>
-              <motion.span 
-                className="block text-gradient-neon text-glow-pink glitch relative"
-                data-text="CULTURE"
-                initial={{ x: 100, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-              >
-                CULTURE
-              </motion.span>
-            </h1>
-          </motion.div>
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="mx-auto mb-8"
+            style={{
+              width: '80px',
+              height: '1px',
+              background: 'linear-gradient(to right, transparent, #C8A44D, transparent)',
+            }}
+          />
 
-          {/* Subtitle */}
+          {/* Subtítulo */}
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-            className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 leading-relaxed"
+            transition={{ duration: 0.9, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="mb-14"
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 'clamp(0.9rem, 2vw, 1.15rem)',
+              fontWeight: 300,
+              letterSpacing: '0.08em',
+              color: '#8B8B8B',
+              maxWidth: '540px',
+              margin: '0 auto 3.5rem',
+              lineHeight: 1.8,
+            }}
           >
-            Gorras exclusivas nacidas en las calles de 
-            <span className="text-neon-pink font-bold"> Medellin</span>. 
-            Cada pieza es una obra de arte urbano que define tu estilo.
+            Donde el lujo y la calle se encuentran.{' '}
+            <span style={{ color: '#C8A44D', fontWeight: 500 }}>Diseños exclusivos</span>{' '}
+            para quienes definen su propio estándar.
           </motion.p>
 
           {/* CTA Buttons */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
           >
             <Link href="/catalogo">
-              <Button size="lg" className="btn-luxury px-10 py-7 text-lg rounded-2xl group">
-                <span>Explorar Catalogo</span>
-                <motion.span
-                  className="ml-2 inline-block"
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </motion.span>
-              </Button>
-            </Link>
-            <Link href="/promociones">
-              <Button
-                variant="outline"
-                size="lg"
-                className="px-10 py-7 text-lg rounded-2xl border-2 border-neon-cyan/50 hover:bg-neon-cyan/10 hover:border-neon-cyan transition-all duration-300 group"
+              <motion.button
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                className="group flex items-center gap-3 px-10 py-4 text-xs font-bold uppercase transition-all duration-300"
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  letterSpacing: '0.2em',
+                  background: 'linear-gradient(135deg, #C8A44D 0%, #B08D57 100%)',
+                  color: '#050505',
+                  boxShadow: '0 8px 32px rgba(200, 164, 77, 0.3)',
+                }}
               >
-                <Sparkles className="w-5 h-5 mr-2 text-neon-cyan group-hover:animate-spin" />
-                <span>Ver Ofertas</span>
-              </Button>
+                Explorar Colección
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </motion.button>
+            </Link>
+
+            <Link href="/promociones">
+              <motion.button
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                className="flex items-center gap-3 px-10 py-4 text-xs font-bold uppercase transition-all duration-300"
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  letterSpacing: '0.2em',
+                  color: '#C0C0C0',
+                  border: '1px solid #333333',
+                  background: 'transparent',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#C0C0C0'
+                  ;(e.currentTarget as HTMLButtonElement).style.color = '#F5F5F5'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#333333'
+                  ;(e.currentTarget as HTMLButtonElement).style.color = '#C0C0C0'
+                }}
+              >
+                Nuevos Lanzamientos
+              </motion.button>
             </Link>
           </motion.div>
 
@@ -233,57 +271,61 @@ export function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 1.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-10 border-t border-border/30"
+            className="grid grid-cols-2 md:grid-cols-4 gap-px"
+            style={{ border: '1px solid #1a1a1a' }}
           >
             {[
-              { value: '1000+', label: 'Clientes Felices', color: 'text-neon-pink' },
-              { value: '50+', label: 'Disenos Unicos', color: 'text-neon-cyan' },
-              { value: '24h', label: 'Envio Express', color: 'text-neon-green' },
-              { value: '100%', label: 'Satisfaccion', color: 'text-neon-yellow' },
+              { value: '1,000+', label: 'Clientes' },
+              { value: '50+', label: 'Diseños' },
+              { value: '24h', label: 'Despacho' },
+              { value: '100%', label: 'Satisfacción' },
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.4 + index * 0.1 }}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="text-center p-4 rounded-2xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all duration-300"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.3 + index * 0.1 }}
+                className="flex flex-col items-center justify-center py-8 px-4"
+                style={{ background: '#0D0D0D', borderRight: index < 3 ? '1px solid #1a1a1a' : 'none' }}
               >
-                <motion.span 
-                  className={`block text-3xl md:text-4xl lg:text-5xl font-black ${stat.color}`}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 1.5 + index * 0.1, type: "spring" }}
+                <span
+                  className="block text-2xl md:text-3xl font-black mb-1"
+                  style={{
+                    fontFamily: 'var(--font-cinzel)',
+                    background: 'linear-gradient(135deg, #B08D57, #D4AF37)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
                 >
                   {stat.value}
-                </motion.span>
-                <span className="text-sm text-muted-foreground mt-1 block">{stat.label}</span>
+                </span>
+                <span
+                  className="text-[10px] uppercase tracking-[0.25em]"
+                  style={{ fontFamily: 'var(--font-sans)', color: '#8B8B8B', letterSpacing: '0.25em' }}
+                >
+                  {stat.label}
+                </span>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Scroll Indicator */}
+      {/* ── Scroll Indicator ──────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
       >
         <motion.div
-          animate={{ y: [0, 15, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2"
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <span className="text-xs text-muted-foreground uppercase tracking-widest">Scroll</span>
-          <div className="w-6 h-10 rounded-full border-2 border-primary/50 flex items-start justify-center p-2">
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="w-1.5 h-3 bg-primary rounded-full"
-            />
-          </div>
+          <ChevronDown
+            style={{ width: '16px', height: '16px', color: '#333' }}
+          />
         </motion.div>
       </motion.div>
     </section>
