@@ -62,7 +62,9 @@ function ConfirmacionContent() {
 
   const fetchOrder = async () => {
     try {
-      const response = await fetch(`/api/orders/${reference}`)
+      const wompiId = searchParams.get('id')
+      const url = `/api/orders/${reference}${wompiId ? `?wompi_id=${wompiId}` : ''}`
+      const response = await fetch(url)
       if (!response.ok) {
         throw new Error('Orden no encontrada')
       }
