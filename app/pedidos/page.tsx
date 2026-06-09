@@ -174,44 +174,64 @@ function OrdersContent() {
 
   // Load Auth Session & Realtime Subscriptions
   useEffect(() => {
+    let mounted = true
     let ordersChannel: any = null
+    let dataLoaded = false
 
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        setUser(session.user)
-        await fetchOrders(session.user.id)
-        await fetchNotifications()
+    const setupUser = async (userId: string) => {
+      if (!mounted || dataLoaded) return
+      dataLoaded = true
 
-        // Set up real-time subscription for logged-in user
-        ordersChannel = supabase
-          .channel(`user-updates-${session.user.id}`)
-          .on(
-            'postgres_changes',
-            { event: 'UPDATE', schema: 'public', table: 'orders', filter: `user_id=eq.${session.user.id}` },
-            async (payload: any) => {
-              console.log('Order changed in real-time:', payload)
-              await fetchOrders(session.user.id)
-              toast.info(`Pedido #${payload.new.order_number} actualizado a: ${payload.new.status}`)
-            }
-          )
-          .on(
-            'postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${session.user.id}` },
-            async (payload: any) => {
-              console.log('New notification in real-time:', payload)
-              await fetchNotifications()
-              toast.info(`Nueva notificación: ${payload.new.title}`)
-            }
-          )
-          .subscribe()
-      }
-      setAuthLoading(false)
+      await fetchOrders(userId)
+      await fetchNotifications()
+
+      // Set up real-time subscription for logged-in user
+      ordersChannel = supabase
+        .channel(`user-updates-${userId}`)
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` },
+          async (payload: any) => {
+            console.log('Order changed in real-time:', payload)
+            await fetchOrders(userId)
+            toast.info(`Pedido #${payload.new.order_number} actualizado a: ${payload.new.status}`)
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+          async (payload: any) => {
+            console.log('New notification in real-time:', payload)
+            await fetchNotifications()
+            toast.info(`Nueva notificación: ${payload.new.title}`)
+          }
+        )
+        .subscribe()
+
+      if (mounted) setAuthLoading(false)
     }
 
-    checkAuth()
+    // onAuthStateChange fires with the current session immediately (even from localStorage)
+    // This solves the "blank page after login" issue where getSession() returns null
+    // for a brief moment while the SDK hydrates.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return
+
+      if (session?.user && !dataLoaded) {
+        setUser(session.user)
+        await setupUser(session.user.id)
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null)
+        if (mounted) setAuthLoading(false)
+      } else if (event === 'INITIAL_SESSION' && !session?.user && !dataLoaded) {
+        // No session - allow guest view
+        if (mounted) setAuthLoading(false)
+      }
+    })
 
     return () => {
+      mounted = false
+      subscription.unsubscribe()
       if (ordersChannel) {
         supabase.removeChannel(ordersChannel)
       }

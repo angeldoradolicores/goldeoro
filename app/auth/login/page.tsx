@@ -26,16 +26,13 @@ function LoginForm() {
   })
 
   useEffect(() => {
-    // Clear any residual session when landing on login page to ensure clean login
-    const clearSession = async () => {
-      const supabase = createClient()
-      await supabase.auth.signOut()
-      useAuthStore.getState().setUser(null)
-      useAuthStore.getState().setIsAdmin(false)
-      useCartStore.getState().clearCart()
-      useFavoritesStore.getState().clearFavorites()
-    }
-    clearSession()
+    // Only clear local store state - do NOT call signOut() here as it
+    // would destroy a valid session that was just created upon redirect.
+    useAuthStore.getState().setUser(null)
+    useAuthStore.getState().setIsAdmin(false)
+    useAuthStore.getState().setInitialized(false)
+    useCartStore.getState().clearCart()
+    useFavoritesStore.getState().clearFavorites()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
