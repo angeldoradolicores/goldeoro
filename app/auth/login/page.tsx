@@ -61,19 +61,24 @@ function LoginForm() {
           
         const is_admin = !!profile?.is_admin
         
+        // Update global stores immediately so Navbar updates before router.push finishes
+        useAuthStore.getState().setUser(user)
+        useAuthStore.getState().setIsAdmin(is_admin)
+        useAuthStore.getState().setInitialized(true)
+        useCartStore.getState().syncCart()
+        useFavoritesStore.getState().syncFavorites()
+
         if (is_admin) {
           toast.success('Bienvenido al Panel de Administrador')
-          // window.location.assign forces a full page reload so the server
-          // receives the auth cookies and the new page starts with a valid session.
-          window.location.assign('/admin')
+          router.push('/admin')
+          router.refresh()
           return
         }
       }
 
       toast.success('Bienvenido de vuelta!')
-      // Force a full page reload (not SPA navigation) so cookies are properly
-      // sent to the server and the page loads with the correct auth session.
-      window.location.assign(redirectTo)
+      router.push(redirectTo)
+      router.refresh()
     } catch {
       toast.error('Error al iniciar sesion')
     } finally {
