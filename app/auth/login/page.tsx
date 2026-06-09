@@ -70,15 +70,19 @@ function LoginForm() {
 
         if (is_admin) {
           toast.success('Bienvenido al Panel de Administrador')
-          router.push('/admin')
-          router.refresh()
+          // Wait for Supabase SSR to finish writing session cookies asynchronously
+          setTimeout(() => {
+            window.location.href = '/admin'
+          }, 800)
           return
         }
       }
 
       toast.success('Bienvenido de vuelta!')
-      router.push(redirectTo)
-      router.refresh()
+      // Wait for Supabase SSR to finish writing session cookies asynchronously
+      setTimeout(() => {
+        window.location.href = redirectTo
+      }, 800)
     } catch {
       toast.error('Error al iniciar sesion')
     } finally {
