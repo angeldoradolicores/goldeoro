@@ -1,3 +1,7 @@
+import { Resend } from 'resend';
+
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
 interface TrackingInfo {
   carrier?: string
   trackingNumber?: string
@@ -61,7 +65,6 @@ export async function sendOrderStatusEmail(
     color: '#FF007F', // default neon-pink
   }
 
-  const apiKey = process.env.RESEND_API_KEY
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
   const formattedTotal = details
@@ -218,31 +221,22 @@ export async function sendOrderStatusEmail(
 </html>
 `
 
-  if (apiKey) {
+  if (resend) {
     try {
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: `Urban Crown <${fromEmail}>`,
-          to,
-          subject: config.subject,
-          html,
-        }),
-      })
+      const { data, error } = await resend.emails.send({
+        from: `Urban Crown <${fromEmail}>`,
+        to,
+        subject: config.subject,
+        html,
+      });
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('[mail] Resend API error response:', errorText)
+      if (error) {
+        console.error('[mail] Resend API error response:', error);
       } else {
-        const result = await response.json()
-        console.log('[mail] Email sent successfully via Resend:', result.id)
+        console.log('[mail] Email sent successfully via Resend:', data?.id);
       }
     } catch (err) {
-      console.error('[mail] Failed to send email via Resend API:', err)
+      console.error('[mail] Failed to send email via Resend API:', err);
     }
   } else {
     // Mock logging when RESEND_API_KEY is not defined
