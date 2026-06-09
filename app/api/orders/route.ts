@@ -142,7 +142,9 @@ export async function POST(request: Request) {
 
     const signature = generateWompiSignature(reference, amountInCents, 'COP')
 
-    const checkoutUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=${amountInCents}&reference=${reference}&signature=${signature}&redirect-url=${redirectUrl}&customer-data:email=${encodeURIComponent(shippingInfo.email || '')}&customer-data:full-name=${encodeURIComponent(shippingInfo.name || '')}&customer-data:phone-number=${encodeURIComponent(shippingInfo.phone || '')}`
+    const checkoutUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=${amountInCents}&reference=${reference}&signature:integrity=${signature}&redirect-url=${redirectUrl}&customer-data:email=${encodeURIComponent(shippingInfo.email || '')}&customer-data:full-name=${encodeURIComponent(shippingInfo.name || '')}&customer-data:phone-number=${encodeURIComponent(shippingInfo.phone || '')}`
+
+    console.log('[orders] Checkout URL generated, reference:', reference, '| signature length:', signature.length, '| amount:', amountInCents)
 
     return NextResponse.json({
       success: true,
