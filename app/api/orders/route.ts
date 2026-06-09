@@ -133,6 +133,13 @@ export async function POST(request: Request) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://luxurycapsoficial.vercel.app'
     const redirectUrl = encodeURIComponent(`${siteUrl}/checkout/confirmacion?ref=${order.id}`)
 
+    // Verify integrity key is available
+    if (!process.env.WOMPI_INTEGRITY_KEY) {
+      console.error('[orders] WOMPI_INTEGRITY_KEY is not set — signature will be empty and Wompi will reject the request')
+    } else {
+      console.log('[orders] WOMPI_INTEGRITY_KEY is present, length:', process.env.WOMPI_INTEGRITY_KEY.length)
+    }
+
     const signature = generateWompiSignature(reference, amountInCents, 'COP')
 
     const checkoutUrl = `https://checkout.wompi.co/p/?public-key=${wompiPublicKey}&currency=COP&amount-in-cents=${amountInCents}&reference=${reference}&signature=${signature}&redirect-url=${redirectUrl}&customer-data:email=${encodeURIComponent(shippingInfo.email || '')}&customer-data:full-name=${encodeURIComponent(shippingInfo.name || '')}&customer-data:phone-number=${encodeURIComponent(shippingInfo.phone || '')}`
