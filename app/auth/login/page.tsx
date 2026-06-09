@@ -26,13 +26,11 @@ function LoginForm() {
   })
 
   useEffect(() => {
-    // Only clear local store state - do NOT call signOut() here as it
-    // would destroy a valid session that was just created upon redirect.
+    // Only reset local in-memory store state when visiting login page.
+    // Do NOT call signOut() or clearCart() here as that would destroy valid sessions and DB data.
     useAuthStore.getState().setUser(null)
     useAuthStore.getState().setIsAdmin(false)
     useAuthStore.getState().setInitialized(false)
-    useCartStore.getState().clearCart()
-    useFavoritesStore.getState().clearFavorites()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,24 +61,19 @@ function LoginForm() {
           
         const is_admin = !!profile?.is_admin
         
-        // Update global stores immediately
-        useAuthStore.getState().setUser(user)
-        useAuthStore.getState().setIsAdmin(is_admin)
-        useAuthStore.getState().setInitialized(true)
-        useCartStore.getState().syncCart()
-        useFavoritesStore.getState().syncFavorites()
-
         if (is_admin) {
           toast.success('Bienvenido al Panel de Administrador')
-          router.push('/admin')
-          router.refresh()
+          // window.location.assign forces a full page reload so the server
+          // receives the auth cookies and the new page starts with a valid session.
+          window.location.assign('/admin')
           return
         }
       }
 
       toast.success('Bienvenido de vuelta!')
-      router.push(redirectTo)
-      router.refresh()
+      // Force a full page reload (not SPA navigation) so cookies are properly
+      // sent to the server and the page loads with the correct auth session.
+      window.location.assign(redirectTo)
     } catch {
       toast.error('Error al iniciar sesion')
     } finally {
