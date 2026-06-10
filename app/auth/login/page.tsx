@@ -77,8 +77,8 @@ function LoginForm() {
           useFavoritesStore.getState().syncFavoritesFromServer(),
         ])
 
-        // Now redirect - server will have session from cookies
-        window.location.href = redirectTo
+        // Use soft redirect to preserve Zustand state
+        router.push(redirectTo)
       }
     } catch {
       toast.error('Error al iniciar sesion')
