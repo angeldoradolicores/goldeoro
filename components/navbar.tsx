@@ -50,12 +50,28 @@ export function Navbar() {
     const initAuth = async () => {
       if (isInitialized) return
 
+      let user = null
       const { data: { session } } = await supabase.auth.getSession()
-      let user = session?.user ?? null
+      user = session?.user ?? null
+
       if (!user) {
         const { data: { user: fallbackUser } } = await supabase.auth.getUser()
         user = fallbackUser ?? null
       }
+
+      if (!user) {
+        try {
+          const res = await fetch('/api/auth/session')
+          if (res.ok) {
+            const json = await res.json()
+            user = json.user ?? null
+            if (json.isAdmin) setIsAdmin(true)
+          }
+        } catch {
+          // ignore fetch failure
+        }
+      }
+
       setUser(user)
 
       if (user) {
@@ -63,12 +79,16 @@ export function Navbar() {
         useFavoritesStore.getState().setUserId(user.id)
         useCartStore.getState().hydrateCart(user.id)
         useFavoritesStore.getState().hydrateFavorites(user.id)
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', user.id)
-          .maybeSingle()
-        setIsAdmin(profile?.is_admin || false)
+
+        if (!isAdmin) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', user.id)
+            .maybeSingle()
+          setIsAdmin(profile?.is_admin || false)
+        }
+
         useCartStore.getState().syncCart(user.id)
         useFavoritesStore.getState().syncFavorites(user.id)
       } else {
