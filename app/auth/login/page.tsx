@@ -81,10 +81,8 @@ function LoginForm() {
           console.warn('Sync error after login:', e)
         }
         
-        // Navigate without hard reload to preserve state
-        startTransition(() => {
-          router.push(redirectTo)
-        })
+        // Navigate with a hard reload to ensure Vercel cache is cleared
+        window.location.href = redirectTo
       }
     } catch {
       toast.error('Error al iniciar sesion')
