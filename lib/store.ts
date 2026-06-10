@@ -729,8 +729,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
   setIsAdmin: (isAdmin) => set({ isAdmin }),
   setInitialized: (initialized) => set({ isInitialized: initialized }),
   logout: async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    try {
+      // Use server endpoint to signOut - more reliable on Vercel
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch (err) {
+      console.error('Error during logout:', err)
+    }
+    // Clear local state regardless
     set({ user: null, isAdmin: false })
     useCartStore.getState().clearCart()
     useCartStore.getState().setUserId(null)
