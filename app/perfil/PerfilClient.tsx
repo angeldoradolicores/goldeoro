@@ -229,7 +229,7 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
 
   const handleLogout = async () => {
     await useAuthStore.getState().logout()
-    router.push('/')
+    window.location.href = '/'
   }
 
   const handleSaveProfile = async () => {

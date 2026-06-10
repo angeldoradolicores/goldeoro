@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { useAuthStore, useCartStore, useFavoritesStore } from "@/lib/store"
-import { signIn } from "@/app/auth/actions"
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -45,13 +44,22 @@ function LoginForm() {
 
     try {
       const data = new FormData(e.currentTarget)
-      data.set('redirectTo', redirectTo)
-      const result = await signIn(data)
-      if (result?.error) {
-        toast.error(result.error === 'Invalid login credentials'
-          ? 'Email o contrasena incorrectos'
-          : result.error)
+      const email = data.get('email') as string
+      const password = data.get('password') as string
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const result = await res.json()
+      if (!res.ok || result.error) {
+        toast.error(result.error || 'Email o contrasena incorrectos')
+        return
       }
+
+      router.push(redirectTo)
     } catch (error) {
       toast.error('Error al iniciar sesion')
     } finally {
