@@ -48,8 +48,8 @@ function LoginForm() {
       })
 
       if (error) {
-        toast.error(error.message === 'Invalid login credentials' 
-          ? 'Email o contrasena incorrectos' 
+        toast.error(error.message === 'Invalid login credentials'
+          ? 'Email o contrasena incorrectos'
           : error.message)
         return
       }
@@ -61,27 +61,23 @@ function LoginForm() {
           .select('is_admin')
           .eq('id', user.id)
           .maybeSingle()
-          
+
         const is_admin = !!profile?.is_admin
-        
+
         // Update global stores immediately
         useAuthStore.getState().setUser(user)
         useAuthStore.getState().setIsAdmin(is_admin)
         useAuthStore.getState().setInitialized(true)
         useCartStore.getState().setUserId(user.id)
         useFavoritesStore.getState().setUserId(user.id)
-        
-        // Sync cart and favorites with authenticated user
-        try {
-          await useCartStore.getState().syncCart(user.id)
-          await useFavoritesStore.getState().syncFavorites(user.id)
-        } catch (e) {
-          console.warn('Sync error after login:', e)
-        }
-        
-        // Hard redirect so the page reloads fresh and Navbar re-initializes
-        // This guarantees session cookies are propagated on Vercel edge before
-        // any client-side Supabase queries run
+
+        // Wait for server sync to complete before redirecting
+        await Promise.all([
+          useCartStore.getState().syncCartFromServer(),
+          useFavoritesStore.getState().syncFavoritesFromServer(),
+        ])
+
+        // Now redirect - server will have session from cookies
         window.location.href = redirectTo
       }
     } catch {

@@ -4,10 +4,15 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+    if (userError) {
+      console.error('[cart GET] getUser error:', userError.message)
+      return NextResponse.json({ items: [], userId: null })
+    }
 
     if (!user) {
-      return NextResponse.json({ items: [] })
+      return NextResponse.json({ items: [], userId: null })
     }
 
     const { data: dbItems, error } = await supabase
@@ -21,8 +26,8 @@ export async function GET() {
       .eq('user_id', user.id)
 
     if (error) {
-      console.warn('[cart GET] Error:', error.message)
-      return NextResponse.json({ items: [] })
+      console.warn('[cart GET] Query error:', error.message)
+      return NextResponse.json({ items: [], userId: user.id })
     }
 
     const items = (dbItems ?? [])
@@ -50,8 +55,8 @@ export async function GET() {
 
     return NextResponse.json({ items, userId: user.id })
   } catch (err) {
-    console.error('[cart GET]', err)
-    return NextResponse.json({ items: [] })
+    console.error('[cart GET] Catch error:', err)
+    return NextResponse.json({ items: [], userId: null })
   }
 }
 

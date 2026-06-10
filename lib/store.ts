@@ -479,23 +479,27 @@ export const useCartStore = create<CartStore>((set, get) => ({
   syncCartFromServer: async () => {
     try {
       const res = await fetch('/api/cart', { credentials: 'include' })
-      if (!res.ok) return
+      if (!res.ok) {
+        console.error('[syncCartFromServer] Response not ok:', res.status)
+        return
+      }
       const data = await res.json()
       const serverItems: CartItem[] = data.items ?? []
       const userId: string | null = data.userId ?? null
-      if (!userId) return
 
-      set({ userId })
-      const localItems = get().items
-      const mergedMap = new Map<string, CartItem>()
-      serverItems.forEach(item => mergedMap.set(item.id, item))
-      // local items (guest cart) take precedence
-      localItems.forEach(item => mergedMap.set(item.id, item))
-      const merged = Array.from(mergedMap.values())
-      set({ items: merged })
-      saveLocalCart(merged, userId)
+      if (userId) {
+        set({ userId })
+        const localItems = get().items
+        const mergedMap = new Map<string, CartItem>()
+        serverItems.forEach(item => mergedMap.set(item.id, item))
+        // local items (guest cart) take precedence
+        localItems.forEach(item => mergedMap.set(item.id, item))
+        const merged = Array.from(mergedMap.values())
+        set({ items: merged })
+        saveLocalCart(merged, userId)
+      }
     } catch (err) {
-      console.warn('[syncCartFromServer]', err)
+      console.warn('[syncCartFromServer] Error:', err)
     }
   }
 }))
@@ -671,23 +675,27 @@ export const useFavoritesStore = create<FavoritesStore>((set, get) => ({
   syncFavoritesFromServer: async () => {
     try {
       const res = await fetch('/api/favorites', { credentials: 'include' })
-      if (!res.ok) return
+      if (!res.ok) {
+        console.error('[syncFavoritesFromServer] Response not ok:', res.status)
+        return
+      }
       const data = await res.json()
       const serverItems: Product[] = data.items ?? []
       const userId: string | null = data.userId ?? null
-      if (!userId) return
 
-      set({ userId })
-      const localItems = get().items
-      const mergedMap = new Map<string, Product>()
-      serverItems.forEach(item => mergedMap.set(item.id, item))
-      // local items take precedence
-      localItems.forEach(item => mergedMap.set(item.id, item))
-      const merged = Array.from(mergedMap.values())
-      set({ items: merged })
-      saveLocalFavorites(merged, userId)
+      if (userId) {
+        set({ userId })
+        const localItems = get().items
+        const mergedMap = new Map<string, Product>()
+        serverItems.forEach(item => mergedMap.set(item.id, item))
+        // local items take precedence
+        localItems.forEach(item => mergedMap.set(item.id, item))
+        const merged = Array.from(mergedMap.values())
+        set({ items: merged })
+        saveLocalFavorites(merged, userId)
+      }
     } catch (err) {
-      console.warn('[syncFavoritesFromServer]', err)
+      console.warn('[syncFavoritesFromServer] Error:', err)
     }
   }
 }))
