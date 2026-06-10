@@ -49,7 +49,9 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
   const [addedToCart, setAddedToCart] = useState(false)
   const addItem = useCartStore(state => state.addItem)
   const toggleFavorite = useFavoritesStore(state => state.toggleFavorite)
-  const isFav = useFavoritesStore(state => product ? state.items.some(i => i.id === product.id) : false)
+  const cartItems = useCartStore(state => state.items)
+  const favoriteItems = useFavoritesStore(state => state.items)
+  const isFav = product ? favoriteItems.some(i => i.id === product.id) : false
 
   useEffect(() => {
     const fetchProduct = async () => {
