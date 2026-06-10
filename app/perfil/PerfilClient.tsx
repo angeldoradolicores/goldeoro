@@ -225,7 +225,9 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
 
   const handleLogout = async () => {
     await useAuthStore.getState().logout()
-    window.location.href = '/'
+    router.refresh()
+    await new Promise(resolve => setTimeout(resolve, 500))
+    router.push('/')
   }
 
   const handleSaveProfile = async () => {

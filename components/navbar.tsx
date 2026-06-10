@@ -110,7 +110,9 @@ export function Navbar() {
 
   const handleLogout = async () => {
     await logout()
-    window.location.href = '/'
+    router.refresh()
+    await new Promise(resolve => setTimeout(resolve, 500))
+    router.push('/')
   }
 
   return (

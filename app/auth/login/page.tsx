@@ -81,8 +81,10 @@ function LoginForm() {
           console.warn('Sync error after login:', e)
         }
         
-        // Navigate with a hard reload to ensure Vercel cache is cleared
-        window.location.href = redirectTo
+        // Navigate with router refresh to ensure Next.js cache is cleared properly
+        router.refresh()
+        await new Promise(resolve => setTimeout(resolve, 500))
+        router.push(redirectTo)
       }
     } catch {
       toast.error('Error al iniciar sesion')
