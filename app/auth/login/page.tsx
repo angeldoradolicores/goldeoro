@@ -60,7 +60,7 @@ function LoginForm() {
         return
       }
 
-      router.push(redirectTo)
+      window.location.href = redirectTo
     } catch (error) {
       toast.error('Error al iniciar sesion')
     } finally {
