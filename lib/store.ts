@@ -220,23 +220,12 @@ export const useCartStore = create<CartStore>((set, get) => ({
     if (currentUserId) {
       persistViaAPI(currentUserId)
     } else {
-      const supabase = createClient()
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        const uid = session?.user?.id ?? null
+      // If no userId, try to sync from server first
+      get().syncCartFromServer().then(() => {
+        const uid = get().userId
         if (uid) {
-          set({ userId: uid })
-          saveLocalCart(newItems, uid)
           persistViaAPI(uid)
         }
-      }).catch(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-          const uid = user?.id ?? null
-          if (uid) {
-            set({ userId: uid })
-            saveLocalCart(newItems, uid)
-            persistViaAPI(uid)
-          }
-        }).catch(() => {})
       })
     }
   },
@@ -271,17 +260,12 @@ export const useCartStore = create<CartStore>((set, get) => ({
     if (currentUserId) {
       persistViaAPI(currentUserId)
     } else {
-      const supabase = createClient()
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        const uid = session?.user?.id ?? null
-        if (uid) set({ userId: uid })
-        persistViaAPI(uid)
-      }).catch(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-          const uid = user?.id ?? null
-          if (uid) set({ userId: uid })
+      // If no userId, try to sync from server first
+      get().syncCartFromServer().then(() => {
+        const uid = get().userId
+        if (uid) {
           persistViaAPI(uid)
-        }).catch(() => {})
+        }
       })
     }
   },
@@ -335,17 +319,12 @@ export const useCartStore = create<CartStore>((set, get) => ({
     if (currentUserId) {
       persistViaAPI(currentUserId)
     } else {
-      const supabase = createClient()
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        const uid = session?.user?.id ?? null
-        if (uid) set({ userId: uid })
-        persistViaAPI(uid)
-      }).catch(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-          const uid = user?.id ?? null
-          if (uid) set({ userId: uid })
+      // If no userId, try to sync from server first
+      get().syncCartFromServer().then(() => {
+        const uid = get().userId
+        if (uid) {
           persistViaAPI(uid)
-        }).catch(() => {})
+        }
       })
     }
   },
@@ -357,9 +336,6 @@ export const useCartStore = create<CartStore>((set, get) => ({
     const persistViaAPI = async (uid: string | null) => {
       if (!uid) return
       try {
-        // Delete all cart items for the user by deleting without filters
-        // Since we can't do a bulk delete via API, we'll rely on the local clear
-        // and re-sync on next sync
         const res = await fetch('/api/cart', {
           method: 'DELETE',
           credentials: 'include',
@@ -375,17 +351,12 @@ export const useCartStore = create<CartStore>((set, get) => ({
     if (currentUserId) {
       persistViaAPI(currentUserId)
     } else {
-      const supabase = createClient()
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        const uid = session?.user?.id ?? null
-        if (uid) set({ userId: uid })
-        persistViaAPI(uid)
-      }).catch(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-          const uid = user?.id ?? null
-          if (uid) set({ userId: uid })
+      // If no userId, try to sync from server first
+      get().syncCartFromServer().then(() => {
+        const uid = get().userId
+        if (uid) {
           persistViaAPI(uid)
-        }).catch(() => {})
+        }
       })
     }
   },
@@ -555,16 +526,23 @@ export const useFavoritesStore = create<FavoritesStore>((set, get) => ({
     const supabase = createClient()
     const isFav = get().isFavorite(product.id)
     let currentUserId = get().userId
+
+    // If no userId, try to sync from server first
+    if (!currentUserId) {
+      await get().syncFavoritesFromServer()
+      currentUserId = get().userId
+    }
+
     if (!currentUserId) {
       const { data: { session } } = await supabase.auth.getSession()
       currentUserId = session?.user?.id || null
       if (!currentUserId) {
-        // Fallback to getUser
         const { data: { user } } = await supabase.auth.getUser()
         currentUserId = user?.id ?? null
       }
       if (currentUserId) set({ userId: currentUserId })
     }
+
     let newItems: Product[] = []
 
     if (isFav) {
