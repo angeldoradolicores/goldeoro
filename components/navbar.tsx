@@ -106,9 +106,11 @@ export function Navbar() {
           .eq('id', currentUser.id)
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
-        // On auth state change events (login/session-refresh), also use server sync
-        useCartStore.getState().syncCartFromServer()
-        useFavoritesStore.getState().syncFavoritesFromServer()
+        // On auth state change events (login/session-refresh), await the sync
+        await Promise.all([
+          useCartStore.getState().syncCartFromServer(),
+          useFavoritesStore.getState().syncFavoritesFromServer(),
+        ])
       }
       setInitialized(true)
     })
@@ -118,9 +120,7 @@ export function Navbar() {
 
   const handleLogout = async () => {
     await logout()
-    router.refresh()
-    await new Promise(resolve => setTimeout(resolve, 500))
-    router.push('/')
+    window.location.href = '/'
   }
 
   return (
