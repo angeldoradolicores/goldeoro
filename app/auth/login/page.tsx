@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 import { useAuthStore, useCartStore, useFavoritesStore } from "@/lib/store"
+import { signIn } from "@/app/auth/actions"
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -38,55 +39,20 @@ function LoginForm() {
     useFavoritesStore.getState().hydrateFavorites(null)
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      })
-
-      if (error) {
-        toast.error(error.message === 'Invalid login credentials' 
-          ? 'Email o contrasena incorrectos' 
-          : error.message)
-        return
+      const data = new FormData(e.currentTarget)
+      data.set('redirectTo', redirectTo)
+      const result = await signIn(data)
+      if (result?.error) {
+        toast.error(result.error === 'Invalid login credentials'
+          ? 'Email o contrasena incorrectos'
+          : result.error)
       }
-
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', user.id)
-          .maybeSingle()
-          
-        const is_admin = !!profile?.is_admin
-        
-        // Update global stores immediately
-        useAuthStore.getState().setUser(user)
-        useAuthStore.getState().setIsAdmin(is_admin)
-        useAuthStore.getState().setInitialized(true)
-        useCartStore.getState().setUserId(user.id)
-        useFavoritesStore.getState().setUserId(user.id)
-        
-        // Sync cart and favorites with authenticated user
-        try {
-          await useCartStore.getState().syncCart(user.id)
-          await useFavoritesStore.getState().syncFavorites(user.id)
-        } catch (e) {
-          console.warn('Sync error after login:', e)
-        }
-        
-        // Navigate without hard reload to preserve state
-        startTransition(() => {
-          router.push(redirectTo)
-        })
-      }
-    } catch {
+    } catch (error) {
       toast.error('Error al iniciar sesion')
     } finally {
       setIsLoading(false)
@@ -183,7 +149,8 @@ function LoginForm() {
             <p className="text-muted-foreground mb-8">Ingresa tus credenciales para continuar</p>
 
             <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
-              <div className="space-y-2">
+              <input type="hidden" name="redirectTo" value={redirectTo} />
+            <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -196,6 +163,7 @@ function LoginForm() {
                     required
                     disabled={isLoading}
                     autoComplete="off"
+                    name="email"
                   />
                 </div>
               </div>
@@ -213,6 +181,7 @@ function LoginForm() {
                     required
                     disabled={isLoading}
                     autoComplete="new-password"
+                    name="password"
                   />
                   <button
                     type="button"
