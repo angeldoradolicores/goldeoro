@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect, Suspense, useTransition } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Crown, Mail, Lock, ArrowRight, Loader2 } from "lucide-react"
 import SparklesUI from '@/components/sparkles'
 import { Button } from "@/components/ui/button"
@@ -16,9 +16,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isOAuthLoading, setIsOAuthLoading] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
 
-  const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/'
   
@@ -81,10 +79,10 @@ function LoginForm() {
           console.warn('Sync error after login:', e)
         }
         
-        // Navigate with router refresh to ensure Next.js cache is cleared properly
-        router.refresh()
-        await new Promise(resolve => setTimeout(resolve, 500))
-        router.push(redirectTo)
+        // Hard redirect so the page reloads fresh and Navbar re-initializes
+        // This guarantees session cookies are propagated on Vercel edge before
+        // any client-side Supabase queries run
+        window.location.href = redirectTo
       }
     } catch {
       toast.error('Error al iniciar sesion')

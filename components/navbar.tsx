@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ShoppingBag, User, Crown, LogOut, Heart } from 'lucide-react'
@@ -27,6 +27,8 @@ export function Navbar() {
   const toggleCart = useCartStore(state => state.toggleCart)
   const count = useCartStore(state => state.items.reduce((acc, i) => acc + (i.quantity || 0), 0))
   const favoritesCount = useFavoritesStore(state => state.items.length)
+  // Ref to prevent double-initialization within the same component mount
+  const initCalledRef = useRef(false)
 
   const handleFavorites = () => {
     if (!user) {
@@ -48,27 +50,33 @@ export function Navbar() {
     const supabase = createClient()
 
     const initAuth = async () => {
-      if (isInitialized) return
+      // Use a local ref instead of Zustand's isInitialized so every page mount
+      // re-syncs cart/favorites, preventing stale state after login navigation
+      if (initCalledRef.current) return
+      initCalledRef.current = true
 
       const { data: { session } } = await supabase.auth.getSession()
-      let user = session?.user ?? null
-      if (!user) {
+      let currentUser = session?.user ?? null
+      if (!currentUser) {
         const { data: { user: fallbackUser } } = await supabase.auth.getUser()
-        user = fallbackUser ?? null
+        currentUser = fallbackUser ?? null
       }
-      setUser(user)
+      setUser(currentUser)
 
-      if (user) {
-        useCartStore.getState().setUserId(user.id)
-        useFavoritesStore.getState().setUserId(user.id)
+      if (currentUser) {
+        useCartStore.getState().setUserId(currentUser.id)
+        useFavoritesStore.getState().setUserId(currentUser.id)
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
-          .eq('id', user.id)
+          .eq('id', currentUser.id)
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
-        useCartStore.getState().syncCart(user.id)
-        useFavoritesStore.getState().syncFavorites(user.id)
+        // Await both syncs so state is ready before UI renders
+        await Promise.all([
+          useCartStore.getState().syncCart(currentUser.id),
+          useFavoritesStore.getState().syncFavorites(currentUser.id),
+        ])
       } else {
         useCartStore.getState().setUserId(null)
         useFavoritesStore.getState().setUserId(null)
@@ -82,25 +90,26 @@ export function Navbar() {
     initAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const user = session?.user || null
-      setUser(user)
-      if (!user) {
+      const currentUser = session?.user || null
+      setUser(currentUser)
+      if (!currentUser) {
         setIsAdmin(false)
         useCartStore.getState().setUserId(null)
         useCartStore.getState().clearCart()
         useFavoritesStore.getState().setUserId(null)
         useFavoritesStore.getState().clearFavorites()
       } else {
-        useCartStore.getState().setUserId(user.id)
-        useFavoritesStore.getState().setUserId(user.id)
+        useCartStore.getState().setUserId(currentUser.id)
+        useFavoritesStore.getState().setUserId(currentUser.id)
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
-          .eq('id', user.id)
+          .eq('id', currentUser.id)
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
-        useCartStore.getState().syncCart(user.id)
-        useFavoritesStore.getState().syncFavorites(user.id)
+        // Fire-and-forget sync on auth state change events
+        useCartStore.getState().syncCart(currentUser.id)
+        useFavoritesStore.getState().syncFavorites(currentUser.id)
       }
       setInitialized(true)
     })
