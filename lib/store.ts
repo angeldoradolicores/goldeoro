@@ -194,46 +194,48 @@ export const useCartStore = create<CartStore>((set, get) => ({
     set({ items: newItems, isOpen: true })
     saveLocalCart(newItems, currentUserId)
 
-    const supabase = createClient()
-    const persistUpsert = async (uid: string | null) => {
+    const item = newItems.find((i) => i.id === itemId)
+    if (!item) return
+
+    const persistViaAPI = async (uid: string | null) => {
       if (!uid) return
-      const item = newItems.find((i) => i.id === itemId)
-      if (!item) return
-      
-      const { error } = await supabase.from('cart_items').upsert({
-        user_id: uid,
-        product_id: product.id,
-        quantity: item.quantity,
-        selected_color: color,
-        selected_size: size,
-      }, {
-        onConflict: 'user_id,product_id,selected_color,selected_size',
-      })
-      
-      if (error) console.error('Error syncing cart item upsert:', error.message)
+      try {
+        const res = await fetch('/api/cart', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product_id: product.id,
+            quantity: item.quantity,
+            selected_color: color || null,
+            selected_size: size || null,
+          }),
+        })
+        if (!res.ok) console.error('Error syncing cart item:', res.statusText)
+      } catch (err) {
+        console.error('Error syncing cart item:', err)
+      }
     }
 
-    // Try to persist immediately if we have userId
     if (currentUserId) {
-      persistUpsert(currentUserId)
+      persistViaAPI(currentUserId)
     } else {
-      // No userId yet, try to get session/user
+      const supabase = createClient()
       supabase.auth.getSession().then(({ data: { session } }) => {
         const uid = session?.user?.id ?? null
         if (uid) {
           set({ userId: uid })
           saveLocalCart(newItems, uid)
+          persistViaAPI(uid)
         }
-        persistUpsert(uid)
       }).catch(() => {
-        // Last resort: try getUser if getSession fails
         supabase.auth.getUser().then(({ data: { user } }) => {
           const uid = user?.id ?? null
           if (uid) {
             set({ userId: uid })
             saveLocalCart(newItems, uid)
+            persistViaAPI(uid)
           }
-          persistUpsert(uid)
         }).catch(() => {})
       })
     }
@@ -246,31 +248,39 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
     if (!itemToRemove) return
     let currentUserId = get().userId
-    const supabase = createClient()
-    const persistDelete = async (uid: string | null) => {
+
+    const persistViaAPI = async (uid: string | null) => {
       if (!uid) return
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('user_id', uid)
-        .eq('product_id', itemToRemove.product.id)
-        .eq('selected_color', itemToRemove.selectedColor)
-        .eq('selected_size', itemToRemove.selectedSize)
-      if (error) console.error('Error syncing cart item removal:', error.message)
+      try {
+        const res = await fetch('/api/cart', {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product_id: itemToRemove.product.id,
+            selected_color: itemToRemove.selectedColor || null,
+            selected_size: itemToRemove.selectedSize || null,
+          }),
+        })
+        if (!res.ok) console.error('Error syncing cart item removal:', res.statusText)
+      } catch (err) {
+        console.error('Error syncing cart item removal:', err)
+      }
     }
 
     if (currentUserId) {
-      persistDelete(currentUserId)
+      persistViaAPI(currentUserId)
     } else {
+      const supabase = createClient()
       supabase.auth.getSession().then(({ data: { session } }) => {
         const uid = session?.user?.id ?? null
         if (uid) set({ userId: uid })
-        persistDelete(uid)
+        persistViaAPI(uid)
       }).catch(() => {
         supabase.auth.getUser().then(({ data: { user } }) => {
           const uid = user?.id ?? null
           if (uid) set({ userId: uid })
-          persistDelete(uid)
+          persistViaAPI(uid)
         }).catch(() => {})
       })
     }
@@ -287,42 +297,54 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
     if (!itemToUpdate) return
     let currentUserId = get().userId
-    const supabase = createClient()
-    const persistUpdate = async (uid: string | null) => {
+
+    const persistViaAPI = async (uid: string | null) => {
       if (!uid) return
-      if (quantity === 0) {
-        const { error } = await supabase
-          .from('cart_items')
-          .delete()
-          .eq('user_id', uid)
-          .eq('product_id', itemToUpdate.product.id)
-          .eq('selected_color', itemToUpdate.selectedColor)
-          .eq('selected_size', itemToUpdate.selectedSize)
-        if (error) console.error('Error syncing cart item removal:', error.message)
-      } else {
-        const { error } = await supabase
-          .from('cart_items')
-          .update({ quantity })
-          .eq('user_id', uid)
-          .eq('product_id', itemToUpdate.product.id)
-          .eq('selected_color', itemToUpdate.selectedColor)
-          .eq('selected_size', itemToUpdate.selectedSize)
-        if (error) console.error('Error syncing cart item quantity:', error.message)
+      try {
+        if (quantity === 0) {
+          const res = await fetch('/api/cart', {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              product_id: itemToUpdate.product.id,
+              selected_color: itemToUpdate.selectedColor || null,
+              selected_size: itemToUpdate.selectedSize || null,
+            }),
+          })
+          if (!res.ok) console.error('Error syncing cart item removal:', res.statusText)
+        } else {
+          const res = await fetch('/api/cart', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              product_id: itemToUpdate.product.id,
+              quantity,
+              selected_color: itemToUpdate.selectedColor || null,
+              selected_size: itemToUpdate.selectedSize || null,
+            }),
+          })
+          if (!res.ok) console.error('Error syncing cart item quantity:', res.statusText)
+        }
+      } catch (err) {
+        console.error('Error syncing cart item:', err)
       }
     }
 
     if (currentUserId) {
-      persistUpdate(currentUserId)
+      persistViaAPI(currentUserId)
     } else {
+      const supabase = createClient()
       supabase.auth.getSession().then(({ data: { session } }) => {
         const uid = session?.user?.id ?? null
         if (uid) set({ userId: uid })
-        persistUpdate(uid)
+        persistViaAPI(uid)
       }).catch(() => {
         supabase.auth.getUser().then(({ data: { user } }) => {
           const uid = user?.id ?? null
           if (uid) set({ userId: uid })
-          persistUpdate(uid)
+          persistViaAPI(uid)
         }).catch(() => {})
       })
     }
@@ -331,28 +353,38 @@ export const useCartStore = create<CartStore>((set, get) => ({
     set({ items: [] })
     let currentUserId = get().userId
     saveLocalCart([], currentUserId)
-    const supabase = createClient()
-    const persistClear = async (uid: string | null) => {
+
+    const persistViaAPI = async (uid: string | null) => {
       if (!uid) return
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('user_id', uid)
-      if (error) console.error('Error clearing cart in DB:', error.message)
+      try {
+        // Delete all cart items for the user by deleting without filters
+        // Since we can't do a bulk delete via API, we'll rely on the local clear
+        // and re-sync on next sync
+        const res = await fetch('/api/cart', {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clear_all: true }),
+        })
+        if (!res.ok) console.error('Error clearing cart in DB:', res.statusText)
+      } catch (err) {
+        console.error('Error clearing cart:', err)
+      }
     }
 
     if (currentUserId) {
-      persistClear(currentUserId)
+      persistViaAPI(currentUserId)
     } else {
+      const supabase = createClient()
       supabase.auth.getSession().then(({ data: { session } }) => {
         const uid = session?.user?.id ?? null
         if (uid) set({ userId: uid })
-        persistClear(uid)
+        persistViaAPI(uid)
       }).catch(() => {
         supabase.auth.getUser().then(({ data: { user } }) => {
           const uid = user?.id ?? null
           if (uid) set({ userId: uid })
-          persistClear(uid)
+          persistViaAPI(uid)
         }).catch(() => {})
       })
     }
@@ -536,25 +568,34 @@ export const useFavoritesStore = create<FavoritesStore>((set, get) => ({
       set({ items: newItems })
       saveLocalFavorites(newItems, currentUserId)
       if (currentUserId) {
-        const { error } = await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', currentUserId)
-          .eq('product_id', product.id)
-        if (error) console.warn('Favorites delete error (table may not exist yet):', error.message)
+        try {
+          const res = await fetch('/api/favorites', {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: product.id }),
+          })
+          if (!res.ok) console.warn('Favorites delete error:', res.statusText)
+        } catch (err) {
+          console.warn('Favorites delete error:', err)
+        }
       }
     } else {
       newItems = [...get().items, product]
       set({ items: newItems })
       saveLocalFavorites(newItems, currentUserId)
       if (currentUserId) {
-        const { error } = await supabase
-          .from('favorites')
-          .upsert({
-            user_id: currentUserId,
-            product_id: product.id,
-          }, { onConflict: 'user_id,product_id' })
-        if (error) console.warn('Favorites upsert error (table may not exist yet):', error.message)
+        try {
+          const res = await fetch('/api/favorites', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: product.id }),
+          })
+          if (!res.ok) console.warn('Favorites upsert error:', res.statusText)
+        } catch (err) {
+          console.warn('Favorites upsert error:', err)
+        }
       }
     }
   },

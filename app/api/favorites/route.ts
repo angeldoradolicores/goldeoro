@@ -43,3 +43,74 @@ export async function GET() {
     return NextResponse.json({ items: [] })
   }
 }
+
+export async function POST(req: Request) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await req.json()
+    const { product_id } = body
+
+    if (!product_id) {
+      return NextResponse.json({ error: 'Missing product_id' }, { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from('favorites')
+      .upsert({
+        user_id: user.id,
+        product_id,
+      }, {
+        onConflict: 'user_id,product_id',
+      })
+
+    if (error) {
+      console.error('[favorites POST] Error:', error.message)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('[favorites POST]', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await req.json()
+    const { product_id } = body
+
+    if (!product_id) {
+      return NextResponse.json({ error: 'Missing product_id' }, { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from('favorites')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('product_id', product_id)
+
+    if (error) {
+      console.error('[favorites DELETE] Error:', error.message)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('[favorites DELETE]', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
