@@ -2,15 +2,37 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const body = await request.json()
-  const email = body.email as string
-  const password = body.password as string
+  const contentType = request.headers.get('content-type') ?? ''
+  const isJson = contentType.includes('application/json')
 
-  if (!email || !password) {
-    return NextResponse.json({ error: 'Email y contrasena son requeridos' }, { status: 400 })
+  let email: string | null = null
+  let password: string | null = null
+  let redirectTo = '/'
+
+  if (isJson) {
+    const body = await request.json()
+    email = body.email as string
+    password = body.password as string
+    redirectTo = body.redirectTo || '/'
+  } else {
+    const formData = await request.formData()
+    email = formData.get('email')?.toString() ?? null
+    password = formData.get('password')?.toString() ?? null
+    redirectTo = formData.get('redirectTo')?.toString() || '/'
   }
 
-  const response = NextResponse.next()
+  if (!email || !password) {
+    if (isJson) {
+      return NextResponse.json({ error: 'Email y contrasena son requeridos' }, { status: 400 })
+    }
+
+    const loginUrl = new URL('/auth/login', request.url)
+    loginUrl.searchParams.set('error', 'Email y contrasena son requeridos')
+    loginUrl.searchParams.set('redirect', redirectTo)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  let response = NextResponse.next()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -46,8 +68,22 @@ export async function POST(request: Request) {
   })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 })
+    if (isJson) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
+    const loginUrl = new URL('/auth/login', request.url)
+    loginUrl.searchParams.set('error', error.message)
+    loginUrl.searchParams.set('redirect', redirectTo)
+    response = NextResponse.redirect(loginUrl)
+    return response
   }
 
-  return response.json({ success: true })
+  if (isJson) {
+    return response.json({ success: true })
+  }
+
+  const redirectUrl = new URL(redirectTo, request.url)
+  response = NextResponse.redirect(redirectUrl)
+  return response
 }

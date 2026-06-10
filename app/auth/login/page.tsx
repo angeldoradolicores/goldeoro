@@ -46,12 +46,13 @@ function LoginForm() {
       const data = new FormData(e.currentTarget)
       const email = data.get('email') as string
       const password = data.get('password') as string
+      const redirectToValue = (data.get('redirectTo') as string) || redirectTo || '/'
 
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, redirectTo: redirectToValue }),
       })
 
       const result = await res.json()
@@ -157,7 +158,7 @@ function LoginForm() {
             <h2 className="text-2xl font-bold text-foreground mb-2">Bienvenido de vuelta</h2>
             <p className="text-muted-foreground mb-8">Ingresa tus credenciales para continuar</p>
 
-            <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+            <form action="/api/auth/login" method="post" onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
               <input type="hidden" name="redirectTo" value={redirectTo} />
             <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Email</label>
