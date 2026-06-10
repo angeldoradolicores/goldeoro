@@ -178,6 +178,10 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
     }
 
     if (userId) {
+      useCartStore.getState().setUserId(userId)
+      useFavoritesStore.getState().setUserId(userId)
+      useCartStore.getState().hydrateCart(userId)
+      useFavoritesStore.getState().hydrateFavorites(userId)
       useCartStore.getState().syncCart(userId).catch(e => console.warn('Cart sync:', e))
       syncFavorites(userId).catch(e => console.warn('Favorites sync:', e))
     } else {

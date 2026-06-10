@@ -61,6 +61,8 @@ export function Navbar() {
       if (user) {
         useCartStore.getState().setUserId(user.id)
         useFavoritesStore.getState().setUserId(user.id)
+        useCartStore.getState().hydrateCart(user.id)
+        useFavoritesStore.getState().hydrateFavorites(user.id)
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
