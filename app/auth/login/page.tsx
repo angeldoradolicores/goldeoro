@@ -38,31 +38,55 @@ function LoginForm() {
     useFavoritesStore.getState().hydrateFavorites(null)
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      const data = new FormData(e.currentTarget)
-      const email = data.get('email') as string
-      const password = data.get('password') as string
-      const redirectToValue = (data.get('redirectTo') as string) || redirectTo || '/'
-
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, redirectTo: redirectToValue }),
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
       })
 
-      const result = await res.json()
-      if (!res.ok || result.error) {
-        toast.error(result.error || 'Email o contrasena incorrectos')
+      if (error) {
+        toast.error(error.message === 'Invalid login credentials' 
+          ? 'Email o contrasena incorrectos' 
+          : error.message)
         return
       }
 
-      window.location.href = redirectTo
-    } catch (error) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .maybeSingle()
+          
+        const is_admin = !!profile?.is_admin
+        
+        // Update global stores immediately
+        useAuthStore.getState().setUser(user)
+        useAuthStore.getState().setIsAdmin(is_admin)
+        useAuthStore.getState().setInitialized(true)
+        useCartStore.getState().setUserId(user.id)
+        useFavoritesStore.getState().setUserId(user.id)
+        
+        // Sync cart and favorites with authenticated user
+        try {
+          await useCartStore.getState().syncCart(user.id)
+          await useFavoritesStore.getState().syncFavorites(user.id)
+        } catch (e) {
+          console.warn('Sync error after login:', e)
+        }
+        
+        // Navigate without hard reload to preserve state
+        startTransition(() => {
+          router.push(redirectTo)
+        })
+      }
+    } catch {
       toast.error('Error al iniciar sesion')
     } finally {
       setIsLoading(false)
@@ -158,9 +182,8 @@ function LoginForm() {
             <h2 className="text-2xl font-bold text-foreground mb-2">Bienvenido de vuelta</h2>
             <p className="text-muted-foreground mb-8">Ingresa tus credenciales para continuar</p>
 
-            <form action="/api/auth/login" method="post" onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
-              <input type="hidden" name="redirectTo" value={redirectTo} />
-            <div className="space-y-2">
+            <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+              <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -173,7 +196,6 @@ function LoginForm() {
                     required
                     disabled={isLoading}
                     autoComplete="off"
-                    name="email"
                   />
                 </div>
               </div>
@@ -191,7 +213,6 @@ function LoginForm() {
                     required
                     disabled={isLoading}
                     autoComplete="new-password"
-                    name="password"
                   />
                   <button
                     type="button"

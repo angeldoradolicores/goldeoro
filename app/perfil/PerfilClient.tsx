@@ -178,10 +178,6 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
     }
 
     if (userId) {
-      useCartStore.getState().setUserId(userId)
-      useFavoritesStore.getState().setUserId(userId)
-      useCartStore.getState().hydrateCart(userId)
-      useFavoritesStore.getState().hydrateFavorites(userId)
       useCartStore.getState().syncCart(userId).catch(e => console.warn('Cart sync:', e))
       syncFavorites(userId).catch(e => console.warn('Favorites sync:', e))
     } else {
@@ -229,7 +225,7 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
 
   const handleLogout = async () => {
     await useAuthStore.getState().logout()
-    window.location.href = '/'
+    router.push('/')
   }
 
   const handleSaveProfile = async () => {

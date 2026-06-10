@@ -632,12 +632,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
   setIsAdmin: (isAdmin) => set({ isAdmin }),
   setInitialized: (initialized) => set({ isInitialized: initialized }),
   logout: async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
-    } catch (error) {
-      console.warn('Logout API failure:', error)
-    }
-
     const supabase = createClient()
     await supabase.auth.signOut()
     set({ user: null, isAdmin: false })
