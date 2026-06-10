@@ -102,6 +102,7 @@ interface CartStore {
   total: () => number
   itemCount: () => number
   syncCart: (userId?: string | null) => Promise<void>
+  syncCartFromServer: () => Promise<void>
 }
 
 interface ChatStore {
@@ -121,6 +122,7 @@ interface FavoritesStore {
   toggleFavorite: (product: Product) => Promise<void>
   isFavorite: (productId: string) => boolean
   syncFavorites: (userId?: string | null) => Promise<void>
+  syncFavoritesFromServer: () => Promise<void>
   clearFavorites: () => void
 }
 
@@ -440,6 +442,29 @@ export const useCartStore = create<CartStore>((set, get) => ({
         if (error) console.error('Error syncing merged cart item:', error.message)
       })
     })
+  },
+  // Loads cart via server API route — bypasses client JWT timing issues on Vercel
+  syncCartFromServer: async () => {
+    try {
+      const res = await fetch('/api/cart', { credentials: 'include' })
+      if (!res.ok) return
+      const data = await res.json()
+      const serverItems: CartItem[] = data.items ?? []
+      const userId: string | null = data.userId ?? null
+      if (!userId) return
+
+      set({ userId })
+      const localItems = get().items
+      const mergedMap = new Map<string, CartItem>()
+      serverItems.forEach(item => mergedMap.set(item.id, item))
+      // local items (guest cart) take precedence
+      localItems.forEach(item => mergedMap.set(item.id, item))
+      const merged = Array.from(mergedMap.values())
+      set({ items: merged })
+      saveLocalCart(merged, userId)
+    } catch (err) {
+      console.warn('[syncCartFromServer]', err)
+    }
   }
 }))
 
@@ -600,6 +625,29 @@ export const useFavoritesStore = create<FavoritesStore>((set, get) => ({
   clearFavorites: () => {
     saveLocalFavorites([], get().userId)
     set({ items: [] })
+  },
+  // Loads favorites via server API route — bypasses client JWT timing issues on Vercel
+  syncFavoritesFromServer: async () => {
+    try {
+      const res = await fetch('/api/favorites', { credentials: 'include' })
+      if (!res.ok) return
+      const data = await res.json()
+      const serverItems: Product[] = data.items ?? []
+      const userId: string | null = data.userId ?? null
+      if (!userId) return
+
+      set({ userId })
+      const localItems = get().items
+      const mergedMap = new Map<string, Product>()
+      serverItems.forEach(item => mergedMap.set(item.id, item))
+      // local items take precedence
+      localItems.forEach(item => mergedMap.set(item.id, item))
+      const merged = Array.from(mergedMap.values())
+      set({ items: merged })
+      saveLocalFavorites(merged, userId)
+    } catch (err) {
+      console.warn('[syncFavoritesFromServer]', err)
+    }
   }
 }))
 

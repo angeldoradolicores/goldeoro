@@ -50,8 +50,7 @@ export function Navbar() {
     const supabase = createClient()
 
     const initAuth = async () => {
-      // Use a local ref instead of Zustand's isInitialized so every page mount
-      // re-syncs cart/favorites, preventing stale state after login navigation
+      // Use a local ref to prevent double-init within same component mount
       if (initCalledRef.current) return
       initCalledRef.current = true
 
@@ -64,18 +63,20 @@ export function Navbar() {
       setUser(currentUser)
 
       if (currentUser) {
-        useCartStore.getState().setUserId(currentUser.id)
-        useFavoritesStore.getState().setUserId(currentUser.id)
+        // Load admin flag
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
           .eq('id', currentUser.id)
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
-        // Await both syncs so state is ready before UI renders
+
+        // Use server-side API routes to load cart/favorites.
+        // This bypasses client JWT timing issues — the server always has the
+        // session from cookies, so queries always succeed on first load.
         await Promise.all([
-          useCartStore.getState().syncCart(currentUser.id),
-          useFavoritesStore.getState().syncFavorites(currentUser.id),
+          useCartStore.getState().syncCartFromServer(),
+          useFavoritesStore.getState().syncFavoritesFromServer(),
         ])
       } else {
         useCartStore.getState().setUserId(null)
@@ -99,17 +100,15 @@ export function Navbar() {
         useFavoritesStore.getState().setUserId(null)
         useFavoritesStore.getState().clearFavorites()
       } else {
-        useCartStore.getState().setUserId(currentUser.id)
-        useFavoritesStore.getState().setUserId(currentUser.id)
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
           .eq('id', currentUser.id)
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
-        // Fire-and-forget sync on auth state change events
-        useCartStore.getState().syncCart(currentUser.id)
-        useFavoritesStore.getState().syncFavorites(currentUser.id)
+        // On auth state change events (login/session-refresh), also use server sync
+        useCartStore.getState().syncCartFromServer()
+        useFavoritesStore.getState().syncFavoritesFromServer()
       }
       setInitialized(true)
     })

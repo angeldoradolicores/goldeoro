@@ -178,11 +178,11 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
     }
 
     if (userId) {
-      useCartStore.getState().syncCart(userId).catch(e => console.warn('Cart sync:', e))
-      syncFavorites(userId).catch(e => console.warn('Favorites sync:', e))
+      useCartStore.getState().syncCartFromServer().catch(e => console.warn('Cart sync:', e))
+      useFavoritesStore.getState().syncFavoritesFromServer().catch(e => console.warn('Favorites sync:', e))
     } else {
-      useCartStore.getState().syncCart().catch(e => console.warn('Cart sync:', e))
-      syncFavorites().catch(e => console.warn('Favorites sync:', e))
+      useCartStore.getState().hydrateCart()
+      useFavoritesStore.getState().hydrateFavorites()
     }
 
     // Notifications can run on client side
