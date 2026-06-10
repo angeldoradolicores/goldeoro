@@ -70,21 +70,21 @@ export function FeaturedProducts() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-graphite/40 border border-gold-action/20 mb-8"
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-graphite/40 border border-chrome/20 mb-8"
           >
-            <Award className="w-4 h-4 text-gold-action" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-gold-action font-sans">
+            <Award className="w-4 h-4 text-chrome" />
+            <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-chrome font-sans">
               Edición Limitada
             </span>
           </motion.div>
           
           <h2 className="text-4xl md:text-5xl font-display font-bold leading-none tracking-tight">
-            <span className="text-gradient-gold">PIEZAS</span>
+            <span className="text-gradient-chrome">PIEZAS</span>
             <br />
             <span className="text-white-diamond mt-2 inline-block">DESTACADAS</span>
           </h2>
           <p className="mt-6 text-sm md:text-base text-titanium max-w-xl mx-auto leading-relaxed font-sans font-light tracking-wide">
-            Descubre nuestras piezas más exclusivas, seleccionadas para quienes buscan la máxima expresión del <span className="text-gold-action font-normal">lujo urbano</span>.
+            Descubre nuestras piezas más exclusivas, seleccionadas para quienes buscan la máxima expresión del <span className="text-chrome font-normal">lujo urbano</span>.
           </p>
         </motion.div>
 

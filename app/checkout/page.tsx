@@ -7,8 +7,9 @@ import departmentsData from '../../departments.json';
 import citiesData from '../../cities.json';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Truck, CreditCard, MapPin, CheckCircle, Minus, Plus, Trash2, Package, Loader2, Smartphone, Building2 } from 'lucide-react'
-import { useCartStore } from '@/lib/store'
+import { ArrowLeft, Truck, CreditCard, MapPin, CheckCircle, Minus, Plus, Trash2, Package, Loader2, Smartphone, Building2, Plus as PlusIcon } from 'lucide-react'
+import { useCartStore, useAuthStore } from '@/lib/store'
+import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/navbar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+
+interface Address {
+  id: string; full_name: string; street: string; city: string;
+  state: string; country: string; postal_code: string; phone: string; is_default: boolean;
+}
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('es-CO', {
@@ -54,6 +60,7 @@ const paymentMethods = [
 
 export default function CheckoutPage() {
   const { items, removeItem, updateQuantity, total, clearCart } = useCartStore()
+  const { user, isInitialized } = useAuthStore()
   const router = useRouter()
   const cartTotal = total()
   const [step, setStep] = useState(1)
@@ -85,6 +92,140 @@ export default function CheckoutPage() {
 
   const [selectedShipping, setSelectedShipping] = useState('')
   const shippingCost = shippingOptions.find(s => s.id === selectedShipping)?.price || 0
+
+  // Addresses
+  const [addresses, setAddresses] = useState<Address[]>([])
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('')
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false)
+  const [newAddress, setNewAddress] = useState({
+    full_name: '',
+    street: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    phone: '',
+  })
+
+  useEffect(() => {
+    if (isInitialized && !user && items.length > 0) {
+      router.push('/auth/login?redirect=/checkout')
+    }
+
+    // Load user data and addresses
+    if (user && isInitialized) {
+      console.log('Loading user data for checkout, userId:', user.id)
+      loadUserDataAndAddresses()
+    }
+  }, [isInitialized, user])
+
+  const loadUserDataAndAddresses = async () => {
+    if (!user) return
+    
+    try {
+      const supabase = createClient()
+      
+      console.log('Fetching profile for user:', user.id)
+      
+      // Load profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      console.log('Profile data:', profile, 'Error:', profileError)
+
+      if (profile) {
+        console.log('Setting shipping data with profile:', profile)
+        setShippingData(prev => ({
+          ...prev,
+          fullName: profile.full_name || '',
+          email: profile.email || user.email || '',
+          phone: profile.phone || '',
+        }))
+      }
+
+      // Load addresses
+      const { data: userAddresses, error: addressError } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('is_default', { ascending: false })
+
+      console.log('Addresses data:', userAddresses, 'Error:', addressError)
+
+      if (userAddresses && userAddresses.length > 0) {
+        setAddresses(userAddresses as Address[])
+        // Auto-select first or default address
+        const defaultAddr = userAddresses.find((a: any) => a.is_default)
+        const firstAddr = userAddresses[0]
+        const addressToSelect = defaultAddr || firstAddr
+        console.log('Auto-selecting address:', addressToSelect)
+        setSelectedAddressId(addressToSelect.id)
+        fillAddressData(addressToSelect)
+      } else {
+        console.log('No addresses found for user')
+      }
+    } catch (err) {
+      console.error('Error loading user data:', err)
+    }
+  }
+
+  const fillAddressData = (address: any) => {
+    setSelectedDepartment(address.state || '')
+    setShippingData(prev => ({
+      ...prev,
+      city: address.city || '',
+      address: address.street || '',
+      phone: address.phone || prev.phone,
+      postalCode: address.postal_code || '',
+    }))
+  }
+
+  const handleAddressChange = (addressId: string) => {
+    setSelectedAddressId(addressId)
+    const selected = addresses.find(a => a.id === addressId)
+    if (selected) {
+      fillAddressData(selected)
+    }
+  }
+
+  const handleSaveNewAddress = async () => {
+    if (!newAddress.full_name || !newAddress.street || !newAddress.city || !newAddress.state || !newAddress.postal_code || !newAddress.phone) {
+      toast.error('Por favor completa todos los campos')
+      return
+    }
+
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.from('addresses').insert({
+        user_id: user.id,
+        ...newAddress,
+        country: 'Colombia',
+        is_default: addresses.length === 0,
+      }).select().single()
+
+      if (error) throw error
+
+      setAddresses([...addresses, data as Address])
+      fillAddressData(data)
+      setSelectedAddressId(data.id)
+      setShowNewAddressForm(false)
+      setNewAddress({
+        full_name: '',
+        street: '',
+        city: '',
+        state: '',
+        postal_code: '',
+        phone: '',
+      })
+      toast.success('Dirección agregada')
+    } catch (err) {
+      console.error('Error saving address:', err)
+      toast.error('Error al guardar la dirección')
+    }
+  }
+
   const discountAmount = appliedPromo?.discount || 0
   const finalTotal = cartTotal + shippingCost - discountAmount
 
@@ -313,7 +454,7 @@ export default function CheckoutPage() {
                     </h2>
                     {items.map((item) => (
                       <div
-                        key={`${item.product.id}-${item.selectedColor}`}
+                        key={item.id}
                         className="flex gap-4 p-4 rounded-none bg-carbon border border-steel/30 shadow-md"
                       >
                         <div className="relative w-20 h-20 rounded-none bg-graphite overflow-hidden border border-steel/30 shrink-0">
@@ -335,21 +476,21 @@ export default function CheckoutPage() {
                         </div>
                         <div className="flex flex-col items-end justify-between">
                           <button
-                            onClick={() => removeItem(item.product.id)}
+                            onClick={() => removeItem(item.id)}
                             className="p-1 text-titanium hover:text-destructive transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="w-7 h-7 rounded-none bg-graphite border border-steel/30 flex items-center justify-center hover:bg-gold-action hover:text-obsidian transition-colors text-chrome"
                             >
                               <Minus className="w-3 h-3" />
                             </button>
                             <span className="w-6 text-center text-xs text-white-diamond font-sans font-semibold">{item.quantity}</span>
                             <button
-                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="w-7 h-7 rounded-none bg-graphite border border-steel/30 flex items-center justify-center hover:bg-gold-action hover:text-obsidian transition-colors text-chrome"
                             >
                               <Plus className="w-3 h-3" />
@@ -376,6 +517,103 @@ export default function CheckoutPage() {
                       <Truck className="w-4 h-4 text-gold-action" />
                       Información de Envío
                     </h2>
+
+                    {/* Saved Addresses Section */}
+                    {addresses.length > 0 && (
+                      <div className="bg-graphite/50 border border-steel/20 p-5 space-y-3">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-titanium mb-2">Dirección guardada</p>
+                        <div className="space-y-2">
+                          {addresses.map(addr => (
+                            <label key={addr.id} className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-steel/10 transition">
+                              <input
+                                type="radio"
+                                name="address"
+                                value={addr.id}
+                                checked={selectedAddressId === addr.id}
+                                onChange={() => handleAddressChange(addr.id)}
+                                className="w-4 h-4 cursor-pointer"
+                              />
+                              <span className="text-xs text-white-diamond">
+                                <strong>{addr.full_name}</strong> • {addr.street}, {addr.city} ({addr.state})
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => setShowNewAddressForm(!showNewAddressForm)}
+                          className="text-xs uppercase tracking-wider text-gold-action font-semibold hover:underline flex items-center gap-1 mt-2"
+                        >
+                          <PlusIcon className="w-3 h-3" /> Agregar nueva dirección
+                        </button>
+
+                        {/* New Address Form */}
+                        {showNewAddressForm && (
+                          <div className="mt-4 p-4 bg-steel/10 border border-steel/20 space-y-3">
+                            <h3 className="text-xs font-semibold uppercase tracking-wider text-white-diamond">Nueva Dirección</h3>
+                            <div className="grid grid-cols-1 gap-3">
+                              <Input
+                                placeholder="Nombre completo"
+                                value={newAddress.full_name}
+                                onChange={(e) => setNewAddress({...newAddress, full_name: e.target.value})}
+                                className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
+                              />
+                              <Input
+                                placeholder="Calle y número"
+                                value={newAddress.street}
+                                onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+                                className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
+                              />
+                              <Select
+                                value={newAddress.state}
+                                onValueChange={(value) => setNewAddress({...newAddress, state: value})}
+                              >
+                                <SelectTrigger className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs">
+                                  <SelectValue placeholder="Departamento" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-graphite border-steel/30 rounded-none text-xs">
+                                  {departmentsData.map((dept) => (
+                                    <SelectItem key={dept.id} value={dept.name}>{dept.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Input
+                                placeholder="Ciudad"
+                                value={newAddress.city}
+                                onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                                className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
+                              />
+                              <Input
+                                placeholder="Código postal"
+                                value={newAddress.postal_code}
+                                onChange={(e) => setNewAddress({...newAddress, postal_code: e.target.value})}
+                                className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
+                              />
+                              <Input
+                                placeholder="Teléfono"
+                                value={newAddress.phone}
+                                onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
+                                className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
+                              />
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={handleSaveNewAddress}
+                                  className="btn-luxury rounded-none text-xs uppercase flex-1"
+                                >
+                                  Guardar
+                                </Button>
+                                <Button
+                                  onClick={() => setShowNewAddressForm(false)}
+                                  variant="outline"
+                                  className="rounded-none text-xs uppercase flex-1"
+                                >
+                                  Cancelar
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div className="md:col-span-2 space-y-1">

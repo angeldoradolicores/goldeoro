@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Crown, Target, Award, Shield, Eye, CheckCircle } from "lucide-react"
+import SparklesUI from '@/components/sparkles'
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 
@@ -14,6 +15,7 @@ export default function NosotrosPage() {
       <section className="pt-40 pb-20 relative overflow-hidden bg-obsidian border-b border-steel/10">
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(200,164,77,0.02)_0%,transparent_70%)] animate-pulse" />
+          <SparklesUI extra={1} />
         </div>
         
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">

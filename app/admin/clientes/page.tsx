@@ -35,6 +35,7 @@ export default function ClientesPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [showBuyersOnly, setShowBuyersOnly] = useState(false)
   const [selected, setSelected] = useState<Customer | null>(null)
   const [selectedOrders, setSelectedOrders] = useState<any[]>([])
   const [loadingOrders, setLoadingOrders] = useState(false)
@@ -67,10 +68,13 @@ export default function ClientesPage() {
 
   const filtered = customers.filter(c => {
     const q = search.toLowerCase()
-    return !search ||
+    const matchesSearch = !search ||
       c.full_name?.toLowerCase().includes(q) ||
       c.email?.toLowerCase().includes(q) ||
-      c.phone?.includes(q)
+      c.phone?.toLowerCase().includes(q)
+
+    const matchesBuyer = !showBuyersOnly || c.total_orders > 0
+    return matchesSearch && matchesBuyer
   })
 
   const stats = [
@@ -110,11 +114,17 @@ export default function ClientesPage() {
       </div>
 
       {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Buscar por nombre, email o teléfono..."
-          className="pl-9 bg-card border-border/50" />
+      <div className="flex flex-col sm:flex-row gap-3 items-center">
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant={showBuyersOnly ? undefined : 'ghost'} onClick={() => setShowBuyersOnly(false)}>Todos</Button>
+          <Button size="sm" variant={showBuyersOnly ? 'default' : 'ghost'} onClick={() => setShowBuyersOnly(true)}>Compradores</Button>
+        </div>
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar por nombre, email o teléfono..."
+            className="pl-9 bg-card border-border/50" />
+        </div>
       </div>
 
       {/* Table */}

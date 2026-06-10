@@ -55,8 +55,8 @@ const headingStyle = {
 export function Footer() {
   return (
     <footer style={{ background: '#050505', borderTop: '1px solid #1a1a1a' }}>
-      {/* Gold accent top line */}
-      <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(200,164,77,0.25), transparent)' }} />
+      {/* Silver accent top line */}
+      <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.2), transparent)' }} />
 
       <div className="container mx-auto px-4 lg:px-8 pt-20 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
@@ -74,7 +74,7 @@ export function Footer() {
                     letterSpacing: '0.25em',
                     textShadow: '0 1px 0 rgba(255,255,255,0.03)',
                   }}
-                  onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#C8A44D'}
+                  onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#DDE8F5'}
                   onMouseLeave={e => (e.currentTarget as HTMLSpanElement).style.color = '#1a1a1a'}
                 >
                   URBAN
@@ -87,7 +87,7 @@ export function Footer() {
                     letterSpacing: '0.25em',
                     textShadow: '0 1px 0 rgba(255,255,255,0.03)',
                   }}
-                  onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#C8A44D'}
+                  onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#DDE8F5'}
                   onMouseLeave={e => (e.currentTarget as HTMLSpanElement).style.color = '#1a1a1a'}
                 >
                   CROWN
@@ -129,8 +129,8 @@ export function Footer() {
                   style={{ border: '1px solid #1a1a1a', color: '#333' }}
                   aria-label={social.label}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = '#C8A44D'
-                    ;(e.currentTarget as HTMLAnchorElement).style.color = '#C8A44D'
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(221,232,245,0.4)'
+                    ;(e.currentTarget as HTMLAnchorElement).style.color = '#DDE8F5'
                   }}
                   onMouseLeave={e => {
                     (e.currentTarget as HTMLAnchorElement).style.borderColor = '#1a1a1a'

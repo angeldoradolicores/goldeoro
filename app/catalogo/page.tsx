@@ -6,9 +6,9 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Search, Grid3X3, LayoutList, X, Sparkles, Filter } from 'lucide-react'
 import { mockProducts, type Product } from '@/lib/store'
+import SparklesUI from '@/components/sparkles'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { CartDrawer } from '@/components/cart-drawer'
 import { ChatBot } from '@/components/chatbot'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -130,6 +130,7 @@ function CatalogoContent() {
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(200,164,77,0.02)_0%,transparent_70%)]" />
           <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(139,139,139,0.02)_0%,transparent_70%)]" />
+          <SparklesUI extra={1} />
         </div>
         <div className="container mx-auto px-4 max-w-7xl text-center">
           <motion.div
@@ -137,7 +138,10 @@ function CatalogoContent() {
             animate={{ opacity: 1, scale: 1 }}
             className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-graphite/40 border border-gold-action/20 mb-8"
           >
-            <Sparkles className="w-4 h-4 text-gold-action" />
+            {/* small icon for label */}
+            <span className="w-4 h-4 inline-block" aria-hidden>
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-gold-action"><path fill="currentColor" d="M12 2l1.5 4.5L18 8l-3.5 2.5L14 15l-2-1-2 1 .5-4.5L6 8l4.5-1.5L12 2z"/></svg>
+            </span>
             <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-gold-action font-sans">
               Colección Completa
             </span>
@@ -359,7 +363,6 @@ function CatalogoContent() {
       </section>
 
       <Footer />
-      <CartDrawer />
       <ChatBot />
     </main>
   )

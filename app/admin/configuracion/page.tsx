@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Store, Truck, CreditCard, Bell, Shield, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -9,6 +10,17 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 
 export default function ConfiguracionPage() {
+  const [notificationSettings, setNotificationSettings] = useState([
+    { name: 'Email de nuevos pedidos', enabled: true },
+    { name: 'Email de stock bajo', enabled: true },
+    { name: 'Notificaciones push', enabled: false },
+    { name: 'Resumen diario de ventas', enabled: true },
+  ])
+
+  const toggleNotification = (name: string) => {
+    setNotificationSettings(prev => prev.map(item => item.name === name ? { ...item, enabled: !item.enabled } : item))
+  }
+
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
@@ -145,15 +157,10 @@ export default function ConfiguracionPage() {
         </div>
 
         <div className="space-y-4">
-          {[
-            { name: 'Email de nuevos pedidos', enabled: true },
-            { name: 'Email de stock bajo', enabled: true },
-            { name: 'Notificaciones push', enabled: false },
-            { name: 'Resumen diario de ventas', enabled: true },
-          ].map((notification) => (
+          {notificationSettings.map((notification) => (
             <div key={notification.name} className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
               <span className="font-medium">{notification.name}</span>
-              <Switch defaultChecked={notification.enabled} />
+              <Switch checked={notification.enabled} onCheckedChange={() => toggleNotification(notification.name)} />
             </div>
           ))}
         </div>

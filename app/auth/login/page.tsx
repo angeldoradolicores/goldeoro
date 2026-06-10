@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useTransition } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Crown, Mail, Lock, ArrowRight, Loader2 } from "lucide-react"
+import SparklesUI from '@/components/sparkles'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
@@ -15,6 +16,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isOAuthLoading, setIsOAuthLoading] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -26,11 +28,14 @@ function LoginForm() {
   })
 
   useEffect(() => {
-    // Only reset local in-memory store state when visiting login page.
-    // Do NOT call signOut() or clearCart() here as that would destroy valid sessions and DB data.
+    // Reset auth state and switch cart/favorites back to guest mode.
     useAuthStore.getState().setUser(null)
     useAuthStore.getState().setIsAdmin(false)
     useAuthStore.getState().setInitialized(false)
+    useCartStore.getState().setUserId(null)
+    useCartStore.getState().hydrateCart(null)
+    useFavoritesStore.getState().setUserId(null)
+    useFavoritesStore.getState().hydrateFavorites(null)
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,29 +66,26 @@ function LoginForm() {
           
         const is_admin = !!profile?.is_admin
         
-        // Update global stores immediately so Navbar updates before router.push finishes
+        // Update global stores immediately
         useAuthStore.getState().setUser(user)
         useAuthStore.getState().setIsAdmin(is_admin)
         useAuthStore.getState().setInitialized(true)
-        useCartStore.getState().syncCart()
-        useFavoritesStore.getState().syncFavorites()
-
-        if (is_admin) {
-          toast.success('Bienvenido al Panel de Administrador')
-          // Wait for Supabase SSR to finish writing session cookies asynchronously
-          setTimeout(() => {
-            window.location.href = `/admin?t=${Date.now()}`
-          }, 800)
-          return
+        useCartStore.getState().setUserId(user.id)
+        useFavoritesStore.getState().setUserId(user.id)
+        
+        // Sync cart and favorites with authenticated user
+        try {
+          await useCartStore.getState().syncCart(user.id)
+          await useFavoritesStore.getState().syncFavorites(user.id)
+        } catch (e) {
+          console.warn('Sync error after login:', e)
         }
+        
+        // Navigate without hard reload to preserve state
+        startTransition(() => {
+          router.push(redirectTo)
+        })
       }
-
-      toast.success('Bienvenido de vuelta!')
-      // Wait for Supabase SSR to finish writing session cookies asynchronously
-      setTimeout(() => {
-        const separator = redirectTo.includes('?') ? '&' : '?'
-        window.location.href = `${redirectTo}${separator}t=${Date.now()}`
-      }, 800)
     } catch {
       toast.error('Error al iniciar sesion')
     } finally {
@@ -117,12 +119,13 @@ function LoginForm() {
     <div className="min-h-screen bg-background flex">
       {/* Left Side - Decorative */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gold/20 via-background to-background" />
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-gold/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        </div>
-        
+          <div className="absolute inset-0 bg-gradient-to-br from-chrome/20 via-background to-background" />
+          <div className="absolute inset-0 opacity-30">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-chrome/20 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-chrome/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          </div>
+          <SparklesUI extra={2} />
+
         <div className="relative z-10 flex flex-col justify-center items-center w-full p-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -130,9 +133,9 @@ function LoginForm() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <Crown className="w-20 h-20 text-gold mx-auto mb-6" />
+            <Crown className="w-20 h-20 text-chrome mx-auto mb-6" />
             <h1 className="text-5xl font-bold text-foreground mb-4">
-              LUXURY<span className="text-gold">HATS</span>
+              LUXURY<span className="text-chrome">HATS</span>
             </h1>
             <p className="text-muted-foreground text-lg max-w-md">
               Accede a tu cuenta y descubre las gorras mas exclusivas del mercado urbano
@@ -148,9 +151,9 @@ function LoginForm() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="w-24 h-24 rounded-2xl bg-card/50 backdrop-blur border border-gold/20 flex items-center justify-center"
+                className="w-24 h-24 rounded-2xl bg-card/50 backdrop-blur border border-chrome/20 flex items-center justify-center"
               >
-                <Crown className="w-8 h-8 text-gold/50" />
+                <Crown className="w-8 h-8 text-chrome/50" />
               </div>
             ))}
           </motion.div>
@@ -168,9 +171,9 @@ function LoginForm() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <Link href="/">
-              <Crown className="w-12 h-12 text-gold mx-auto mb-4" />
+              <Crown className="w-12 h-12 text-chrome mx-auto mb-4" />
               <h1 className="text-3xl font-bold">
-                LUXURY<span className="text-gold">HATS</span>
+                LUXURY<span className="text-chrome">HATS</span>
               </h1>
             </Link>
           </div>
@@ -189,7 +192,7 @@ function LoginForm() {
                     placeholder="tu@email.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="pl-12 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
+                    className="pl-12 h-14 bg-background/50 border-border rounded-xl focus:border-chrome focus:ring-chrome/20"
                     required
                     disabled={isLoading}
                     autoComplete="off"
@@ -206,7 +209,7 @@ function LoginForm() {
                     placeholder="********"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="pl-12 pr-12 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
+                    className="pl-12 pr-12 h-14 bg-background/50 border-border rounded-xl focus:border-chrome focus:ring-chrome/20"
                     required
                     disabled={isLoading}
                     autoComplete="new-password"
@@ -222,7 +225,7 @@ function LoginForm() {
               </div>
 
               <div className="flex items-center justify-end">
-                <Link href="/auth/recuperar" className="text-sm text-gold hover:text-gold/80 transition-colors">
+                <Link href="/auth/recuperar" className="text-sm text-chrome hover:text-chrome/80 transition-colors">
                   Olvidaste tu contrasena?
                 </Link>
               </div>
@@ -230,7 +233,7 @@ function LoginForm() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-14 bg-gold hover:bg-gold/90 text-background font-semibold rounded-xl transition-all duration-300 group"
+                className="w-full h-14 bg-chrome hover:bg-chrome/90 text-obsidian font-semibold rounded-xl transition-all duration-300 group glint-strong"
               >
                 {isLoading ? (
                   <Loader2 className="w-6 h-6 animate-spin" />
@@ -259,7 +262,7 @@ function LoginForm() {
                   variant="outline"
                   disabled={isOAuthLoading !== null}
                   onClick={() => handleOAuthSignIn('google')}
-                  className="h-14 border-border hover:border-gold/50 rounded-xl transition-all duration-300"
+                  className="h-14 border-border hover:border-chrome/50 rounded-xl transition-all duration-300"
                 >
                   {isOAuthLoading === 'google' ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -292,7 +295,7 @@ function LoginForm() {
                   variant="outline"
                   disabled={isOAuthLoading !== null}
                   onClick={() => handleOAuthSignIn('facebook')}
-                  className="h-14 border-border hover:border-gold/50 rounded-xl transition-all duration-300"
+                  className="h-14 border-border hover:border-chrome/50 rounded-xl transition-all duration-300"
                 >
                   {isOAuthLoading === 'facebook' ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -312,7 +315,7 @@ function LoginForm() {
 
             <p className="mt-8 text-center text-muted-foreground">
               No tienes cuenta?{" "}
-              <Link href="/auth/registro" className="text-gold hover:text-gold/80 font-medium transition-colors">
+              <Link href="/auth/registro" className="text-chrome hover:text-chrome/80 font-medium transition-colors">
                 Registrate aqui
               </Link>
             </p>
@@ -320,7 +323,7 @@ function LoginForm() {
 
           {/* Back to home */}
           <div className="mt-6 text-center">
-            <Link href="/" className="text-sm text-muted-foreground hover:text-gold transition-colors">
+            <Link href="/" className="text-sm text-muted-foreground hover:text-chrome transition-colors">
               Volver al inicio
             </Link>
           </div>
@@ -332,7 +335,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-chrome" /></div>}>
       <LoginForm />
     </Suspense>
   )

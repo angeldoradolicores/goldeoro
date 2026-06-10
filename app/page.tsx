@@ -3,7 +3,6 @@ import { HeroSection } from '@/components/hero-section'
 import { FeaturedProducts } from '@/components/featured-products'
 import { FeaturesSection, TestimonialsSection, BrandsSection, PromoBanner } from '@/components/sections'
 import { Footer } from '@/components/footer'
-import { CartDrawer } from '@/components/cart-drawer'
 import { ChatBot } from '@/components/chatbot'
 
 export default function HomePage() {
@@ -17,7 +16,6 @@ export default function HomePage() {
       <PromoBanner />
       <TestimonialsSection />
       <Footer />
-      <CartDrawer />
       <ChatBot />
     </main>
   )

@@ -100,36 +100,70 @@ export async function GET() {
       .slice(0, 6)
       .map(p => ({ ...p, category: '' }))
 
-    // ── Ventas por día (últimos 30 días) ───────────────────────────────────
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    // ── Ventas por día/semana/mes/trimestre ─────────────────────────────────
+    const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
     const { data: recentSalesData } = await supabase
       .from('orders')
       .select('total, created_at')
       .in('status', paidStatuses)
-      .gte('created_at', thirtyDaysAgo.toISOString())
+      .gte('created_at', oneYearAgo.toISOString())
 
-    // Group by day
+    const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
     const dailyMap = new Map<string, number>()
+    const weekMap = new Map<string, number>()
+    const monthMap = new Map<string, number>()
+    const quarterMap = new Map<string, number>()
+
     recentSalesData?.forEach(o => {
-      const day = new Date(o.created_at).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })
-      dailyMap.set(day, (dailyMap.get(day) || 0) + o.total)
+      const created = new Date(o.created_at)
+      const dayLabel = created.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })
+      dailyMap.set(dayLabel, (dailyMap.get(dayLabel) || 0) + o.total)
+
+      const dayOfWeek = (created.getDay() + 6) % 7
+      const weekStart = new Date(created)
+      weekStart.setDate(created.getDate() - dayOfWeek)
+      const weekLabel = `${weekStart.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })}`
+      weekMap.set(weekLabel, (weekMap.get(weekLabel) || 0) + o.total)
+
+      const monthLabel = monthNames[created.getMonth()]
+      monthMap.set(monthLabel, (monthMap.get(monthLabel) || 0) + o.total)
+
+      const quarter = Math.floor(created.getMonth() / 3) + 1
+      const quarterLabel = `Q${quarter} ${created.getFullYear()}`
+      quarterMap.set(quarterLabel, (quarterMap.get(quarterLabel) || 0) + o.total)
     })
 
-    // ── Ventas por mes (últimos 6 meses) ───────────────────────────────────
-    const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+    const salesByDay = []
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(now.getDate() - i)
+      const label = d.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })
+      salesByDay.push({ name: label, ventas: dailyMap.get(label) || 0 })
+    }
+
+    const currentWeekStart = new Date(now)
+    currentWeekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7))
+    const salesByWeek = []
+    for (let i = 11; i >= 0; i--) {
+      const weekStart = new Date(currentWeekStart)
+      weekStart.setDate(currentWeekStart.getDate() - i * 7)
+      const label = weekStart.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })
+      salesByWeek.push({ name: label, ventas: weekMap.get(label) || 0 })
+    }
+
     const salesByMonth = []
     for (let i = 5; i >= 0; i--) {
       const mDate = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const mEnd  = new Date(now.getFullYear(), now.getMonth() - i + 1, 0)
-      const { data: mData } = await supabase
-        .from('orders').select('total')
-        .in('status', paidStatuses)
-        .gte('created_at', mDate.toISOString())
-        .lte('created_at', mEnd.toISOString())
-      salesByMonth.push({
-        name: monthNames[mDate.getMonth()],
-        ventas: mData?.reduce((a, o) => a + o.total, 0) || 0,
-      })
+      const label = monthNames[mDate.getMonth()]
+      salesByMonth.push({ name: label, ventas: monthMap.get(label) || 0 })
+    }
+
+    const salesByQuarter = []
+    for (let i = 3; i >= 0; i--) {
+      const quarterDate = new Date(now.getFullYear(), now.getMonth() - i * 3, 1)
+      const quarterIndex = Math.floor(quarterDate.getMonth() / 3) + 1
+      const label = `Q${quarterIndex} ${quarterDate.getFullYear()}`
+      salesByQuarter.push({ name: label, ventas: quarterMap.get(label) || 0 })
     }
 
     // ── Ventas por categoría (basado en order_items + products) ───────────
@@ -162,7 +196,10 @@ export async function GET() {
         productsChange: 0,
         customersChange: Math.round(((newCustomers || 0) / Math.max(totalCustomers || 1, 1)) * 100 * 10) / 10,
       },
+      salesByDay,
+      salesByWeek,
       salesByMonth,
+      salesByQuarter,
       salesByCategory,
       recentOrders: formattedOrders,
       topProducts,

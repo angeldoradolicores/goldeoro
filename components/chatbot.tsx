@@ -80,7 +80,7 @@ export function ChatBot() {
         animate={{ scale: 1 }}
         transition={{ delay: 1, type: 'spring' }}
         onClick={toggleChat}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full btn-luxury flex items-center justify-center shadow-lg glow-gold"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full btn-luxury flex items-center justify-center shadow-lg glow-chrome"
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
@@ -124,7 +124,7 @@ export function ChatBot() {
             {/* Header */}
             <div className="p-4 border-b border-border bg-secondary/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full border border-gold/40 relative overflow-hidden bg-background shrink-0">
+                <div className="w-10 h-10 rounded-full border border-chrome/40 relative overflow-hidden bg-background shrink-0">
                   <Image
                     src="/logo.png"
                     alt="Logo Urban Crown"

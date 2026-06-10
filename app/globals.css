@@ -5,75 +5,93 @@
 
 :root {
   /* ═══════════════════════════════════════════
-     URBAN CROWN — LUXURY PALETTE
-     Inspirado en Ferrari, Chrome Hearts, Amiri
+     URBAN CROWN — REFINED PALETTE (Updated)
+     Base palette strictly aligned with product brief
   ═══════════════════════════════════════════ */
 
-  /* Bases — Negro absoluto a carbón */
-  --obsidian:  #050505;
-  --carbon:    #0D0D0D;
-  --graphite:  #171717;
-  --steel:     #262626;
-  --iron:      #333333;
+  /* Bases */
+  --obsidian:         #050505; /* Negro absoluto */
+  --satin-black:      #0B0B0B; /* Negro satinado */
+  --graphite:         #161616; /* Grafito */
 
-  /* Cromado / Diamante */
-  --chrome:         #C0C0C0;
-  --titanium:       #8B8B8B;
-  --white-diamond:  #F5F5F5;
-  --crystal:        #DDE8F5;
-  --silver-light:   #E8E8E8;
+  /* Cromado / Plata */
+  --chrome:           #C9CDD2; /* Plata cromada */
+  --liquid-silver:    #DDE8F5; /* Plata líquida */
+  --pearl-white:      #F8F9FB; /* Perla blanca */
+  --crystal:          #EAF2FF; /* Cristal */
+  --diamond-reflect:  #BFCEDF; /* Reflejo diamante */
 
-  /* Colección Dorada / Religiosa */
-  --old-gold:      #B08D57;
-  --imperial-gold: #D4AF37;
-  --champagne:     #E6C989;
-  --ivory:         #F3EAD7;
-  --gold-action:   #C8A44D;
+  /* Soft metallic accents */
+  --old-gold:         #BFCEDF;
+  --imperial-gold:    #DDE8F5;
+  --champagne:        #EAF2FF;
+  --gold-action:      #DDE8F5; /* used as premium metallic accent */
+  --gold:             #DDE8F5;
 
-  /* Semánticos Tailwind */
-  --background: var(--carbon);
-  --foreground: var(--white-diamond);
-  --card:              var(--graphite);
-  --card-foreground:   var(--white-diamond);
-  --popover:           var(--graphite);
-  --popover-foreground: var(--white-diamond);
-  --primary:            var(--gold-action);
+  /* Semantic tokens */
+  --background: var(--obsidian);
+  --foreground: rgba(255,255,255,0.95);
+  --card: var(--satin-black);
+  --card-foreground: var(--pearl-white);
+  --popover: var(--graphite);
+  --popover-foreground: var(--pearl-white);
+  --primary: var(--liquid-silver);
   --primary-foreground: var(--obsidian);
-  --secondary:          var(--steel);
-  --secondary-foreground: var(--chrome);
-  --muted:              var(--steel);
-  --muted-foreground:   var(--titanium);
-  --accent:             var(--old-gold);
-  --accent-foreground:  var(--obsidian);
-  --destructive:        oklch(0.55 0.25 25);
-  --destructive-foreground: var(--white-diamond);
-  --border:  var(--steel);
-  --input:   var(--graphite);
-  --ring:    var(--gold-action);
+  --secondary: var(--chrome);
+  --secondary-foreground: var(--pearl-white);
+  --muted: var(--graphite);
+  --muted-foreground: rgba(255,255,255,0.60);
+  --accent: var(--chrome);
+  --accent-foreground: var(--pearl-white);
+  --destructive: oklch(0.55 0.25 25);
+  --destructive-foreground: var(--pearl-white);
+  --border: rgba(255,255,255,0.06);
+  --input: var(--graphite);
+  --ring: var(--liquid-silver);
   --radius: 0.5rem;
 
-  /* Legacy neon vars mapped to luxury equivalents (backward compat) */
-  --neon-pink:   var(--old-gold);
-  --neon-cyan:   var(--chrome);
-  --neon-green:  var(--imperial-gold);
-  --neon-yellow: var(--champagne);
-  --neon-purple: var(--titanium);
-  --neon-orange: var(--gold-action);
-  --gold:        var(--gold-action);
+  /* Glass / sparkle */
+  --glass: rgba(255,255,255,0.03);
+  --glass-border: rgba(221,232,245,0.06);
 
-  /* Glass luxury */
-  --glass: oklch(0.08 0 0 / 0.85);
-  --glass-border: oklch(0.7 0 0 / 0.15);
-
-  /* Sidebar */
   --sidebar: var(--obsidian);
-  --sidebar-foreground: var(--white-diamond);
-  --sidebar-primary: var(--gold-action);
+  --sidebar-foreground: var(--pearl-white);
+  --sidebar-primary: var(--liquid-silver);
   --sidebar-primary-foreground: var(--obsidian);
-  --sidebar-accent: var(--steel);
-  --sidebar-accent-foreground: var(--white-diamond);
-  --sidebar-border: var(--steel);
-  --sidebar-ring: var(--gold-action);
+  --sidebar-accent: var(--chrome);
+  --sidebar-accent-foreground: var(--pearl-white);
+  --sidebar-border: rgba(255,255,255,0.06);
+  --sidebar-ring: var(--liquid-silver);
+}
+
+/* Global input / placeholder / focus rules to enforce legibility */
+:root, .dark {
+  --uc-text: rgba(255,255,255,0.95);
+  --uc-placeholder: rgba(255,255,255,0.60);
+  --uc-hover: rgba(255,255,255,0.80);
+  --uc-focus-border: #DDE8F5;
+  --uc-focus-shadow: 0 0 20px rgba(221,232,245,0.25);
+}
+
+@layer base {
+  input, textarea, select {
+    color: var(--uc-text) !important;
+    background: transparent;
+  }
+  ::placeholder {
+    color: var(--uc-placeholder) !important;
+    opacity: 1;
+  }
+  input:hover, textarea:hover, select:hover {
+    color: var(--uc-hover) !important;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--uc-focus-border) !important;
+    box-shadow: var(--uc-focus-shadow) !important;
+    outline: none !important;
+  }
+  /* Prevent dark-grey text on black backgrounds */
+  .text-muted-foreground, .placeholder\:text-steel { color: var(--uc-placeholder) !important; }
 }
 
 @theme inline {
@@ -188,18 +206,112 @@
   }
 
   .text-gradient-chrome {
-    background: linear-gradient(135deg, var(--titanium) 0%, var(--white-diamond) 50%, var(--titanium) 100%);
+    background: linear-gradient(135deg, var(--titanium) 0%, var(--pearl-white) 50%, var(--titanium) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Legacy compat: remap neon gradient to gold */
+  /* Legacy compat: remap neon gradient to chrome */
   .text-gradient-neon {
     background: linear-gradient(135deg, var(--old-gold) 0%, var(--imperial-gold) 50%, var(--champagne) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* ═══════════════════════════════════════════
+     Sparkles / Metallic Sheen Utilities
+  ═══════════════════════════════════════════ */
+
+  .sparkles-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 5;
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(221,232,245,0.95);
+    filter: drop-shadow(0 0 8px rgba(221,232,245,0.45));
+    opacity: 0;
+    transform-origin: center;
+    animation: sparkle 2.6s linear infinite;
+  }
+
+  @keyframes sparkle {
+    0% { transform: scale(0.2) translateY(0); opacity: 0 }
+    15% { opacity: 1; transform: scale(1.2) translateY(-4px) }
+    60% { opacity: 0.6; transform: scale(0.9) translateY(-2px) }
+    100% { transform: scale(0.2) translateY(0); opacity: 0 }
+  }
+
+  .metallic-3d {
+    background: linear-gradient(135deg, rgba(201,205,210,0.95) 0%, rgba(221,232,245,0.98) 40%, rgba(185,195,212,0.9) 70%);
+    box-shadow: 0 10px 30px rgba(5,5,5,0.6), inset 0 2px 8px rgba(255,255,255,0.04);
+    transform-style: preserve-3d;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  .metallic-3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.36) 50%, rgba(255,255,255,0) 100%);
+    transform: translateX(-120%);
+    mix-blend-mode: overlay;
+    animation: glint 3.2s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes glint {
+    0% { transform: translateX(-120%) skewX(-8deg) }
+    100% { transform: translateX(220%) skewX(-8deg) }
+  }
+
+  .metallic-plate-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Variantes más notorias */
+  .sparkle-lg {
+    width: 8px;
+    height: 8px;
+    filter: drop-shadow(0 0 14px rgba(221,232,245,0.6));
+    animation-duration: 3.6s;
+  }
+
+  .glint-strong::before {
+    animation-duration: 1.8s;
+    mix-blend-mode: screen;
+    opacity: 0.95;
+  }
+
+  /* Utility para resaltar CTAs y product-cards */
+  .reflect-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 45%, rgba(255,255,255,0) 70%);
+    transform: translateX(-140%) skewX(-10deg);
+    animation: shimmer 2.4s linear infinite;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-140%) skewX(-10deg) }
+    100% { transform: translateX(220%) skewX(-10deg) }
   }
 
   /* ═══════════════════════════════════════════
@@ -317,10 +429,11 @@
   }
 
   /* ═══════════════════════════════════════════
-     SHIMMER DORADO
+     SHIMMER PLATA
   ═══════════════════════════════════════════ */
 
-  .shimmer-gold {
+  .shimmer-gold,
+  .shimmer-platinum {
     background: linear-gradient(
       90deg,
       var(--old-gold) 0%,
@@ -341,7 +454,7 @@
     100% { background-position: -200% 0; }
   }
 
-  /* Legacy shimmer mapped to gold */
+  /* Legacy shimmer mapped to silver */
   .shimmer {
     background: linear-gradient(
       90deg,
@@ -354,7 +467,7 @@
   }
 
   /* ═══════════════════════════════════════════
-     ANIMATED BORDER DORADO
+     ANIMATED BORDER PLATA
   ═══════════════════════════════════════════ */
 
   .border-animate {
@@ -401,8 +514,9 @@
      GLOW EFFECTS LUXURY (muy sutiles)
   ═══════════════════════════════════════════ */
 
-  .glow-gold {
-    box-shadow: 0 0 24px oklch(0.72 0.12 75 / 0.25);
+  .glow-gold,
+  .glow-platinum {
+    box-shadow: 0 0 24px rgba(221, 232, 245, 0.22);
   }
 
   .glow-chrome {
@@ -486,6 +600,43 @@
 
   .spray-effect { position: relative; }
   .spray-effect::after { display: none; }
+
+  /* ═══════════════════════════════════════════
+     PRELOADER + MICRO SPARKLES + CURSOR
+  ═══════════════════════════════════════════ */
+
+  .uc-preloader {
+    background: linear-gradient(180deg, rgba(5,5,5,1) 0%, rgba(11,11,11,1) 100%);
+  }
+  .uc-logo { border: 1px solid rgba(221,232,245,0.06); }
+  .uc-cross {
+    color: var(--pearl-white);
+    font-weight: 700;
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.6));
+    transform: translateY(-2px);
+    opacity: 0.95;
+  }
+
+  /* Micro sparkles background (very subtle) */
+  .uc-sparkles::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02) 0px, transparent 2px), radial-gradient(circle at 60% 70%, rgba(255,255,255,0.01) 0px, transparent 2px);
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+  }
+
+  /* Custom cursor element will be rendered by a client component */
+  .uc-cursor { pointer-events: none; position: fixed; z-index: 9999; width: 14px; height: 14px; border-radius: 999px; background: linear-gradient(180deg, var(--chrome), var(--liquid-silver)); box-shadow: 0 2px 10px rgba(0,0,0,0.6); transform: translate(-50%, -50%); transition: transform 150ms ease, width 150ms ease, height 150ms ease, opacity 200ms ease; }
+  .uc-cursor.magnet { transform: translate(-50%, -50%) scale(1.6); }
+
+  @media (pointer: coarse) {
+    .uc-cursor { display: none; }
+  }
+
+
 
   /* ═══════════════════════════════════════════
      GLITCH (desactivado — mantenido para compat)

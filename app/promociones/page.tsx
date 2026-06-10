@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { 
-  Sparkles, ArrowRight, Truck, ShieldCheck, CheckCircle2, TrendingUp
-} from "lucide-react"
+import { ArrowRight, Truck, ShieldCheck, CheckCircle2, TrendingUp } from "lucide-react"
+import SparklesUI from '@/components/sparkles'
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -74,6 +73,7 @@ export default function PromocionesPage() {
       <section className="pt-40 pb-20 relative overflow-hidden bg-obsidian border-b border-steel/10">
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(200,164,77,0.02)_0%,transparent_70%)]" />
+          <SparklesUI extra={2} />
         </div>
         
         <div className="container mx-auto px-4 relative z-10 max-w-4xl text-center">
@@ -82,8 +82,8 @@ export default function PromocionesPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 px-5 py-2 bg-graphite/40 border border-gold-action/20 rounded-none mb-8">
-              <Sparkles className="w-4 h-4 text-gold-action" />
+            <div className="inline-flex items-center gap-2 px-5 py-2 bg-graphite/40 border border-gold-action/20 rounded-none mb-8 relative">
+              <SparklesUI extra={1} />
               <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-gold-action font-sans">Descuentos Exclusivos</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight text-white-diamond mb-6 uppercase">

@@ -65,14 +65,14 @@ function SectionLabel({ eyebrow, title, highlight }: { eyebrow: string; title: s
   return (
     <div className="text-center mb-16">
       <div className="flex items-center justify-center gap-4 mb-5">
-        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, #C8A44D)' }} />
+        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.4))' }} />
         <span
           className="text-[10px] font-semibold uppercase tracking-[0.45em]"
-          style={{ fontFamily: 'var(--font-sans)', color: '#C8A44D', letterSpacing: '0.45em' }}
+          style={{ fontFamily: 'var(--font-sans)', color: '#DDE8F5', letterSpacing: '0.45em' }}
         >
           {eyebrow}
         </span>
-        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, #C8A44D)' }} />
+        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, rgba(221,232,245,0.4))' }} />
       </div>
       <h2
         className="text-3xl md:text-4xl lg:text-5xl font-black leading-tight"
@@ -81,7 +81,7 @@ function SectionLabel({ eyebrow, title, highlight }: { eyebrow: string; title: s
         {title}{' '}
         <span
           style={{
-            background: 'linear-gradient(135deg, #B08D57 0%, #D4AF37 50%, #E6C989 100%)',
+            background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 50%, #EAF2FF 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -155,7 +155,7 @@ export function FeaturesSection() {
                     className="w-12 h-12 flex items-center justify-center mb-0"
                     style={{ border: '1px solid #262626' }}
                   >
-                    <feature.icon style={{ width: '20px', height: '20px', color: '#C8A44D' }} />
+                    <feature.icon style={{ width: '20px', height: '20px', color: '#DDE8F5' }} />
                   </div>
                 </div>
 
@@ -242,7 +242,7 @@ export function TestimonialsSection() {
                 {/* Stars */}
                 <div className="flex items-center gap-1 mb-6">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} style={{ width: '12px', height: '12px', fill: '#C8A44D', color: '#C8A44D' }} />
+                    <Star key={i} style={{ width: '12px', height: '12px', fill: '#DDE8F5', color: '#DDE8F5' }} />
                   ))}
                 </div>
 
@@ -330,7 +330,7 @@ export function BrandsSection() {
                 color: '#1a1a1a',
                 letterSpacing: '0.25em',
               }}
-              onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#C8A44D'}
+              onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#DDE8F5'}
               onMouseLeave={e => (e.currentTarget as HTMLSpanElement).style.color = '#1a1a1a'}
             >
               {brand}
@@ -371,16 +371,16 @@ export function PromoBanner() {
           >
             {/* Badge */}
             <div className="flex items-center justify-center gap-3 mb-8">
-              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, #C8A44D)' }} />
-              <Award style={{ width: '14px', height: '14px', color: '#C8A44D' }} />
+              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.4))' }} />
+              <Award style={{ width: '14px', height: '14px', color: '#DDE8F5' }} />
               <span
                 className="text-[10px] font-semibold uppercase tracking-[0.45em]"
-                style={{ fontFamily: 'var(--font-sans)', color: '#C8A44D', letterSpacing: '0.45em' }}
+                style={{ fontFamily: 'var(--font-sans)', color: '#DDE8F5', letterSpacing: '0.45em' }}
               >
                 Oferta Especial
               </span>
-              <Award style={{ width: '14px', height: '14px', color: '#C8A44D' }} />
-              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, #C8A44D)' }} />
+              <Award style={{ width: '14px', height: '14px', color: '#DDE8F5' }} />
+              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, rgba(221,232,245,0.4))' }} />
             </div>
 
             <h2
@@ -389,7 +389,7 @@ export function PromoBanner() {
             >
               <span
                 style={{
-                  background: 'linear-gradient(135deg, #B08D57 0%, #D4AF37 40%, #E6C989 60%, #C8A44D 100%)',
+                  background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 40%, #EAF2FF 60%, #BFCEDF 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -415,9 +415,9 @@ export function PromoBanner() {
                 className="font-bold px-3 py-1"
                 style={{
                   fontFamily: 'var(--font-cinzel)',
-                  color: '#D4AF37',
-                  border: '1px solid rgba(200,164,77,0.3)',
-                  background: 'rgba(200,164,77,0.06)',
+                  color: '#DDE8F5',
+                  border: '1px solid rgba(221,232,245,0.25)',
+                  background: 'rgba(221,232,245,0.08)',
                   letterSpacing: '0.15em',
                 }}
               >
@@ -451,7 +451,7 @@ export function PromoBanner() {
                       className="block text-2xl font-black mb-1"
                       style={{
                         fontFamily: 'var(--font-cinzel)',
-                        background: 'linear-gradient(135deg, #B08D57, #D4AF37)',
+                        background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',

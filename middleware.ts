@@ -34,11 +34,26 @@ export async function middleware(request: NextRequest) {
   const user = session?.user ?? null
 
   // Protect /admin routes
-  if (request.nextUrl.pathname.startsWith('/admin') && !user) {
-    const login = request.nextUrl.clone()
-    login.pathname = '/auth/login'
-    login.searchParams.set('redirect', request.nextUrl.pathname)
-    return NextResponse.redirect(login)
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (!user) {
+      const login = request.nextUrl.clone()
+      login.pathname = '/auth/login'
+      login.searchParams.set('redirect', request.nextUrl.pathname)
+      return NextResponse.redirect(login)
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (!profile?.is_admin) {
+      const home = request.nextUrl.clone()
+      home.pathname = '/'
+      home.searchParams.set('unauthorized', '1')
+      return NextResponse.redirect(home)
+    }
   }
 
   // Protect /perfil routes

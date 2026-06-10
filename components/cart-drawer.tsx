@@ -3,8 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
-import { useCartStore } from '@/lib/store'
-import Link from 'next/link'
+import { useCartStore, useAuthStore } from '@/lib/store'
+import { useRouter } from 'next/navigation'
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('es-CO', {
@@ -16,7 +16,18 @@ function formatPrice(price: number) {
 
 export function CartDrawer() {
   const { items, isOpen, setCartOpen, removeItem, updateQuantity, total, clearCart } = useCartStore()
+  const { user } = useAuthStore()
+  const router = useRouter()
   const cartTotal = total()
+
+  const handleCheckout = () => {
+    setCartOpen(false)
+    if (!user) {
+      router.push('/auth/login?redirect=/checkout')
+      return
+    }
+    router.push('/checkout')
+  }
 
   return (
     <AnimatePresence>
@@ -49,7 +60,7 @@ export function CartDrawer() {
             {/* Top accent line */}
             <div
               className="absolute top-0 left-0 right-0 h-px"
-              style={{ background: 'linear-gradient(to right, transparent, rgba(200,164,77,0.6), transparent)' }}
+              style={{ background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.35), transparent)' }}
             />
 
             {/* Header */}
@@ -59,7 +70,7 @@ export function CartDrawer() {
             >
               <div className="flex items-center gap-4">
                 <ShoppingBag
-                  style={{ width: '18px', height: '18px', color: '#C8A44D' }}
+                  style={{ width: '18px', height: '18px', color: '#DDE8F5' }}
                 />
                 <div>
                   <h2
@@ -120,27 +131,28 @@ export function CartDrawer() {
                   >
                     Descubre nuestra colección y agrega tus piezas favoritas
                   </p>
-                  <Link href="/catalogo">
-                    <button
-                      onClick={() => setCartOpen(false)}
-                      className="px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300"
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        background: 'linear-gradient(135deg, #C8A44D, #B08D57)',
-                        color: '#050505',
-                        letterSpacing: '0.2em',
-                      }}
-                    >
-                      Explorar Colección
-                    </button>
-                  </Link>
+                  <button
+                    onClick={() => {
+                      setCartOpen(false)
+                      router.push('/catalogo')
+                    }}
+                    className="px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300"
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5)',
+                      color: '#050505',
+                      letterSpacing: '0.2em',
+                    }}
+                  >
+                    Explorar Colección
+                  </button>
                 </div>
               ) : (
                 <div className="space-y-1">
                   <AnimatePresence>
                     {items.map((item, index) => (
                       <motion.div
-                        key={`${item.product.id}-${item.selectedColor}`}
+                        key={item.id}
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: 60 }}
@@ -181,7 +193,7 @@ export function CartDrawer() {
                             className="text-xs font-bold"
                             style={{
                               fontFamily: 'var(--font-cinzel)',
-                              background: 'linear-gradient(135deg, #B08D57, #D4AF37)',
+                              background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5)',
                               WebkitBackgroundClip: 'text',
                               WebkitTextFillColor: 'transparent',
                               backgroundClip: 'text',
@@ -194,7 +206,7 @@ export function CartDrawer() {
                         {/* Quantity & Remove */}
                         <div className="flex flex-col items-end justify-between">
                           <button
-                            onClick={() => removeItem(item.product.id)}
+                            onClick={() => removeItem(item.id)}
                             className="transition-colors duration-200"
                             style={{ color: '#333' }}
                             onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = '#F87171'}
@@ -205,12 +217,12 @@ export function CartDrawer() {
 
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="w-6 h-6 flex items-center justify-center transition-all duration-200"
                               style={{ border: '1px solid #262626', color: '#8B8B8B' }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLButtonElement).style.borderColor = '#C8A44D'
-                                ;(e.currentTarget as HTMLButtonElement).style.color = '#C8A44D'
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(221,232,245,0.35)'
+                                ;(e.currentTarget as HTMLButtonElement).style.color = '#DDE8F5'
                               }}
                               onMouseLeave={e => {
                                 (e.currentTarget as HTMLButtonElement).style.borderColor = '#262626'
@@ -226,12 +238,12 @@ export function CartDrawer() {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="w-6 h-6 flex items-center justify-center transition-all duration-200"
                               style={{ border: '1px solid #262626', color: '#8B8B8B' }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLButtonElement).style.borderColor = '#C8A44D'
-                                ;(e.currentTarget as HTMLButtonElement).style.color = '#C8A44D'
+                                (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(221,232,245,0.35)'
+                                ;(e.currentTarget as HTMLButtonElement).style.color = '#DDE8F5'
                               }}
                               onMouseLeave={e => {
                                 (e.currentTarget as HTMLButtonElement).style.borderColor = '#262626'
@@ -280,7 +292,7 @@ export function CartDrawer() {
                     </span>
                     <span
                       className="text-[11px]"
-                      style={{ fontFamily: 'var(--font-sans)', color: '#C8A44D' }}
+                      style={{ fontFamily: 'var(--font-sans)', color: '#DDE8F5' }}
                     >
                       Se calcula al finalizar
                     </span>
@@ -292,7 +304,7 @@ export function CartDrawer() {
                   className="mb-5"
                   style={{
                     height: '1px',
-                    background: 'linear-gradient(to right, transparent, rgba(200,164,77,0.4), transparent)',
+                    background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.4), transparent)',
                   }}
                 />
 
@@ -308,7 +320,7 @@ export function CartDrawer() {
                     className="text-lg font-black"
                     style={{
                       fontFamily: 'var(--font-cinzel)',
-                      background: 'linear-gradient(135deg, #B08D57, #D4AF37, #E6C989)',
+                      background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5, #EAF2FF)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
@@ -320,29 +332,27 @@ export function CartDrawer() {
 
                 {/* Actions */}
                 <div className="space-y-3">
-                  <Link href="/checkout" className="block">
-                    <button
-                      onClick={() => setCartOpen(false)}
-                      className="group w-full py-4 flex items-center justify-center gap-3 text-[11px] font-bold uppercase transition-all duration-300"
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        letterSpacing: '0.2em',
-                        background: 'linear-gradient(135deg, #C8A44D 0%, #B08D57 100%)',
-                        color: '#050505',
-                      }}
-                      onMouseEnter={e => {
-                        (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, #D4AF37 0%, #C8A44D 100%)'
-                        ;(e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(200, 164, 77, 0.35)'
-                      }}
-                      onMouseLeave={e => {
-                        (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, #C8A44D 0%, #B08D57 100%)'
-                        ;(e.currentTarget as HTMLButtonElement).style.boxShadow = 'none'
-                      }}
-                    >
-                      Finalizar Compra
-                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </Link>
+                  <button
+                    onClick={handleCheckout}
+                    className="group w-full py-4 flex items-center justify-center gap-3 text-[11px] font-bold uppercase transition-all duration-300"
+                    style={{
+                      fontFamily: 'var(--font-sans)',
+                      letterSpacing: '0.2em',
+                      background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 100%)',
+                      color: '#050505',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, #DDE8F5 0%, #C9CDD2 100%)'
+                      ;(e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(221, 232, 245, 0.35)'
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 100%)'
+                      ;(e.currentTarget as HTMLButtonElement).style.boxShadow = 'none'
+                    }}
+                  >
+                    Finalizar Compra
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </button>
 
                   <button
                     onClick={clearCart}

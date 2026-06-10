@@ -79,6 +79,8 @@ export default function PedidosPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [orderHistory, setOrderHistory] = useState<any[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
   const [showShippingModal, setShowShippingModal] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -92,6 +94,14 @@ export default function PedidosPage() {
 
   useEffect(() => { fetchOrders() }, [])
 
+  useEffect(() => {
+    if (selectedOrder) {
+      fetchOrderHistory(selectedOrder.id)
+    } else {
+      setOrderHistory([])
+    }
+  }, [selectedOrder])
+
   const fetchOrders = async () => {
     try {
       const res = await fetch('/api/admin/orders')
@@ -101,6 +111,21 @@ export default function PedidosPage() {
       console.error(e)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchOrderHistory = async (orderId: string) => {
+    setLoadingHistory(true)
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}/history`)
+      const data = await res.json()
+      if (data.history) setOrderHistory(data.history)
+      else setOrderHistory([])
+    } catch (e) {
+      console.error('[history] fetch error', e)
+      setOrderHistory([])
+    } finally {
+      setLoadingHistory(false)
     }
   }
 
@@ -132,6 +157,9 @@ export default function PedidosPage() {
       setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, ...shippingForm } : o))
       toast.success('Envío actualizado y cliente notificado ✅')
       setShowShippingModal(false)
+
+      // refresh history for the order
+      fetchOrderHistory(selectedOrder.id)
     } catch (e: any) {
       toast.error(e.message || 'Error al actualizar el envío')
     } finally {
@@ -147,13 +175,18 @@ export default function PedidosPage() {
       addr.name?.toLowerCase().includes(search_) ||
       addr.email?.toLowerCase().includes(search_) ||
       addr.phone?.includes(search)
-    const matchStatus = statusFilter === 'all' || o.status === statusFilter
+
+    let matchStatus = false
+    if (statusFilter === 'all') matchStatus = true
+    else if (statusFilter === 'pending') matchStatus = ['pending', 'processing'].includes(o.status)
+    else matchStatus = o.status === statusFilter
+
     return matchSearch && matchStatus
   })
 
   const stats = [
     { label: 'Total',       value: orders.length,                                          icon: Package,     color: 'text-primary' },
-    { label: 'Pendientes',  value: orders.filter(o => o.status === 'pending' || o.status === 'paid' || o.status === 'processing').length, icon: Clock, color: 'text-yellow-400' },
+    { label: 'Pendientes',  value: orders.filter(o => ['pending','processing'].includes(o.status)).length, icon: Clock, color: 'text-yellow-400' },
     { label: 'En Camino',   value: orders.filter(o => o.status === 'shipped').length,       icon: Truck,       color: 'text-purple-400' },
     { label: 'Entregados',  value: orders.filter(o => o.status === 'delivered').length,     icon: CheckCircle, color: 'text-emerald-400' },
     { label: 'Ingresos',    value: formatPrice(orders.filter(o => o.status !== 'cancelled' && o.status !== 'pending').reduce((a, o) => a + (o.total || 0), 0)), icon: DollarSign, color: 'text-green-400' },
@@ -189,6 +222,14 @@ export default function PedidosPage() {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant={statusFilter==='all' ? undefined : 'ghost'} onClick={() => setStatusFilter('all')}>Todos</Button>
+          <Button size="sm" variant={statusFilter==='pending' ? undefined : 'ghost'} onClick={() => setStatusFilter('pending')}>Pendientes</Button>
+          <Button size="sm" variant={statusFilter==='paid' ? undefined : 'ghost'} onClick={() => setStatusFilter('paid')}>Pagados</Button>
+          <Button size="sm" variant={statusFilter==='shipped' ? undefined : 'ghost'} onClick={() => setStatusFilter('shipped')}>En Camino</Button>
+          <Button size="sm" variant={statusFilter==='delivered' ? undefined : 'ghost'} onClick={() => setStatusFilter('delivered')}>Entregados</Button>
+        </div>
+
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)}
@@ -374,6 +415,29 @@ export default function PedidosPage() {
                 </div>
               )}
 
+              {/* Order history timeline (from notifications/history) */}
+              <div>
+                <h4 className="font-semibold mb-3 text-sm uppercase tracking-wide text-muted-foreground">Historial del Pedido</h4>
+                <div className="space-y-2 p-3 rounded-xl bg-secondary/30 max-h-48 overflow-y-auto">
+                  {loadingHistory ? (
+                    <p className="text-sm text-muted-foreground">Cargando historial...</p>
+                  ) : orderHistory.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No hay historial disponible para este pedido.</p>
+                  ) : (
+                    orderHistory.map((h: any) => (
+                      <div key={h.id} className="flex items-start gap-3">
+                        <Clock className="w-4 h-4 text-muted-foreground mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium">{h.title}</p>
+                          <p className="text-xs text-muted-foreground">{new Date(h.created_at).toLocaleString('es-CO')}</p>
+                          {h.message && <p className="text-xs text-muted-foreground">{h.message}</p>}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
               <div className="flex gap-3 pt-2 border-t border-border">
                 <Button variant="outline" onClick={() => setSelectedOrder(null)} className="flex-1">Cerrar</Button>
                 <Button className="flex-1 btn-luxury" onClick={() => openShippingModal(selectedOrder)}>
@@ -410,7 +474,7 @@ export default function PedidosPage() {
                 <AlertCircle className="w-3.5 h-3.5 text-primary" /> Estado del pedido
               </label>
               <Select value={shippingForm.status} onValueChange={v => setShippingForm(f => ({ ...f, status: v }))}>
-                <SelectTrigger className="bg-secondary border-border">
+                <SelectTrigger className="bg-card/95 border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -431,7 +495,7 @@ export default function PedidosPage() {
                 <Building2 className="w-3.5 h-3.5 text-primary" /> Transportadora
               </label>
               <Select value={shippingForm.carrier} onValueChange={v => setShippingForm(f => ({ ...f, carrier: v }))}>
-                <SelectTrigger className="bg-secondary border-border">
+                <SelectTrigger className="bg-card/95 border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -451,7 +515,7 @@ export default function PedidosPage() {
                 value={shippingForm.tracking_number}
                 onChange={e => setShippingForm(f => ({ ...f, tracking_number: e.target.value }))}
                 placeholder="Ej: 123456789"
-                className="bg-secondary border-border font-mono"
+                className="bg-card/95 border-border text-foreground placeholder:text-muted-foreground font-mono"
               />
             </div>
 
@@ -464,7 +528,7 @@ export default function PedidosPage() {
                 value={shippingForm.tracking_photo_url}
                 onChange={e => setShippingForm(f => ({ ...f, tracking_photo_url: e.target.value }))}
                 placeholder="https://... (link de Google Drive, WhatsApp, etc.)"
-                className="bg-secondary border-border"
+                className="bg-card/95 border-border text-foreground placeholder:text-muted-foreground"
               />
               <p className="text-xs text-muted-foreground">Pega el link de la foto de la guía. El cliente podrá verla en su perfil.</p>
             </div>
@@ -479,7 +543,7 @@ export default function PedidosPage() {
                 onChange={e => setShippingForm(f => ({ ...f, admin_note: e.target.value }))}
                 placeholder="Ej: Tu pedido fue entregado a la transportadora hoy a las 3pm..."
                 rows={3}
-                className="w-full px-3 py-2 text-sm rounded-lg bg-secondary border border-border resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full px-3 py-2 text-sm rounded-lg bg-card/95 border border-border resize-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 

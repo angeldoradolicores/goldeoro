@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Crown, Mail, Lock, User, Phone, ArrowRight, Check, Loader2 } from "lucide-react"
+import SparklesUI from '@/components/sparkles'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
@@ -316,7 +317,7 @@ export default function RegistroPage() {
                 <Button
                   type="submit"
                   disabled={isLoading || (step === 2 && formData.password !== formData.confirmPassword)}
-                  className="flex-1 h-14 bg-gold hover:bg-gold/90 text-background font-semibold rounded-xl transition-all duration-300 group"
+                  className="flex-1 h-14 bg-gold hover:bg-gold/90 text-background font-semibold rounded-xl transition-all duration-300 group glint-strong"
                 >
                   {isLoading ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
@@ -411,6 +412,7 @@ export default function RegistroPage() {
           <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-gold/20 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-1/3 left-1/4 w-72 h-72 bg-gold/10 rounded-full blur-3xl animate-pulse delay-1000" />
         </div>
+        <SparklesUI extra={2} />
         
         <div className="relative z-10 flex flex-col justify-center items-center w-full p-12">
           <motion.div

@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ShoppingBag, User, Crown, LogOut } from 'lucide-react'
+import { Menu, X, ShoppingBag, User, Crown, LogOut, Heart } from 'lucide-react'
 import { useCartStore, useFavoritesStore, useAuthStore } from '@/lib/store'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 
@@ -20,10 +21,20 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const router = useRouter()
 
   const { user, isAdmin, isInitialized, setUser, setIsAdmin, setInitialized, logout } = useAuthStore()
-  const { toggleCart, itemCount, clearCart } = useCartStore()
-  const count = itemCount()
+  const toggleCart = useCartStore(state => state.toggleCart)
+  const count = useCartStore(state => state.items.reduce((acc, i) => acc + (i.quantity || 0), 0))
+  const favoritesCount = useFavoritesStore(state => state.items.length)
+
+  const handleFavorites = () => {
+    if (!user) {
+      router.push('/auth/login?redirect=/catalogo')
+      return
+    }
+    router.push('/perfil?tab=favoritos')
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,46 +47,66 @@ export function Navbar() {
   useEffect(() => {
     const supabase = createClient()
 
-    const getUser = async () => {
+    const initAuth = async () => {
       if (isInitialized) return
-      const { data: { user } } = await supabase.auth.getUser()
+
+      const { data: { session } } = await supabase.auth.getSession()
+      let user = session?.user ?? null
+      if (!user) {
+        const { data: { user: fallbackUser } } = await supabase.auth.getUser()
+        user = fallbackUser ?? null
+      }
       setUser(user)
+
       if (user) {
+        useCartStore.getState().setUserId(user.id)
+        useFavoritesStore.getState().setUserId(user.id)
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
           .eq('id', user.id)
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
-        useCartStore.getState().syncCart()
-        useFavoritesStore.getState().syncFavorites()
+        useCartStore.getState().syncCart(user.id)
+        useFavoritesStore.getState().syncFavorites(user.id)
+      } else {
+        useCartStore.getState().setUserId(null)
+        useFavoritesStore.getState().setUserId(null)
+        useCartStore.getState().hydrateCart()
+        useFavoritesStore.getState().hydrateFavorites()
       }
+
       setInitialized(true)
     }
 
-    getUser()
+    initAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user || null)
-      if (!session?.user) {
+      const user = session?.user || null
+      setUser(user)
+      if (!user) {
         setIsAdmin(false)
+        useCartStore.getState().setUserId(null)
         useCartStore.getState().clearCart()
+        useFavoritesStore.getState().setUserId(null)
         useFavoritesStore.getState().clearFavorites()
       } else {
+        useCartStore.getState().setUserId(user.id)
+        useFavoritesStore.getState().setUserId(user.id)
         const { data: profile } = await supabase
           .from('profiles')
           .select('is_admin')
-          .eq('id', session.user.id)
+          .eq('id', user.id)
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
-        useCartStore.getState().syncCart()
-        useFavoritesStore.getState().syncFavorites()
+        useCartStore.getState().syncCart(user.id)
+        useFavoritesStore.getState().syncFavorites(user.id)
       }
       setInitialized(true)
     })
 
     return () => subscription.unsubscribe()
-  }, [isInitialized, setUser, setIsAdmin, setInitialized])
+  }, [setUser, setIsAdmin, setInitialized])
 
   const handleLogout = async () => {
     await logout()
@@ -112,14 +143,14 @@ export function Navbar() {
                   URBAN CROWN
                 </span>
                 <span
-                  className="text-[9px] tracking-[0.5em] uppercase mt-0.5 text-gold-action"
+                  className="text-[9px] tracking-[0.5em] uppercase mt-0.5 text-chrome"
                   style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.45em' }}
                 >
                   Luxury Streetwear
                 </span>
-                {/* Gold underline on hover */}
+                {/* Silver underline on hover */}
                 <motion.div
-                  className="h-px bg-gradient-to-r from-transparent via-gold-action to-transparent mt-1"
+                  className="h-px bg-gradient-to-r from-transparent via-chrome to-transparent mt-1"
                   initial={{ scaleX: 0, opacity: 0 }}
                   whileHover={{ scaleX: 1, opacity: 1 }}
                   transition={{ duration: 0.4 }}
@@ -134,11 +165,11 @@ export function Navbar() {
                   <motion.span
                     className="relative text-xs font-semibold text-titanium hover:text-white-diamond transition-colors duration-300 uppercase tracking-[0.15em]"
                     style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.15em' }}
-                    whileHover={{ y: -1 }}
+                    whileHover={{ y: -1, textShadow: '0 0 18px rgba(221,232,245,0.25)' }}
                   >
                     {link.label}
                     <motion.span
-                      className="absolute -bottom-1 left-0 h-px bg-gradient-to-r from-gold-action to-old-gold"
+                      className="absolute -bottom-1 left-0 h-px bg-gradient-to-r from-chrome via-white-diamond to-chrome"
                       initial={{ width: 0 }}
                       whileHover={{ width: '100%' }}
                       transition={{ duration: 0.3 }}
@@ -158,7 +189,7 @@ export function Navbar() {
                       <motion.button
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
-                        className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] border border-steel text-titanium hover:border-gold-action hover:text-gold-action rounded-sm transition-all duration-300"
+                        className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] border border-steel text-titanium hover:border-chrome hover:text-white-diamond rounded-sm transition-all duration-300"
                         style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.15em' }}
                       >
                         <Crown className="w-3 h-3" />
@@ -190,6 +221,34 @@ export function Navbar() {
                 </Link>
               )}
 
+              {/* Favorites */}
+              <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={handleFavorites}
+                className="relative p-2 text-titanium hover:text-white-diamond transition-colors duration-300"
+              >
+                <Heart style={{ width: '18px', height: '18px' }} />
+                <AnimatePresence>
+                  {favoritesCount > 0 && (
+                    <motion.span
+                      key="fav-badge"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center text-[9px] font-bold rounded-full"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,0,0,1), rgba(220,0,0,0.9))',
+                        color: '#ffffff',
+                        fontFamily: 'var(--font-sans)',
+                      }}
+                    >
+                      {favoritesCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+
               {/* Cart */}
               <motion.button
                 whileHover={{ scale: 1.08 }}
@@ -207,7 +266,7 @@ export function Navbar() {
                       exit={{ scale: 0, opacity: 0 }}
                       className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center text-[9px] font-bold rounded-full"
                       style={{
-                        background: 'linear-gradient(135deg, #C8A44D, #B08D57)',
+                        background: 'linear-gradient(135deg, rgba(221,232,245,1), rgba(185,195,212,0.9))',
                         color: '#050505',
                         fontFamily: 'var(--font-sans)',
                       }}
@@ -272,7 +331,7 @@ export function Navbar() {
                   >
                     URBAN CROWN
                   </span>
-                  <span className="text-[9px] tracking-[0.4em] text-gold-action mt-0.5 uppercase"
+                  <span className="text-[9px] tracking-[0.4em] text-chrome mt-0.5 uppercase"
                     style={{ fontFamily: 'var(--font-sans)' }}>
                     Luxury Streetwear
                   </span>
@@ -315,7 +374,7 @@ export function Navbar() {
                     className="pt-6"
                   >
                     <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                      <button className="w-full py-3.5 text-xs font-bold uppercase tracking-[0.2em] border border-gold-action text-gold-action hover:bg-gold-action hover:text-obsidian transition-all duration-300 rounded-sm"
+                      <button className="w-full py-3.5 text-xs font-bold uppercase tracking-[0.2em] border border-chrome text-chrome hover:bg-chrome hover:text-obsidian transition-all duration-300 rounded-sm"
                         style={{ fontFamily: 'var(--font-sans)' }}>
                         <Crown className="w-3.5 h-3.5 inline mr-2" />
                         Panel Admin
@@ -332,7 +391,7 @@ export function Navbar() {
                     className="pt-6"
                   >
                     <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                      <button className="w-full py-3.5 text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-gold-action to-old-gold text-obsidian rounded-sm transition-all duration-300"
+                      <button className="w-full py-3.5 text-xs font-bold uppercase tracking-[0.2em] bg-gradient-to-r from-chrome/80 to-steel/70 text-obsidian rounded-sm transition-all duration-300"
                         style={{ fontFamily: 'var(--font-sans)' }}>
                         <User className="w-3.5 h-3.5 inline mr-2" />
                         Ingresar

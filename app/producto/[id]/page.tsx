@@ -8,7 +8,6 @@ import { ArrowLeft, ShoppingBag, Heart, Share2, Truck, Shield, RotateCcw, Minus,
 import { useCartStore, useFavoritesStore } from '@/lib/store'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { CartDrawer } from '@/components/cart-drawer'
 import { ChatBot } from '@/components/chatbot'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -48,8 +47,9 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
   const [selectedColor, setSelectedColor] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
-  const { addItem } = useCartStore()
-  const { toggleFavorite, isFavorite } = useFavoritesStore()
+  const addItem = useCartStore(state => state.addItem)
+  const toggleFavorite = useFavoritesStore(state => state.toggleFavorite)
+  const isFav = useFavoritesStore(state => product ? state.items.some(i => i.id === product.id) : false)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -324,11 +324,11 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
                   variant="outline"
                   size="icon"
                   className={`w-14 h-14 border-steel/30 rounded-none transition-colors hover:border-gold-action/50 ${
-                    product && isFavorite(product.id) ? 'text-gold-action border-gold-action/50 bg-gold-action/5' : 'text-chrome'
+                    product && isFav ? 'text-gold-action border-gold-action/50 bg-gold-action/5' : 'text-chrome'
                   }`}
                   onClick={handleToggleFavorite}
                 >
-                  <Heart className={`w-4 h-4 ${product && isFavorite(product.id) ? 'fill-current text-gold-action' : ''}`} />
+                  <Heart className={`w-4 h-4 ${product && isFav ? 'fill-current text-gold-action' : ''}`} />
                 </Button>
                 <Button variant="outline" size="icon" className="w-14 h-14 border-steel/30 rounded-none hover:border-gold-action/50 text-chrome">
                   <Share2 className="w-4 h-4" />
@@ -394,7 +394,6 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
       </main>
 
       <Footer />
-      <CartDrawer />
       <ChatBot />
     </div>
   )

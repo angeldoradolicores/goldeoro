@@ -3,6 +3,9 @@ import { Cinzel, Montserrat, Cormorant_Garamond } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+import Preloader from '@/components/preloader'
+import Cursor from '@/components/cursor'
+import { CartDrawer } from '@/components/cart-drawer'
 
 const cinzel = Cinzel({
   subsets: ['latin'],
@@ -59,7 +62,11 @@ export default function RootLayout({
         `}</style>
       </head>
       <body className="font-sans antialiased min-h-screen">
+        {/* Preloader (luxury splash) */}
+        <Preloader />
+        <Cursor />
         {children}
+        <CartDrawer />
         <Toaster
           position="top-right"
           toastOptions={{

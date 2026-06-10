@@ -1,9 +1,10 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { ArrowRight, ChevronDown } from 'lucide-react'
+import { ArrowRight, ChevronDown, Crown } from 'lucide-react'
 import Link from 'next/link'
 import { useRef, useState, useEffect } from 'react'
+import SparklesUI from './sparkles'
 
 // Partícula brillante mínima
 function Particle({ delay, x, y }: { delay: number; x: string; y: string }) {
@@ -15,7 +16,8 @@ function Particle({ delay, x, y }: { delay: number; x: string; y: string }) {
         top: y,
         width: '2px',
         height: '2px',
-        background: 'rgba(200, 164, 77, 0.6)',
+        background: 'rgba(221, 232, 245, 0.75)',
+        filter: 'drop-shadow(0 0 12px rgba(221,232,245,0.35))',
       }}
       animate={{
         opacity: [0, 1, 0],
@@ -43,6 +45,10 @@ export function HeroSection() {
     target: containerRef,
     offset: ['start start', 'end start'],
   })
+
+  const [extraSparkles, setExtraSparkles] = useState(0)
+  // connect scroll to extra sparkles
+  useSpawnFromScroll(scrollYProgress, setExtraSparkles)
 
   const y = useTransform(scrollYProgress, [0, 1], [0, 140])
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
@@ -77,8 +83,8 @@ export function HeroSection() {
           style={{
             background: `
               radial-gradient(ellipse 80% 60% at 50% 50%, rgba(13,13,13,1) 0%, rgba(5,5,5,1) 100%),
-              radial-gradient(ellipse 40% 40% at 20% 80%, rgba(176,141,87,0.04) 0%, transparent 70%),
-              radial-gradient(ellipse 40% 40% at 80% 20%, rgba(192,192,192,0.03) 0%, transparent 70%)
+              radial-gradient(ellipse 40% 40% at 20% 80%, rgba(221,232,245,0.06) 0%, transparent 70%),
+              radial-gradient(ellipse 40% 40% at 80% 20%, rgba(221,232,245,0.04) 0%, transparent 70%)
             `,
           }}
         />
@@ -89,7 +95,7 @@ export function HeroSection() {
           style={{
             top: '45%',
             height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(200,164,77,0.06) 30%, rgba(192,192,192,0.08) 50%, rgba(200,164,77,0.06) 70%, transparent 100%)',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(221,232,245,0.04) 30%, rgba(201,205,210,0.06) 50%, rgba(221,232,245,0.04) 70%, transparent 100%)',
           }}
         />
 
@@ -98,18 +104,21 @@ export function HeroSection() {
           <Particle key={i} x={p.x} y={p.y} delay={p.delay} />
         ))}
 
+        {/* Capa de micro-brillos (reusable). `extraSparkles` aumenta según scrollYProgress */}
+        {mounted && <SparklesUI extra={extraSparkles} />}
+
         {/* Humo sutil en esquinas */}
         <div
           className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(200,164,77,0.04) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(221,232,245,0.03) 0%, transparent 70%)',
             filter: 'blur(60px)',
           }}
         />
         <div
           className="absolute -top-10 -right-10 w-80 h-80 rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(192,192,192,0.03) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(201,205,210,0.03) 0%, transparent 70%)',
             filter: 'blur(50px)',
           }}
         />
@@ -117,7 +126,9 @@ export function HeroSection() {
 
       {/* ── Contenido ──────────────────────────────────────── */}
       <motion.div
-        style={{ y, opacity }}
+        style={{ y, opacity, perspective: 1500, transformStyle: 'preserve-3d' }}
+        whileHover={{ rotateX: 3, rotateY: -6, scale: 1.01 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="container mx-auto px-4 lg:px-8 relative z-10"
       >
         <div className="max-w-5xl mx-auto text-center">
@@ -129,18 +140,18 @@ export function HeroSection() {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="flex items-center justify-center gap-4 mb-10"
           >
-            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to right, transparent, #C8A44D)' }} />
+            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to right, transparent, #DDE8F5)' }} />
             <span
               className="text-[10px] font-semibold tracking-[0.5em] uppercase"
               style={{
                 fontFamily: 'var(--font-sans)',
-                color: '#C8A44D',
+                color: '#DDE8F5',
                 letterSpacing: '0.5em',
               }}
             >
               Colección 2024
             </span>
-            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to left, transparent, #C8A44D)' }} />
+            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to left, transparent, #DDE8F5)' }} />
           </motion.div>
 
           {/* Título principal — Cinzel, fade secuencial */}
@@ -155,7 +166,7 @@ export function HeroSection() {
                 fontWeight: 900,
                 lineHeight: 0.92,
                 letterSpacing: '-0.02em',
-                color: '#F5F5F5',
+                color: '#F8F9FB',
               }}
             >
               URBAN
@@ -170,7 +181,7 @@ export function HeroSection() {
                 fontWeight: 900,
                 lineHeight: 0.92,
                 letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg, #B08D57 0%, #D4AF37 40%, #E6C989 60%, #C8A44D 100%)',
+                background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 40%, #EAF2FF 60%, #BFCEDF 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -189,7 +200,7 @@ export function HeroSection() {
             style={{
               width: '80px',
               height: '1px',
-              background: 'linear-gradient(to right, transparent, #C8A44D, transparent)',
+              background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.2), transparent)',
             }}
           />
 
@@ -204,14 +215,14 @@ export function HeroSection() {
               fontSize: 'clamp(0.9rem, 2vw, 1.15rem)',
               fontWeight: 300,
               letterSpacing: '0.08em',
-              color: '#8B8B8B',
+              color: '#BFCEDF',
               maxWidth: '540px',
               margin: '0 auto 3.5rem',
               lineHeight: 1.8,
             }}
           >
             Donde el lujo y la calle se encuentran.{' '}
-            <span style={{ color: '#C8A44D', fontWeight: 500 }}>Diseños exclusivos</span>{' '}
+            <span style={{ color: '#DDE8F5', fontWeight: 500 }}>Diseños exclusivos</span>{' '}
             para quienes definen su propio estándar.
           </motion.p>
 
@@ -230,9 +241,9 @@ export function HeroSection() {
                 style={{
                   fontFamily: 'var(--font-sans)',
                   letterSpacing: '0.2em',
-                  background: 'linear-gradient(135deg, #C8A44D 0%, #B08D57 100%)',
+                  background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 100%)',
                   color: '#050505',
-                  boxShadow: '0 8px 32px rgba(200, 164, 77, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
                 }}
               >
                 Explorar Colección
@@ -248,22 +259,35 @@ export function HeroSection() {
                 style={{
                   fontFamily: 'var(--font-sans)',
                   letterSpacing: '0.2em',
-                  color: '#C0C0C0',
-                  border: '1px solid #333333',
+                  color: '#C9CDD2',
+                  border: '1px solid #161616',
                   background: 'transparent',
                 }}
                 onMouseEnter={e => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#C0C0C0'
-                  ;(e.currentTarget as HTMLButtonElement).style.color = '#F5F5F5'
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#C9CDD2'
+                  ;(e.currentTarget as HTMLButtonElement).style.color = '#F8F9FB'
                 }}
                 onMouseLeave={e => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#333333'
-                  ;(e.currentTarget as HTMLButtonElement).style.color = '#C0C0C0'
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#161616'
+                  ;(e.currentTarget as HTMLButtonElement).style.color = '#C9CDD2'
                 }}
               >
                 Nuevos Lanzamientos
               </motion.button>
             </Link>
+          </motion.div>
+
+          {/* Placa metálica 3D decorativa */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.05 }}
+            whileHover={{ rotateX: 4, rotateY: -6, scale: 1.02 }}
+            className="mx-auto my-8 w-72 h-72 metallic-3d"
+          >
+            <div className="metallic-plate-center">
+              <Crown style={{ width: 56, height: 56, color: 'rgba(13,13,13,0.85)' }} />
+            </div>
           </motion.div>
 
           {/* Stats */}
@@ -292,7 +316,7 @@ export function HeroSection() {
                   className="block text-2xl md:text-3xl font-black mb-1"
                   style={{
                     fontFamily: 'var(--font-cinzel)',
-                    background: 'linear-gradient(135deg, #B08D57, #D4AF37)',
+                    background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
@@ -302,7 +326,7 @@ export function HeroSection() {
                 </span>
                 <span
                   className="text-[10px] uppercase tracking-[0.25em]"
-                  style={{ fontFamily: 'var(--font-sans)', color: '#8B8B8B', letterSpacing: '0.25em' }}
+                  style={{ fontFamily: 'var(--font-sans)', color: '#BFCEDF', letterSpacing: '0.25em' }}
                 >
                   {stat.label}
                 </span>
@@ -330,4 +354,17 @@ export function HeroSection() {
       </motion.div>
     </section>
   )
+}
+
+// increase extraSparkles based on scroll progress (client-side only)
+function useSpawnFromScroll(scrollYProgress: any, setExtra: (n: number) => void) {
+  useEffect(() => {
+    if (!scrollYProgress) return
+    const unsub = scrollYProgress.onChange((v: number) => {
+      // spawn up to 8 extra sparkles as user scrolls through hero
+      const count = Math.min(8, Math.floor((v || 0) * 10))
+      setExtra(count)
+    })
+    return () => unsub()
+  }, [scrollYProgress, setExtra])
 }

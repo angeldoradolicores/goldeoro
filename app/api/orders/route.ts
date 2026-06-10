@@ -130,7 +130,8 @@ export async function POST(request: Request) {
     const wompiPublicKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY || 'pub_test_XXXXXXXXXXXXXXXXXX'
     const amountInCents = Math.round(total * 100)
     const reference = order.id
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://luxurycapsoficial.vercel.app'
+    const requestUrl = new URL(request.url)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `${requestUrl.protocol}//${requestUrl.host}`)
     const redirectUrl = encodeURIComponent(`${siteUrl}/checkout/confirmacion?ref=${order.id}`)
 
     // Verify integrity key is available

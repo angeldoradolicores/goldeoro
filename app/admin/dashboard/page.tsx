@@ -42,6 +42,7 @@ const statusColor: Record<string, string> = {
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [timeframe, setTimeframe] = useState<'daily' | 'weekly' | 'monthly' | 'quarterly'>('monthly')
 
   useEffect(() => {
     fetch('/api/admin/stats')
@@ -59,9 +60,28 @@ export default function DashboardPage() {
 
   const stats = data?.stats || {}
   const topProducts = data?.topProducts || []
+  const salesByDay = data?.salesByDay || []
+  const salesByWeek = data?.salesByWeek || []
   const salesByMonth = data?.salesByMonth || []
+  const salesByQuarter = data?.salesByQuarter || []
   const salesByCategory = data?.salesByCategory || []
   const recentOrders = data?.recentOrders || []
+
+  const salesOptions = [
+    { key: 'daily', label: 'Diario' },
+    { key: 'weekly', label: 'Semanal' },
+    { key: 'monthly', label: 'Mensual' },
+    { key: 'quarterly', label: 'Trimestral' },
+  ] as const
+
+  const chartData = {
+    daily: salesByDay,
+    weekly: salesByWeek,
+    monthly: salesByMonth,
+    quarterly: salesByQuarter,
+  }[timeframe]
+
+  const timeframeLabel = salesOptions.find(option => option.key === timeframe)?.label || 'Mensual'
 
   const cards = [
     {
@@ -148,31 +168,41 @@ export default function DashboardPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="lg:col-span-2 p-6 rounded-2xl bg-card border border-border/50">
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
             <div>
-              <h3 className="font-semibold">Ventas Mensuales</h3>
-              <p className="text-sm text-muted-foreground">Últimos 6 meses — datos reales</p>
+              <h3 className="font-semibold">Ventas {timeframeLabel}</h3>
+              <p className="text-sm text-muted-foreground">Visualiza el comportamiento diario, semanal, mensual y trimestral</p>
             </div>
-            <BarChart2 className="w-5 h-5 text-primary/50" />
+            <div className="flex flex-wrap gap-2">
+              {salesOptions.map(option => (
+                <button
+                  key={option.key}
+                  onClick={() => setTimeframe(option.key)}
+                  className={`rounded-full px-3 py-1.5 text-sm transition ${timeframe === option.key ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-secondary/70 text-muted-foreground hover:bg-secondary'}`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="h-[260px]">
-            {salesByMonth.length > 0 ? (
+          <div className="h-[280px]">
+            {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={salesByMonth} barSize={28}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} axisLine={false} tickLine={false} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false}
-                    tickFormatter={v => formatPrice(v)} />
+                <BarChart data={chartData} barSize={28}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} axisLine={false} tickLine={false} />
+                  <YAxis stroke="#94a3b8" fontSize={11} axisLine={false} tickLine={false}
+                    tickFormatter={v => formatPrice(v as number)} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '10px' }}
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '10px' }}
                     formatter={(v: number) => [formatPriceFull(v), 'Ventas']}
                   />
-                  <Bar dataKey="ventas" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="ventas" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                No hay datos de ventas aún
+                No hay datos de ventas para este período
               </div>
             )}
           </div>

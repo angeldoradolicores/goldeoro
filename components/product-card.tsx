@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingBag, Heart, Eye } from 'lucide-react'
+import SparklesUI from './sparkles'
 import { useCartStore, useFavoritesStore } from '@/lib/store'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -43,9 +44,9 @@ function formatPrice(price: number) {
 function MetalBadge({ text, variant = 'gold' }: { text: string; variant?: 'gold' | 'chrome' | 'crimson' }) {
   const styles = {
     gold: {
-      background: 'linear-gradient(135deg, rgba(176,141,87,0.15), rgba(200,164,77,0.1))',
-      border: '1px solid rgba(200,164,77,0.4)',
-      color: '#D4AF37',
+      background: 'linear-gradient(135deg, rgba(221,232,245,0.18), rgba(201,205,210,0.12))',
+      border: '1px solid rgba(221,232,245,0.25)',
+      color: '#DDE8F5',
     },
     chrome: {
       background: 'linear-gradient(135deg, rgba(192,192,192,0.1), rgba(139,139,139,0.08))',
@@ -73,11 +74,10 @@ function MetalBadge({ text, variant = 'gold' }: { text: string; variant?: 'gold'
 }
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
-  const { addItem } = useCartStore()
-  const { toggleFavorite, isFavorite } = useFavoritesStore()
+  const addItem = useCartStore(state => state.addItem)
+  const toggleFavorite = useFavoritesStore(state => state.toggleFavorite)
+  const isWishlisted = useFavoritesStore(state => state.items.some(i => i.id === product.id))
   const [isHovered, setIsHovered] = useState(false)
-
-  const isWishlisted = isFavorite(product.id)
 
   const discount = product.original_price
     ? Math.round((1 - product.price / product.original_price) * 100)
@@ -93,8 +93,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    const wasWishlisted = isWishlisted
     await toggleFavorite(product as any)
-    if (!isWishlisted) {
+    if (!wasWishlisted) {
       toast.success('Agregado a favoritos')
     } else {
       toast.info('Eliminado de favoritos')
@@ -104,9 +105,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
+      whileHover={{ rotateX: 3, rotateY: -3, scale: 1.01 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
       className="group"
+      style={{ transformStyle: 'preserve-3d' }}
     >
       <Link href={`/producto/${product.slug || product.id}`}>
         <div
@@ -115,7 +118,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             background: '#0D0D0D',
             border: isHovered ? '1px solid rgba(192,192,192,0.25)' : '1px solid #262626',
             boxShadow: isHovered
-              ? '0 20px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(200,164,77,0.05)'
+              ? '0 20px 48px rgba(0,0,0,0.75), 0 0 0 1px rgba(221,232,245,0.1)'
               : '0 4px 16px rgba(0,0,0,0.4)',
             transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
           }}
@@ -123,7 +126,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           onMouseLeave={() => setIsHovered(false)}
         >
           {/* Image Container */}
-          <div className="relative aspect-square overflow-hidden" style={{ background: '#171717' }}>
+            <div className="relative aspect-square overflow-hidden" style={{ background: '#171717' }}>
             <Image
               src={product.images?.[0] || '/images/placeholder-hat.jpg'}
               alt={product.name}
@@ -142,6 +145,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 opacity: isHovered ? 1 : 0,
               }}
             />
+
+            {/* Sparkles + shimmer overlay */}
+            <SparklesUI extra={isHovered ? 2 : 0} />
+            <div className="reflect-shimmer" />
 
             {/* Reflejo satinado superior */}
             <div
@@ -180,8 +187,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 style={{
                   background: 'rgba(13,13,13,0.85)',
                   backdropFilter: 'blur(8px)',
-                  border: isWishlisted ? '1px solid rgba(200,164,77,0.5)' : '1px solid #333',
-                  color: isWishlisted ? '#D4AF37' : '#8B8B8B',
+                  border: isWishlisted ? '1px solid rgba(221,232,245,0.25)' : '1px solid #333',
+                  color: isWishlisted ? '#DDE8F5' : '#8B8B8B',
                 }}
               >
                 <Heart className="w-4 h-4" style={{ fill: isWishlisted ? 'currentColor' : 'none' }} />
@@ -221,7 +228,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   letterSpacing: '0.2em',
                   background: product.stock === 0
                     ? 'rgba(38,38,38,0.95)'
-                    : 'linear-gradient(135deg, #C8A44D 0%, #B08D57 100%)',
+                    : 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 100%)',
                   color: product.stock === 0 ? '#8B8B8B' : '#050505',
                   backdropFilter: 'blur(8px)',
                 }}
@@ -286,7 +293,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 className="text-base font-bold"
                 style={{
                   fontFamily: 'var(--font-cinzel)',
-                  background: 'linear-gradient(135deg, #B08D57, #D4AF37)',
+                  background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
