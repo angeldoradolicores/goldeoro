@@ -90,6 +90,48 @@ export default function CheckoutPage() {
   })
   const [nequiPhone, setNequiPhone] = useState('')
 
+  const normalizeDigits = (value: string) => value.replace(/\D/g, '')
+  const isValidEmail = (email: string) => email.trim() === '' ? false : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const isValidPhone = (phone: string) => phone.trim() === '' ? false : /^\d{7,15}$/.test(normalizeDigits(phone))
+  const isValidPostalCode = (postalCode: string) => postalCode.trim() === '' ? true : /^\d{4,10}$/.test(postalCode)
+  
+  const getEmailError = (email: string): string | null => {
+    if (!email.trim()) return 'El correo es requerido'
+    if (!isValidEmail(email)) return 'Formato de correo inválido (ej: ejemplo@correo.com)'
+    return null
+  }
+  
+  const getPhoneError = (phone: string): string | null => {
+    if (!phone.trim()) return 'El teléfono es requerido'
+    if (!isValidPhone(phone)) return 'Teléfono inválido (7-15 dígitos)'
+    return null
+  }
+  
+  const getPostalCodeError = (postalCode: string): string | null => {
+    if (postalCode.trim() === '') return null
+    if (!isValidPostalCode(postalCode)) return 'Código postal inválido (solo dígitos, 4-10 caracteres)'
+    return null
+  }
+
+  const validateShippingInfo = (): boolean => {
+    if (!shippingData.fullName.trim()) return false
+    if (!shippingData.email.trim() || !isValidEmail(shippingData.email)) return false
+    if (!shippingData.phone.trim() || !isValidPhone(shippingData.phone)) return false
+    if (!selectedDepartment || !shippingData.city.trim()) return false
+    if (!shippingData.address.trim()) return false
+    if (!isValidPostalCode(shippingData.postalCode)) return false
+    return true
+  }
+
+  const validateNewAddress = () => {
+    if (!newAddress.full_name.trim() || !newAddress.street.trim() || !newAddress.city.trim() || !newAddress.state.trim() || !newAddress.postal_code.trim() || !newAddress.phone.trim()) {
+      return false
+    }
+    if (!isValidPhone(newAddress.phone)) return false
+    if (!isValidPostalCode(newAddress.postal_code)) return false
+    return true
+  }
+
   const [selectedShipping, setSelectedShipping] = useState('')
   const shippingCost = shippingOptions.find(s => s.id === selectedShipping)?.price || 0
 
@@ -196,8 +238,8 @@ export default function CheckoutPage() {
       toast.error('Debes iniciar sesión para guardar una dirección')
       return
     }
-    if (!newAddress.full_name || !newAddress.street || !newAddress.city || !newAddress.state || !newAddress.postal_code || !newAddress.phone) {
-      toast.error('Por favor completa todos los campos')
+    if (!validateNewAddress()) {
+      toast.error('Por favor completa todos los campos con datos válidos')
       return
     }
 
@@ -272,20 +314,8 @@ export default function CheckoutPage() {
 
   // Complete order
   const handleCompleteOrder = async () => {
-    if (!shippingData.fullName || !shippingData.email || !shippingData.phone || !selectedDepartment || !shippingData.city || !shippingData.address) {
-      toast.error('Por favor completa todos los campos de envío')
-      setStep(2)
-      return
-    }
-    // Simple email format validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shippingData.email)) {
-      toast.error('Correo electrónico no válido')
-      setStep(2)
-      return
-    }
-    // Simple phone validation (digits only, length 7-15)
-    if (!/^\d{7,15}$/.test(shippingData.phone.replace(/\D/g, ''))) {
-      toast.error('Número de celular no válido')
+    if (!validateShippingInfo()) {
+      toast.error('Por favor completa todos los campos de envío con datos válidos')
       setStep(2)
       return
     }
@@ -495,8 +525,9 @@ export default function CheckoutPage() {
                             </button>
                             <span className="w-6 text-center text-xs text-white-diamond font-sans font-semibold">{item.quantity}</span>
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="w-7 h-7 rounded-none bg-graphite border border-steel/30 flex items-center justify-center hover:bg-gold-action hover:text-obsidian transition-colors text-chrome"
+                              onClick={() => item.quantity < item.product.stock && updateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= item.product.stock}
+                              className={`w-7 h-7 rounded-none bg-graphite border border-steel/30 flex items-center justify-center transition-colors text-chrome ${item.quantity >= item.product.stock ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gold-action hover:text-obsidian'}`}
                             >
                               <Plus className="w-3 h-3" />
                             </button>
@@ -589,12 +620,16 @@ export default function CheckoutPage() {
                               />
                               <Input
                                 placeholder="Código postal"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 value={newAddress.postal_code}
                                 onChange={(e) => setNewAddress({...newAddress, postal_code: e.target.value})}
                                 className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
                               />
                               <Input
                                 placeholder="Teléfono"
+                                type="tel"
+                                inputMode="tel"
                                 value={newAddress.phone}
                                 onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
                                 className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
@@ -603,6 +638,7 @@ export default function CheckoutPage() {
                                 <Button
                                   onClick={handleSaveNewAddress}
                                   className="btn-luxury rounded-none text-xs uppercase flex-1"
+                                  disabled={!validateNewAddress()}
                                 >
                                   Guardar
                                 </Button>
@@ -637,20 +673,40 @@ export default function CheckoutPage() {
                           type="email"
                           value={shippingData.email}
                           onChange={(e) => setShippingData({ ...shippingData, email: e.target.value })}
-                          className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel"
+                          className={`bg-graphite border rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel ${
+                            shippingData.email.trim() && getEmailError(shippingData.email)
+                              ? 'border-destructive focus:border-destructive'
+                              : 'border-steel/30'
+                          }`}
                           placeholder="tu@email.com"
                           required
                         />
+                        {shippingData.email.trim() && getEmailError(shippingData.email) && (
+                          <p className="text-xs text-destructive mt-1">{getEmailError(shippingData.email)}</p>
+                        )}
                       </div>
                       <div className="space-y-1">
                         <Label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Teléfono *</Label>
                         <Input
+                          type="tel"
+                          inputMode="tel"
                           value={shippingData.phone}
-                          onChange={(e) => setShippingData({ ...shippingData, phone: e.target.value })}
-                          className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel"
-                          placeholder="+57 300 123 4567"
+                          onChange={(e) => {
+                            const digits = normalizeDigits(e.target.value)
+                            setShippingData({ ...shippingData, phone: digits })
+                          }}
+                          maxLength={15}
+                          className={`bg-graphite border rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel ${
+                            shippingData.phone.trim() && getPhoneError(shippingData.phone)
+                              ? 'border-destructive focus:border-destructive'
+                              : 'border-steel/30'
+                          }`}
+                          placeholder="3001234567"
                           required
                         />
+                        {shippingData.phone.trim() && getPhoneError(shippingData.phone) && (
+                          <p className="text-xs text-destructive mt-1">{getPhoneError(shippingData.phone)}</p>
+                        )}
                       </div>
                       <div className="md:col-span-2 space-y-1">
                         <Label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Departamento *</Label>
@@ -692,11 +748,23 @@ export default function CheckoutPage() {
                       <div className="space-y-1">
                         <Label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Código Postal</Label>
                         <Input
+                          inputMode="numeric"
                           value={shippingData.postalCode}
-                          onChange={(e) => setShippingData({ ...shippingData, postalCode: e.target.value })}
-                          className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel"
+                          onChange={(e) => {
+                            const digits = normalizeDigits(e.target.value)
+                            setShippingData({ ...shippingData, postalCode: digits })
+                          }}
+                          maxLength={10}
+                          className={`bg-graphite border rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel ${
+                            shippingData.postalCode.trim() && getPostalCodeError(shippingData.postalCode)
+                              ? 'border-destructive focus:border-destructive'
+                              : 'border-steel/30'
+                          }`}
                           placeholder="110111"
                         />
+                        {shippingData.postalCode.trim() && getPostalCodeError(shippingData.postalCode) && (
+                          <p className="text-xs text-destructive mt-1">{getPostalCodeError(shippingData.postalCode)}</p>
+                        )}
                       </div>
                       <div className="md:col-span-2 space-y-1">
                         <Label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Dirección *</Label>
@@ -750,7 +818,7 @@ export default function CheckoutPage() {
                       <Button
                         onClick={() => setStep(3)}
                         className="flex-1 btn-luxury rounded-none text-xs uppercase tracking-widest font-semibold py-6"
-                        disabled={!shippingData.city || !selectedShipping || !shippingData.fullName || !shippingData.email || !shippingData.phone || !shippingData.address}
+                        disabled={!validateShippingInfo() || !selectedShipping}
                       >
                         Continuar
                       </Button>
@@ -766,6 +834,60 @@ export default function CheckoutPage() {
                     exit={{ opacity: 0, x: 15 }}
                     className="space-y-6"
                   >
+                    {/* Shipping Summary */}
+                    <div className="bg-graphite/40 border border-steel/30 rounded-none p-5 shadow-lg">
+                      <h3 className="text-xs font-display font-semibold uppercase tracking-widest text-white-diamond flex items-center gap-2 mb-4 pb-3 border-b border-steel/20">
+                        <Truck className="w-4 h-4 text-gold-action" />
+                        Resumen de Envío
+                      </h3>
+                      <div className="grid md:grid-cols-2 gap-4 text-xs">
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-titanium font-light">Nombre</p>
+                            <p className="text-white-diamond font-semibold">{shippingData.fullName}</p>
+                          </div>
+                          <div>
+                            <p className="text-titanium font-light">Teléfono</p>
+                            <p className="text-white-diamond font-semibold">{shippingData.phone}</p>
+                          </div>
+                          <div>
+                            <p className="text-titanium font-light">Email</p>
+                            <p className="text-white-diamond font-semibold break-all">{shippingData.email}</p>
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-titanium font-light">Dirección</p>
+                            <p className="text-white-diamond font-semibold">{shippingData.address}</p>
+                          </div>
+                          <div>
+                            <p className="text-titanium font-light">Ubicación</p>
+                            <p className="text-white-diamond font-semibold">{shippingData.city}, {selectedDepartment}</p>
+                          </div>
+                          {shippingData.postalCode && (
+                            <div>
+                              <p className="text-titanium font-light">Código Postal</p>
+                              <p className="text-white-diamond font-semibold">{shippingData.postalCode}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="border-t border-steel/20 mt-4 pt-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-titanium font-light text-xs">Método de Envío</p>
+                            <p className="text-white-diamond font-semibold">{shippingOptions.find(opt => opt.id === selectedShipping)?.name}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-titanium font-light text-xs">Costo de Envío</p>
+                            <p className={`font-semibold ${shippingCost === 0 ? 'text-gold-action' : 'text-white-diamond'}`}>
+                              {shippingCost === 0 ? 'Gratis' : formatPrice(shippingCost)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <h2 className="text-sm font-display font-semibold uppercase tracking-widest text-white-diamond flex items-center gap-2 border-b border-steel/10 pb-3 mb-6">
                       <CreditCard className="w-4 h-4 text-gold-action" />
                       Método de Pago
@@ -977,38 +1099,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Promo Code */}
-                <div className="mt-6 pt-6 border-t border-steel/20">
-                  <Label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Código Promocional</Label>
-                  <div className="flex gap-2 mt-1.5">
-                    <Input
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                      className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-11 text-xs placeholder:text-steel uppercase tracking-wider"
-                      placeholder="LUXURY30"
-                      disabled={!!appliedPromo}
-                    />
-                    <Button
-                      variant="outline"
-                      className="border-steel/50 hover:border-gold-action hover:text-gold-action rounded-none text-xs uppercase tracking-wider font-semibold shrink-0"
-                      onClick={handleApplyPromo}
-                      disabled={isApplyingPromo || !!appliedPromo}
-                    >
-                      {isApplyingPromo ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Aplicar'}
-                    </Button>
-                  </div>
-                  {appliedPromo && (
-                    <button
-                      onClick={() => {
-                        setAppliedPromo(null)
-                        setPromoCode('')
-                      }}
-                      className="text-[10px] uppercase tracking-wider text-destructive mt-2.5 hover:underline font-semibold"
-                    >
-                      Remover código
-                    </button>
-                  )}
-                </div>
+               
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { ArrowRight, Truck, ShieldCheck, CheckCircle2, TrendingUp } from "lucide-react"
@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ProductCard } from "@/components/product-card"
-import { mockProducts, type Product } from "@/lib/store"
+import { useProducts } from '@/lib/hooks/use-products'
+import { type Product } from "@/lib/store"
 
 const trustPromoCards = [
   {
@@ -36,33 +37,8 @@ const trustPromoCards = [
 ]
 
 export default function PromocionesPage() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchPromos = async () => {
-      try {
-        const res = await fetch('/api/products?promotion=true')
-        if (res.ok) {
-          const data = await res.json()
-          if (Array.isArray(data) && data.length > 0) {
-            setProducts(data)
-          } else {
-            // No promotions from API — show empty state
-            setProducts([])
-          }
-        } else {
-          // Error fetching — treat as empty
-          setProducts([])
-        }
-      } catch {
-        setProducts([])
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchPromos()
-  }, [])
+  const { products: rawProducts, isLoading: loading } = useProducts({ promotion: true })
+  const products = rawProducts as Product[]
 
   return (
     <div className="min-h-screen bg-obsidian text-foreground">

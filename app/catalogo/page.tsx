@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useCategories } from '@/lib/hooks/use-products'
+import { useCategories, useProducts } from '@/lib/hooks/use-products'
 
 function CatalogoContent() {
   const searchParams = useSearchParams()
@@ -32,13 +32,14 @@ function CatalogoContent() {
   const initialSort = searchParams.get('sort') || 'featured'
 
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState(search)
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [sortBy, setSortBy] = useState(initialSort)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showFilters, setShowFilters] = useState(false)
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
   const { categories: adminCategories = [], isLoading: loadingCategories } = useCategories()
+  const categoryParam = selectedCategory !== 'Todos' ? selectedCategory : undefined
+  const { products, isLoading: loading } = useProducts({ category: categoryParam, search: debouncedSearch, limit: 100 })
   const validCategorySlugs = adminCategories.map((category) => category.slug)
   const router = useRouter()
 
@@ -70,39 +71,14 @@ function CatalogoContent() {
     }
   }, [filter])
 
-  // Fetch products from API or use mock data
+  // Debounce search input so we don't flood the API with requests
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const params = new URLSearchParams()
-        if (selectedCategory !== 'Todos') {
-          params.set('category', selectedCategory)
-        }
-        if (search) {
-          params.set('search', search)
-        }
-        
-        const res = await fetch(`/api/products?${params}`)
-        if (res.ok) {
-          const data = await res.json()
-          if (Array.isArray(data)) {
-            setProducts(data)
-          } else {
-            setProducts([])
-          }
-        } else {
-          setProducts([])
-        }
-      } catch {
-        setProducts([])
-      } finally {
-        setLoading(false)
-      }
-    }
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 250)
 
-    const debounce = setTimeout(fetchProducts, 300)
-    return () => clearTimeout(debounce)
-  }, [selectedCategory, search])
+    return () => clearTimeout(timer)
+  }, [search])
 
   // Keep URL in sync with selected filters (category + sort) without causing replace loops
   useEffect(() => {

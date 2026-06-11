@@ -94,6 +94,12 @@ export function Navbar() {
 
     initAuth()
 
+    // Fallback sync: attempt to fetch cart/favorites from server on mount.
+    // This helps on production (Vercel) when the auth session cookie is available
+    // but the auth change event wasn't observed by the client yet.
+    useCartStore.getState().syncCartFromServer().catch(() => {})
+    useFavoritesStore.getState().syncFavoritesFromServer().catch(() => {})
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const currentUser = session?.user || null
       setUser(currentUser)

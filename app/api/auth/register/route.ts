@@ -18,7 +18,9 @@ async function getSiteUrl(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { email, password, fullName } = body
+    const email = (body.email || '').trim()
+    const password = body.password
+    const fullName = body.fullName || ''
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email y contraseña son requeridos.' }, { status: 400 })

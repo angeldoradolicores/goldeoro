@@ -145,11 +145,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               src={(product.images || []).find(Boolean) || '/images/placeholder-hat.jpg'}
               alt={product.name}
               fill
-              unoptimized
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover transition-transform duration-700"
               style={{
                 transform: isHovered ? 'scale(1.07)' : 'scale(1)',
               }}
+              loading="lazy"
             />
 
             {/* Overlay gradiente al hover */}

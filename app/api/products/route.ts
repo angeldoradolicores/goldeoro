@@ -15,7 +15,17 @@ export async function GET(request: Request) {
     let query = supabase
       .from('products')
       .select(`
-        *,
+        id,
+        name,
+        slug,
+        price,
+        original_price,
+        stock,
+        featured,
+        is_promotion,
+        colors,
+        sizes,
+        created_at,
         product_images(url, is_primary, sort_order),
         category:categories(name, slug)
       `)
@@ -64,7 +74,11 @@ export async function GET(request: Request) {
     }
 
     if (limit) {
-      query = query.limit(parseInt(limit))
+      const requestedLimit = Number.parseInt(limit, 10)
+      const capLimit = Number.isFinite(requestedLimit) ? Math.min(requestedLimit, 100) : undefined
+      if (capLimit) {
+        query = query.limit(capLimit)
+      }
     }
 
     const { data: products, error } = await query
@@ -87,7 +101,11 @@ export async function GET(request: Request) {
       }
     })
 
-    return NextResponse.json(transformedProducts)
+    return NextResponse.json(transformedProducts, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    })
   } catch (error) {
     console.error('[v0] Products API error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

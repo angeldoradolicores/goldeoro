@@ -69,7 +69,7 @@ export async function sendConfirmationEmail(to: string, actionLink: string, full
   try {
     await transporter.sendMail({
       from: fromEmail,
-      to,
+      to: to.trim(),
       subject,
       html,
     })

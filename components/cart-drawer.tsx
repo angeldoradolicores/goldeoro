@@ -169,6 +169,7 @@ export function CartDrawer() {
                             src={item.product.images?.[0] || '/images/placeholder-hat.jpg'}
                             alt={item.product.name}
                             fill
+                            sizes="72px"
                             className="object-cover"
                           />
                         </div>
@@ -238,16 +239,21 @@ export function CartDrawer() {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="w-6 h-6 flex items-center justify-center transition-all duration-200"
+                              onClick={() => item.quantity < item.product.stock && updateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= item.product.stock}
+                              className={`w-6 h-6 flex items-center justify-center transition-all duration-200 ${item.quantity >= item.product.stock ? 'opacity-40 cursor-not-allowed' : ''}`}
                               style={{ border: '1px solid #262626', color: '#8B8B8B' }}
                               onMouseEnter={e => {
-                                (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(221,232,245,0.35)'
-                                ;(e.currentTarget as HTMLButtonElement).style.color = '#DDE8F5'
+                                if (item.quantity < item.product.stock) {
+                                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(221,232,245,0.35)'
+                                  ;(e.currentTarget as HTMLButtonElement).style.color = '#DDE8F5'
+                                }
                               }}
                               onMouseLeave={e => {
-                                (e.currentTarget as HTMLButtonElement).style.borderColor = '#262626'
-                                ;(e.currentTarget as HTMLButtonElement).style.color = '#8B8B8B'
+                                if (item.quantity < item.product.stock) {
+                                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#262626'
+                                  ;(e.currentTarget as HTMLButtonElement).style.color = '#8B8B8B'
+                                }
                               }}
                             >
                               <Plus style={{ width: '10px', height: '10px' }} />

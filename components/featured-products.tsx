@@ -1,44 +1,18 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, Award } from 'lucide-react'
-import { mockProducts, type Product } from '@/lib/store'
+import { type Product } from '@/lib/store'
 import { Button } from '@/components/ui/button'
 import { ProductCard } from '@/components/product-card'
+import { useFeaturedProducts } from '@/lib/hooks/use-products'
 
 export function FeaturedProducts() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch('/api/products?featured=true&limit=8')
-        if (res.ok) {
-          const data = await res.json()
-          if (Array.isArray(data) && data.length > 0) {
-            setProducts(data)
-          } else {
-            // No products from API — show empty state
-            setProducts([])
-          }
-        } else {
-          // Error fetching — treat as empty
-          setProducts([])
-        }
-      } catch {
-        setProducts([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProducts()
-  }, [])
+  const { products, isLoading: loading } = useFeaturedProducts(8)
 
   // Skeleton loader for products
   const ProductSkeleton = () => (

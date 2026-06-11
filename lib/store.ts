@@ -287,15 +287,16 @@ export const useCartStore = create<CartStore>((set, get) => ({
   },
   updateQuantity: (itemId, quantity) => {
     const itemToUpdate = get().items.find((i) => i.id === itemId)
-    const newItems = quantity === 0
+    if (!itemToUpdate) return
+
+    const clampedQuantity = Math.max(0, Math.min(quantity, itemToUpdate.product.stock || 0))
+    const newItems = clampedQuantity === 0
       ? get().items.filter((i) => i.id !== itemId)
       : get().items.map((i) =>
-          i.id === itemId ? { ...i, quantity } : i
+          i.id === itemId ? { ...i, quantity: clampedQuantity } : i
         )
     set({ items: newItems })
     saveLocalCart(newItems, get().userId)
-
-    if (!itemToUpdate) return
     let currentUserId = get().userId
 
     const persistViaAPI = async (uid: string | null) => {

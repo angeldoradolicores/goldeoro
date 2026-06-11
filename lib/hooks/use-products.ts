@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import type { ProductWithImages, Category, Promotion } from '@/lib/supabase/types'
+import type { Category, Promotion } from '@/lib/supabase/types'
+import type { Product } from '@/lib/store'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
@@ -25,7 +26,7 @@ export function useProducts(options?: {
   const queryString = params.toString()
   const url = `/api/products${queryString ? `?${queryString}` : ''}`
 
-  const { data, error, isLoading, mutate } = useSWR<ProductWithImages[]>(url, fetcher)
+  const { data, error, isLoading, mutate } = useSWR<Product[]>(url, fetcher)
 
   return {
     products: data || [],
@@ -36,7 +37,7 @@ export function useProducts(options?: {
 }
 
 export function useProduct(slug: string) {
-  const { data, error, isLoading, mutate } = useSWR<ProductWithImages>(
+  const { data, error, isLoading, mutate } = useSWR<Product>(
     slug ? `/api/products/${slug}` : null,
     fetcher
   )

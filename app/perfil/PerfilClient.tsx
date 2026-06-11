@@ -245,6 +245,31 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }
 
+  const normalizeDigits = (value: string) => value.replace(/\D/g, '')
+  const isValidPhone = (phone: string) => phone.trim() === '' ? false : /^\d{7,15}$/.test(normalizeDigits(phone))
+  const isValidPostalCode = (postalCode: string) => postalCode.trim() === '' ? true : /^\d{4,10}$/.test(postalCode)
+
+  const getPhoneError = (phone: string): string | null => {
+    if (!phone.trim()) return 'El teléfono es requerido'
+    if (!isValidPhone(phone)) return 'Teléfono inválido (7-15 dígitos)'
+    return null
+  }
+  
+  const getPostalCodeError = (postalCode: string): string | null => {
+    if (postalCode.trim() === '') return null
+    if (!isValidPostalCode(postalCode)) return 'Código postal inválido (solo dígitos, 4-10 caracteres)'
+    return null
+  }
+
+  const validateAddressForm = () => {
+    if (!addressForm.full_name.trim() || !addressForm.phone.trim() || !addressForm.street.trim() || !addressForm.state.trim() || !addressForm.city.trim() || !addressForm.postal_code.trim()) {
+      return false
+    }
+    if (!isValidPhone(addressForm.phone)) return false
+    if (!isValidPostalCode(addressForm.postal_code)) return false
+    return true
+  }
+
   const handleLogout = async () => {
     await useAuthStore.getState().logout()
     router.refresh()
@@ -312,6 +337,10 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
 
   const handleSaveAddress = async () => {
     if (!userId) return
+    if (!validateAddressForm()) {
+      toast.error('Por favor completa los campos de dirección con datos válidos')
+      return
+    }
     setSaving(true)
     if (editingAddress) {
       const { error } = await supabase.from('addresses').update(addressForm).eq('id', editingAddress.id)
@@ -597,15 +626,82 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
                   className="bg-graphite border border-steel/30 rounded-none p-6 space-y-4 shadow-xl">
                   <h3 className="font-display text-sm uppercase tracking-wider text-white-diamond">{editingAddress ? 'Editar Dirección' : 'Nueva Dirección'}</h3>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Nombre completo</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.full_name} onChange={e => setAddressForm(f => ({ ...f, full_name: e.target.value }))} /></div>
-                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Teléfono</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.phone} onChange={e => setAddressForm(f => ({ ...f, phone: e.target.value }))} /></div>
-                    <div className="space-y-1 md:col-span-2"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Dirección</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.street} onChange={e => setAddressForm(f => ({ ...f, street: e.target.value }))} /></div>
-                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Departamento</label><Select value={addressForm.state} onValueChange={(value) => { setAddressForm(f => ({ ...f, state: value, city: '' })); setMunicipalities(departmentMunicipalities[value] || []); }}><SelectTrigger className="bg-graphite border-steel/50 rounded-none focus:border-chrome text-white-diamond text-sm font-sans"><SelectValue placeholder="Selecciona departamento" /></SelectTrigger><SelectContent className="bg-graphite border-steel/50 rounded-none text-xs text-white-diamond">{Object.keys(departmentMunicipalities).map((dept) => (<SelectItem key={dept} value={dept}>{dept}</SelectItem>))}</SelectContent></Select></div>
-                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Municipio</label><Select value={addressForm.city} onValueChange={(value) => setAddressForm(f => ({ ...f, city: value }))} disabled={!addressForm.state}><SelectTrigger className="bg-graphite border-steel/50 rounded-none focus:border-chrome text-white-diamond text-sm font-sans"><SelectValue placeholder="Selecciona municipio" /></SelectTrigger><SelectContent className="bg-graphite border-steel/50 rounded-none text-xs text-white-diamond">{municipalities.map((mun) => (<SelectItem key={mun} value={mun}>{mun}</SelectItem>))}</SelectContent></Select></div>
-                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Código Postal</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.postal_code} onChange={e => setAddressForm(f => ({ ...f, postal_code: e.target.value }))} /></div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Nombre completo</label>
+                      <Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.full_name} onChange={e => setAddressForm(f => ({ ...f, full_name: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Teléfono *</label>
+                      <Input
+                        type="tel"
+                        inputMode="tel"
+                        className={`bg-carbon border rounded-none focus:border-chrome text-white-diamond text-sm font-sans ${
+                          addressForm.phone.trim() && getPhoneError(addressForm.phone)
+                            ? 'border-destructive focus:border-destructive'
+                            : 'border-steel/30'
+                        }`}
+                        value={addressForm.phone}
+                        onChange={e => {
+                          const digits = normalizeDigits(e.target.value)
+                          setAddressForm(f => ({ ...f, phone: digits }))
+                        }}
+                        maxLength={15}
+                        placeholder="3001234567"
+                      />
+                      {addressForm.phone.trim() && getPhoneError(addressForm.phone) && (
+                        <p className="text-xs text-destructive mt-1">{getPhoneError(addressForm.phone)}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Dirección</label>
+                      <Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.street} onChange={e => setAddressForm(f => ({ ...f, street: e.target.value }))} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Departamento</label>
+                      <Select value={addressForm.state} onValueChange={(value) => { setAddressForm(f => ({ ...f, state: value, city: '' })); setMunicipalities(departmentMunicipalities[value] || []); }}>
+                        <SelectTrigger className="bg-graphite border-steel/50 rounded-none focus:border-chrome text-white-diamond text-sm font-sans">
+                          <SelectValue placeholder="Selecciona departamento" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-graphite border-steel/50 rounded-none text-xs text-white-diamond">
+                          {Object.keys(departmentMunicipalities).map((dept) => (<SelectItem key={dept} value={dept}>{dept}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Municipio</label>
+                      <Select value={addressForm.city} onValueChange={(value) => setAddressForm(f => ({ ...f, city: value }))} disabled={!addressForm.state}>
+                        <SelectTrigger className="bg-graphite border-steel/50 rounded-none focus:border-chrome text-white-diamond text-sm font-sans">
+                          <SelectValue placeholder="Selecciona municipio" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-graphite border-steel/50 rounded-none text-xs text-white-diamond">
+                          {municipalities.map((mun) => (<SelectItem key={mun} value={mun}>{mun}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Código Postal</label>
+                      <Input
+                        inputMode="numeric"
+                        className={`bg-carbon border rounded-none focus:border-chrome text-white-diamond text-sm font-sans ${
+                          addressForm.postal_code.trim() && getPostalCodeError(addressForm.postal_code)
+                            ? 'border-destructive focus:border-destructive'
+                            : 'border-steel/30'
+                        }`}
+                        value={addressForm.postal_code}
+                        onChange={e => {
+                          const digits = normalizeDigits(e.target.value)
+                          setAddressForm(f => ({ ...f, postal_code: digits }))
+                        }}
+                        maxLength={10}
+                        placeholder="110111"
+                      />
+                      {addressForm.postal_code.trim() && getPostalCodeError(addressForm.postal_code) && (
+                        <p className="text-xs text-destructive mt-1">{getPostalCodeError(addressForm.postal_code)}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-4 pt-2">
-                    <Button onClick={handleSaveAddress} className="btn-luxury rounded-none text-xs uppercase tracking-wider font-semibold" disabled={saving}>{saving ? <Loader2 className="w-4 h-4 animate-spin mr-1 text-obsidian" /> : null}Guardar</Button>
+                    <Button onClick={handleSaveAddress} className="btn-luxury rounded-none text-xs uppercase tracking-wider font-semibold" disabled={saving || !validateAddressForm()}>{saving ? <Loader2 className="w-4 h-4 animate-spin mr-1 text-obsidian" /> : null}Guardar</Button>
                     <Button variant="ghost" className="text-chrome hover:text-white-diamond text-xs uppercase tracking-wider" onClick={() => { setShowAddressForm(false); setEditingAddress(null); setMunicipalities([]) }}>Cancelar</Button>
                   </div>
                 </motion.div>
