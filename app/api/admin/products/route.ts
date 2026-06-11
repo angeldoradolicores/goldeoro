@@ -1,26 +1,69 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+function normalizeSlug(name: string) {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+async function generateUniqueSlug(supabase: ReturnType<typeof createClient>, name: string, excludeId?: string) {
+  const baseSlug = normalizeSlug(name || 'producto')
+  let query = supabase
+    .from('products')
+    .select('slug')
+    .ilike('slug', `${baseSlug}%`)
+
+  if (excludeId) {
+    query = query.neq('id', excludeId)
+  }
+
+  const { data: existing, error } = await query
+  if (error) {
+    throw error
+  }
+
+  const slugs = (existing || []).map((item: any) => item.slug)
+  if (!slugs.includes(baseSlug)) {
+    return baseSlug
+  }
+
+  let suffix = 1
+  while (slugs.includes(`${baseSlug}-${suffix}`)) {
+    suffix += 1
+  }
+
+  return `${baseSlug}-${suffix}`
+}
+
+async function ensureAdmin(supabase: ReturnType<typeof createClient>) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (!profile?.is_admin) {
+    return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
+  }
+
+  return null
+}
+
 // GET - List products for admin
 export async function GET() {
   try {
     const supabase = await createClient()
-
-    // Check if user is admin
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'No autorizado', products: [] }, { status: 401 })
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', user.id)
-      .maybeSingle()
-
-    if (!profile?.is_admin) {
-      return NextResponse.json({ error: 'Acceso denegado', products: [] }, { status: 403 })
-    }
+    const adminError = await ensureAdmin(supabase)
+    if (adminError) return adminError
 
     const { data: products, error } = await supabase
       .from('products')
@@ -61,16 +104,12 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
+    if (!body.name) {
+      return NextResponse.json({ error: 'Nombre requerido' }, { status: 400 })
+    }
 
-    // Generate slug from name
-    const slug = body.name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
+    const slug = await generateUniqueSlug(supabase, body.name)
 
-    // Create product
     const { data: product, error } = await supabase
       .from('products')
       .insert({
@@ -125,14 +164,17 @@ export async function PUT(request: Request) {
 
     const body = await request.json()
 
-    if (!body.id) {
-      return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
+    if (!body.id || !body.name) {
+      return NextResponse.json({ error: 'ID y nombre requeridos' }, { status: 400 })
     }
+
+    const slug = await generateUniqueSlug(supabase, body.name, body.id)
 
     const { data: product, error } = await supabase
       .from('products')
       .update({
         name: body.name,
+        slug,
         description: body.description,
         price: body.price,
         original_price: body.original_price || null,

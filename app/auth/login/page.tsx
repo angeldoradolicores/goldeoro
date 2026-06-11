@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Crown, Mail, Lock, ArrowRight, Loader2 } from "lucide-react"
 import SparklesUI from '@/components/sparkles'
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [isOAuthLoading, setIsOAuthLoading] = useState<string | null>(null)
 
+  const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/'
   
@@ -42,46 +43,86 @@ function LoginForm() {
 
     try {
       const supabase = createClient()
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      })
+      const email = formData.email.trim()
+      const password = formData.password
 
-      if (error) {
-        toast.error(error.message === 'Invalid login credentials'
-          ? 'Email o contrasena incorrectos'
-          : error.message)
+      if (!email || !password) {
+        toast.error('Email y contraseña son requeridos')
         return
       }
 
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', user.id)
-          .maybeSingle()
+      // Step 1: Sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-        const is_admin = !!profile?.is_admin
+      if (signInError) {
+        const errorMsg = signInError.message === 'Invalid login credentials'
+          ? 'Email o contraseña incorrectos'
+          : signInError.message || 'Error al iniciar sesión'
+        console.error('[login] Sign in error:', signInError)
+        toast.error(errorMsg)
+        return
+      }
 
-        // Update global stores immediately
-        useAuthStore.getState().setUser(user)
-        useAuthStore.getState().setIsAdmin(is_admin)
-        useAuthStore.getState().setInitialized(true)
-        useCartStore.getState().setUserId(user.id)
-        useFavoritesStore.getState().setUserId(user.id)
+      // Step 2: Get user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) {
+        console.error('[login] Get user error:', userError)
+        toast.error('No se pudo obtener información del usuario')
+        return
+      }
 
-        // Wait for server sync to complete before redirecting
+      // Step 3: Get profile/admin status
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (profileError) {
+        console.error('[login] Profile error:', profileError)
+        // Don't fail on profile error, just assume not admin
+      }
+
+      const is_admin = !!profile?.is_admin
+
+      // Step 4: Update global stores
+      useAuthStore.getState().setUser(user)
+      useAuthStore.getState().setIsAdmin(is_admin)
+      useAuthStore.getState().setInitialized(true)
+      useCartStore.getState().setUserId(user.id)
+      useFavoritesStore.getState().setUserId(user.id)
+
+      // Step 5: Sync data from server
+      try {
         await Promise.all([
           useCartStore.getState().syncCartFromServer(),
           useFavoritesStore.getState().syncFavoritesFromServer(),
         ])
-
-        // Use soft redirect to preserve Zustand state
-        router.push(redirectTo)
+      } catch (syncErr) {
+        console.warn('[login] Sync error (non-blocking):', syncErr)
+        // Don't fail on sync errors
       }
-    } catch {
-      toast.error('Error al iniciar sesion')
+
+      // Step 6: Wait a bit for React to process state updates
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Step 7: Determine redirect URL
+      let finalRedirect = redirectTo
+      if (is_admin && redirectTo === '/') {
+        finalRedirect = '/admin/dashboard'
+      } else if (redirectTo.startsWith('/admin') && !is_admin) {
+        finalRedirect = '/'
+      }
+
+      console.log('[login] Success, redirecting to:', finalRedirect)
+      router.push(finalRedirect)
+    } catch (err) {
+      console.error('[login] Unexpected error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión'
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }

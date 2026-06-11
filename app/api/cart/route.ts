@@ -110,8 +110,24 @@ export async function DELETE(req: Request) {
     }
 
     const body = await req.json()
-    const { product_id, selected_color, selected_size } = body
+    const { product_id, selected_color, selected_size, clear_all } = body
 
+    // Handle clear_all case (for logout)
+    if (clear_all) {
+      const { error } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) {
+        console.error('[cart DELETE clear_all] Error:', error.message)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true })
+    }
+
+    // Handle individual item deletion
     if (!product_id) {
       return NextResponse.json({ error: 'Missing product_id' }, { status: 400 })
     }

@@ -342,7 +342,11 @@ export const useCartStore = create<CartStore>((set, get) => ({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ clear_all: true }),
         })
-        if (!res.ok) console.error('Error clearing cart in DB:', res.statusText)
+        // 401 during logout is expected - session may have already ended
+        if (!res.ok && res.status !== 401) {
+          const text = await res.text()
+          console.error('Error clearing cart in DB:', text)
+        }
       } catch (err) {
         console.error('Error clearing cart:', err)
       }

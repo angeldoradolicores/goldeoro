@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, use, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -47,6 +47,17 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
   const [selectedColor, setSelectedColor] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [addedToCart, setAddedToCart] = useState(false)
+
+  const getImageIndexForColor = (color: string, product: Product) => {
+    if (!product || !product.colors || !product.images) return 0
+    const colorIndex = product.colors.findIndex(
+      (itemColor) => itemColor.toLowerCase() === color.toLowerCase()
+    )
+    if (colorIndex >= 0 && colorIndex < product.images.length) {
+      return colorIndex
+    }
+    return 0
+  }
   const addItem = useCartStore(state => state.addItem)
   const toggleFavorite = useFavoritesStore(state => state.toggleFavorite)
   const cartItems = useCartStore(state => state.items)
@@ -62,7 +73,9 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
           const data = await res.json()
           if (data.product) {
             setProduct(data.product)
-            setSelectedColor(data.product.colors?.[0] || '')
+            const initialColor = data.product.colors?.[0] || ''
+            setSelectedColor(initialColor)
+            setSelectedImage(getImageIndexForColor(initialColor, data.product))
             const catParam = encodeURIComponent(data.product.category || '')
             const related = await fetch(`/api/products?category=${catParam}&limit=5`)
             if (related.ok) {
@@ -185,7 +198,12 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
                   {product.images.map((image, index) => (
                     <button
                       key={index}
-                      onClick={() => setSelectedImage(index)}
+                      onClick={() => {
+                        setSelectedImage(index)
+                        if (product.colors?.[index]) {
+                          setSelectedColor(product.colors[index])
+                        }
+                      }}
                       className={`relative w-20 h-20 rounded-none overflow-hidden border transition-all ${
                         selectedImage === index
                           ? 'border-gold-action'
@@ -264,7 +282,10 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
                     {product.colors.map((color) => (
                       <button
                         key={color}
-                        onClick={() => setSelectedColor(color)}
+                        onClick={() => {
+                          setSelectedColor(color)
+                          setSelectedImage(getImageIndexForColor(color, product))
+                        }}
                         className={`px-4 py-2 rounded-none border text-xs uppercase tracking-wider font-medium transition-all ${
                           selectedColor === color
                             ? 'border-gold-action bg-gold-action/10 text-gold-action'

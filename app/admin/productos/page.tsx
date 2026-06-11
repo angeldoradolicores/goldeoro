@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
 import {
   Select,
   SelectContent,
@@ -69,7 +70,7 @@ interface Product {
   created_at: string
 }
 
-const categories = ['Todos', 'Premium', 'Urban', 'Snapback', 'Classic', 'Sport', 'Limited Edition']
+const defaultCategories = ['Todos', 'Premium', 'Urban', 'Snapback', 'Classic', 'Sport', 'Limited Edition']
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('es-CO', {
@@ -90,6 +91,7 @@ function generateSlug(name: string) {
 
 export default function ProductosPage() {
   const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<string[]>(defaultCategories)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('Todos')
@@ -100,19 +102,34 @@ export default function ProductosPage() {
 
   useEffect(() => {
     fetchProducts()
+    fetchCategories()
   }, [])
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/admin/products')
+      const response = await fetch('/api/admin/products', { credentials: 'include' })
       const data = await response.json()
-      if (data.products) {
+      if (response.ok && data.products) {
         setProducts(data.products)
+      } else {
+        console.error('Error fetching products:', response.status, data?.error || response.statusText)
       }
     } catch (error) {
       console.error('Error fetching products:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/admin/categories', { credentials: 'include' })
+      const data = await response.json()
+      if (response.ok && data.categories) {
+        setCategories(['Todos', ...data.categories.map((category: any) => category.name)])
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error)
     }
   }
 
@@ -136,12 +153,18 @@ export default function ProductosPage() {
     try {
       const response = await fetch('/api/admin/products', {
         method: 'DELETE',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: product.id }),
       })
 
       if (response.ok) {
         setProducts(products.filter((p) => p.id !== product.id))
+      } else {
+        const data = await response.json().catch(() => null)
+        const message = data?.error || response.statusText || 'Error eliminando producto'
+        console.error('Error deleting product:', response.status, message)
+        toast.error(message)
       }
     } catch (error) {
       console.error('Error deleting product:', error)
@@ -159,13 +182,14 @@ export default function ProductosPage() {
 
       const response = await fetch('/api/admin/products', {
         method,
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
 
-      const data = await response.json()
+      const data = await response.json().catch(() => null)
 
-      if (response.ok && data.product) {
+      if (response.ok && data?.product) {
         if (editingProduct) {
           setProducts(products.map((p) => 
             p.id === editingProduct.id ? data.product : p
@@ -174,6 +198,11 @@ export default function ProductosPage() {
           setProducts([data.product, ...products])
         }
         setIsModalOpen(false)
+        toast.success(editingProduct ? 'Producto actualizado' : 'Producto creado')
+      } else {
+        const message = data?.error || response.statusText || 'Error guardando producto'
+        console.error('Error saving product:', response.status, message)
+        toast.error(message)
       }
     } catch (error) {
       console.error('Error saving product:', error)
@@ -334,7 +363,7 @@ export default function ProductosPage() {
                             Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <a href={`/productos/${product.slug}`} target="_blank">
+                            <a href={`/producto/${product.slug}`} target="_blank" rel="noreferrer">
                               <Eye className="w-4 h-4 mr-2" />
                               Ver en tienda
                             </a>
@@ -374,6 +403,7 @@ export default function ProductosPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         product={editingProduct}
+        categories={categories}
         onSave={handleSaveProduct}
         saving={saving}
       />
@@ -403,19 +433,22 @@ export default function ProductosPage() {
   )
 }
 
-function ProductModal({
-  isOpen,
-  onClose,
-  product,
-  onSave,
-  saving,
-}: {
+function ProductModal(props: {
   isOpen: boolean
   onClose: () => void
   product: Product | null
+  categories: string[]
   onSave: (data: Partial<Product>) => void
   saving: boolean
 }) {
+  const {
+    isOpen,
+    onClose,
+    product,
+    categories = defaultCategories,
+    onSave,
+    saving,
+  } = props
   const [formData, setFormData] = useState<Partial<Product>>({
     name: '',
     description: '',
@@ -433,6 +466,41 @@ function ProductModal({
   const [videoUrl, setVideoUrl] = useState('')
   const [uploadingImage, setUploadingImage] = useState(false)
   const [uploadingVideo, setUploadingVideo] = useState(false)
+  const [newColor, setNewColor] = useState('')
+
+  const availableColors = [
+    'Negro',
+    'Blanco',
+    'Gris',
+    'Azul',
+    'Rojo',
+    'Verde',
+    'Dorado',
+    'Café',
+    'Beige',
+    'Rosa',
+    'Amarillo',
+    'Plata',
+    'Morado',
+  ]
+
+  const addColor = () => {
+    if (!newColor) return
+    const currentColors = formData.colors || []
+    if (currentColors.includes(newColor)) {
+      toast.error('El color ya está agregado')
+      return
+    }
+    setFormData({ ...formData, colors: [...currentColors, newColor] })
+    setNewColor('')
+  }
+
+  const removeColor = (color: string) => {
+    setFormData({
+      ...formData,
+      colors: (formData.colors || []).filter((item) => item !== color),
+    })
+  }
 
   // Formatting helpers
   const formatNumberInput = (val: string) => {
@@ -528,12 +596,13 @@ function ProductModal({
 
       const response = await fetch('/api/admin/upload', {
         method: 'POST',
+        credentials: 'include',
         body: data,
       })
       
-      const result = await response.json()
+      const result = await response.json().catch(() => null)
       
-      if (response.ok && result.url) {
+      if (response.ok && result?.url) {
         if (type === 'image') {
           setFormData(prev => ({
             ...prev,
@@ -546,7 +615,9 @@ function ProductModal({
           }))
         }
       } else {
-        console.error('Error uploading file:', result.error)
+        const message = result?.error || 'Error subiendo archivo'
+        console.error('Error uploading file:', message)
+        toast.error(message)
       }
     } catch (error) {
       console.error('Upload failed', error)
@@ -601,36 +672,41 @@ function ProductModal({
                   <Plus className="w-4 h-4" />
                 </Button>
                 <div className="relative">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'image')}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                    disabled={uploadingImage}
-                  />
-                  <Button type="button" variant="outline" disabled={uploadingImage}>
+                  <Button type="button" variant="outline" disabled={uploadingImage} className="relative overflow-hidden">
                     {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
                     {uploadingImage ? '' : 'Subir'}
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, 'image')}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
+                      disabled={uploadingImage}
+                    />
                   </Button>
                 </div>
               </div>
               {formData.images && formData.images.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.images.map((img, index) => (
-                    <div key={index} className="relative group">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden">
-                        <Image src={img} alt="" fill className="object-cover" />
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.images.map((img, index) => (
+                      <div key={index} className="relative group">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden">
+                          <Image src={img} alt="" fill className="object-cover" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Las imágenes y los colores se emparejan por posición: la primera imagen corresponde al primer color, la segunda imagen al segundo color, etc.
+                  </p>
+                </>
               )}
             </div>
           </div>
@@ -650,16 +726,16 @@ function ProductModal({
                   <Plus className="w-4 h-4" />
                 </Button>
                 <div className="relative">
-                  <Input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => handleFileUpload(e, 'video')}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                    disabled={uploadingVideo}
-                  />
-                  <Button type="button" variant="outline" disabled={uploadingVideo}>
+                  <Button type="button" variant="outline" disabled={uploadingVideo} className="relative overflow-hidden">
                     {uploadingVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
                     {uploadingVideo ? '' : 'Subir'}
+                    <Input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => handleFileUpload(e, 'video')}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
+                      disabled={uploadingVideo}
+                    />
                   </Button>
                 </div>
               </div>
@@ -770,16 +846,50 @@ function ProductModal({
           {/* Colors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label>Colores (separados por coma)</Label>
-              <Input
-                value={formData.colors?.join(', ')}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  colors: e.target.value.split(',').map(c => c.trim()).filter(Boolean) 
-                })}
-                className="mt-1 bg-secondary border-border/50"
-                placeholder="Negro, Blanco, Dorado"
-              />
+              <Label>Selecciona colores</Label>
+              <div className="mt-1 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+                <Select value={newColor} onValueChange={setNewColor}>
+                  <SelectTrigger className="bg-secondary border-border/50">
+                    <SelectValue placeholder="Selecciona un color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableColors.map((color) => (
+                      <SelectItem key={color} value={color}>
+                        {color}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button type="button" variant="outline" onClick={addColor} className="sm:mt-0">
+                  Agregar
+                </Button>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(formData.colors || []).map((color) => (
+                  <span
+                    key={color}
+                    className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-secondary px-3 py-1 text-sm"
+                  >
+                    {color}
+                    <button
+                      type="button"
+                      onClick={() => removeColor(color)}
+                      className="text-destructive hover:text-destructive/80"
+                      aria-label={`Eliminar color ${color}`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Las imágenes y los colores se emparejan por posición: la primera imagen corresponde al primer color, la segunda imagen al segundo color, etc.
+              </p>
+              {formData.images && formData.colors && formData.images.length !== formData.colors.length && (
+                <p className="text-xs text-destructive mt-2">
+                  La cantidad de colores y de imágenes no coincide. Para que el color muestre la imagen correcta, deben tener el mismo número de elementos.
+                </p>
+              )}
             </div>
           </div>
 

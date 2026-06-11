@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   LayoutDashboard, 
@@ -15,25 +15,80 @@ import {
   X,
   Bell,
   Search,
-  ChevronDown
+  ChevronDown,
+  Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/lib/store'
 
 const sidebarLinks = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/productos', label: 'Productos', icon: Package },
   { href: '/admin/pedidos', label: 'Pedidos', icon: ShoppingCart },
   { href: '/admin/clientes', label: 'Clientes', icon: Users },
+  { href: '/admin/categorias', label: 'Categorías', icon: Settings },
   { href: '/admin/configuracion', label: 'Configuracion', icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
   const [bellRing, setBellRing] = useState(false)
+  const [isAdminVerified, setIsAdminVerified] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  
+  const isAdmin = useAuthStore(state => state.isAdmin)
+  const user = useAuthStore(state => state.user)
+
+  // Verify admin status on mount
+  useEffect(() => {
+    const verifyAdmin = async () => {
+      try {
+        const supabase = createClient()
+        
+        // First check auth store
+        if (isAdmin && user) {
+          setIsAdminVerified(true)
+          setIsLoading(false)
+          return
+        }
+
+        // If not in store, verify with server
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        
+        if (!authUser) {
+          router.push(`/auth/login?redirect=${pathname}`)
+          return
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', authUser.id)
+          .maybeSingle()
+
+        if (!profile?.is_admin) {
+          router.push('/?unauthorized=1')
+          return
+        }
+
+        useAuthStore.getState().setUser(authUser as any)
+        useAuthStore.getState().setIsAdmin(true)
+        setIsAdminVerified(true)
+      } catch (err) {
+        console.error('[admin layout] Verification error:', err)
+        router.push('/')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    verifyAdmin()
+  }, [])
 
   useEffect(() => {
     const supabase = createClient()
@@ -81,6 +136,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       supabase.removeChannel(channel)
     }
   }, [])
+
+  // Show loading state while verifying admin
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Verificando acceso...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If not admin verified, don't render
+  if (!isAdminVerified) {
+    return null
+  }
 
   return (
     <div className="min-h-screen flex bg-background">

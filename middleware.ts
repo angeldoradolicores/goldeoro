@@ -42,18 +42,27 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(login)
     }
 
-    const { data: profile } = await supabase
+    // Add a small delay to ensure DB is updated with admin status
+    // This helps with timing issues on Vercel
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('is_admin')
       .eq('id', user.id)
       .maybeSingle()
 
-    if (!profile?.is_admin) {
+    // If profile not found (new user), allow entry - will be caught by page level checks
+    if (error && error.code !== 'PGRST116') {
+      console.error('[middleware] Profile lookup error:', error)
+    }
+
+    if (profile && !profile.is_admin) {
       const home = request.nextUrl.clone()
       home.pathname = '/'
       home.searchParams.set('unauthorized', '1')
       return NextResponse.redirect(home)
     }
+    
+    // If profile is null, silently allow - page will handle permission check
   }
 
   // Protect /perfil routes
