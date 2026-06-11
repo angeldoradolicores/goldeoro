@@ -55,11 +55,15 @@ export async function sendConfirmationEmail(to: string, actionLink: string, full
     </html>
   `
 
+  const cleanedTo = to.trim().toLowerCase()
+
+  console.log('[mail] Preparing confirmation email', { to: cleanedTo, from: fromEmail })
+
   if (!transporter) {
     console.warn('[mail] Gmail transporter is not configured. Skipping real send.')
     console.log('=== MOCK URBAN CROWN CONFIRMATION EMAIL ===')
     console.log(`FROM: ${fromEmail}`)
-    console.log(`TO: ${to}`)
+    console.log(`TO: ${cleanedTo}`)
     console.log(`SUBJECT: ${subject}`)
     console.log(`CONFIRMATION LINK: ${actionLink}`)
     console.log('===========================================')
@@ -69,10 +73,17 @@ export async function sendConfirmationEmail(to: string, actionLink: string, full
   try {
     await transporter.sendMail({
       from: fromEmail,
-      to: to.trim(),
+      to: cleanedTo,
       subject,
       html,
+      // Envelope forces SMTP MAIL FROM and RCPT TO, useful to control return-path
+      envelope: {
+        from: gmailUser || 'urbancrowncol4@gmail.com',
+        to: cleanedTo,
+      },
+      replyTo: gmailUser || 'urbancrowncol4@gmail.com',
     })
+    console.log('[mail] Confirmation email sent to', cleanedTo)
   } catch (err) {
     console.error('[mail] sendConfirmationEmail failed:', err)
   }
