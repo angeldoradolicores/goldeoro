@@ -32,10 +32,10 @@ export function Navbar() {
 
   const handleFavorites = () => {
     if (!user) {
-      router.push('/auth/login?redirect=/catalogo')
+      router.push('/auth/login?redirect=/favoritos')
       return
     }
-    router.push('/perfil?tab=favoritos')
+    router.push('/favoritos')
   }
 
   useEffect(() => {
@@ -71,6 +71,10 @@ export function Navbar() {
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
 
+        // Set userId in cart/favorites stores BEFORE syncing
+        useCartStore.getState().setUserId(currentUser.id)
+        useFavoritesStore.getState().setUserId(currentUser.id)
+
         // Use server-side API routes to load cart/favorites.
         // This bypasses client JWT timing issues — the server always has the
         // session from cookies, so queries always succeed on first load.
@@ -96,7 +100,6 @@ export function Navbar() {
       if (!currentUser) {
         setIsAdmin(false)
         useCartStore.getState().setUserId(null)
-        useCartStore.getState().clearCart()
         useFavoritesStore.getState().setUserId(null)
         useFavoritesStore.getState().clearFavorites()
       } else {
@@ -106,6 +109,11 @@ export function Navbar() {
           .eq('id', currentUser.id)
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
+        
+        // Set userId in cart/favorites stores BEFORE syncing
+        useCartStore.getState().setUserId(currentUser.id)
+        useFavoritesStore.getState().setUserId(currentUser.id)
+        
         // On auth state change events (login/session-refresh), await the sync
         await Promise.all([
           useCartStore.getState().syncCartFromServer(),

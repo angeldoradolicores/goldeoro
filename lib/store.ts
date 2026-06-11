@@ -136,6 +136,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
   },
   setUserId: (userId) => {
     const previousUserId = get().userId
+    console.log('[setUserId] Switching from', previousUserId, 'to', userId)
+    
     if (previousUserId === userId) {
       set({ userId })
       return
@@ -145,6 +147,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
     if (userId) {
       const guestItems = loadLocalCart(null)
       const userItems = loadLocalCart(userId)
+      
+      console.log('[setUserId] Guest items:', guestItems.length, 'User items:', userItems.length)
 
       const map = new Map<string, CartItem>()
       userItems.forEach(i => map.set(i.id, { ...i }))
@@ -158,6 +162,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
       })
 
       const merged = Array.from(map.values())
+      console.log('[setUserId] Merged to', merged.length, 'items')
       set({ userId, items: merged })
       saveLocalCart(merged, userId)
 
@@ -179,6 +184,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
     // switching to guest (logout)
     const guest = loadLocalCart(null)
+    console.log('[setUserId] Logout - keeping', guest.length, 'guest items')
     set({ userId: null, items: guest })
   },
   addItem: (product, color, size, quantity = 1) => {
@@ -200,6 +206,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
     const persistViaAPI = async (uid: string | null) => {
       if (!uid) return
       try {
+        console.log('[addItem] Persisting to API for user:', uid)
         const res = await fetch('/api/cart', {
           method: 'POST',
           credentials: 'include',
@@ -211,20 +218,29 @@ export const useCartStore = create<CartStore>((set, get) => ({
             selected_size: size || null,
           }),
         })
-        if (!res.ok) console.error('Error syncing cart item:', res.statusText)
+        if (!res.ok) {
+          const text = await res.text()
+          console.error('[addItem] Error syncing cart item:', res.statusText, text)
+        } else {
+          console.log('[addItem] Successfully synced cart item')
+        }
       } catch (err) {
-        console.error('Error syncing cart item:', err)
+        console.error('[addItem] Error syncing cart item:', err)
       }
     }
 
     if (currentUserId) {
       persistViaAPI(currentUserId)
     } else {
+      console.log('[addItem] No userId, attempting syncCartFromServer')
       // If no userId, try to sync from server first
       get().syncCartFromServer().then(() => {
         const uid = get().userId
         if (uid) {
+          console.log('[addItem] Got userId after sync:', uid)
           persistViaAPI(uid)
+        } else {
+          console.log('[addItem] Still no userId after sync')
         }
       })
     }
@@ -453,6 +469,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
   // Loads cart via server API route — bypasses client JWT timing issues on Vercel
   syncCartFromServer: async () => {
     try {
+      console.log('[syncCartFromServer] Starting sync')
       const res = await fetch('/api/cart', { credentials: 'include' })
       if (!res.ok) {
         console.error('[syncCartFromServer] Response not ok:', res.status)
@@ -462,14 +479,22 @@ export const useCartStore = create<CartStore>((set, get) => ({
       const serverItems: CartItem[] = data.items ?? []
       const userId: string | null = data.userId ?? null
 
+      console.log('[syncCartFromServer] Got', serverItems.length, 'items from server for user:', userId)
+
       if (userId) {
         set({ userId })
-        const localItems = get().items
+        const guestItems = get().items
         const mergedMap = new Map<string, CartItem>()
+        // Server items (real persisted cart) take precedence
         serverItems.forEach(item => mergedMap.set(item.id, item))
-        // local items (guest cart) take precedence
-        localItems.forEach(item => mergedMap.set(item.id, item))
+        // Guest items only fill gaps that aren't in server
+        guestItems.forEach(item => {
+          if (!mergedMap.has(item.id)) {
+            mergedMap.set(item.id, item)
+          }
+        })
         const merged = Array.from(mergedMap.values())
+        console.log('[syncCartFromServer] Merged to', merged.length, 'items')
         set({ items: merged })
         saveLocalCart(merged, userId)
       }
@@ -720,9 +745,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
     } catch (err) {
       console.error('Error during logout:', err)
     }
-    // Clear local state regardless
+    // Clear local auth state and keep cart stored for next login
     set({ user: null, isAdmin: false })
-    useCartStore.getState().clearCart()
     useCartStore.getState().setUserId(null)
     useCartStore.getState().hydrateCart(null)
     useFavoritesStore.getState().clearFavorites()

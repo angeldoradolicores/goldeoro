@@ -8,20 +8,7 @@ export async function POST() {
     // 1. Obtener el usuario ANTES de cerrar sesión
     const { data: { user } } = await supabase.auth.getUser()
 
-    // 2. Limpiar el carrito en la BD mientras la sesión aún es válida (usar service role)
-    if (user) {
-      const { error: cartError } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('user_id', user.id)
-
-      if (cartError) {
-        console.error('[logout] Error clearing cart:', cartError.message)
-        // No retornamos error aquí porque queremos continuar con el logout
-      }
-    }
-
-    // 3. Ahora sí cerrar sesión
+    // 2. No borrar el carrito al cerrar sesión. Sólo se cierra la sesión.
     const { error } = await supabase.auth.signOut()
 
     if (error) {

@@ -7,7 +7,7 @@ export default async function PedidosPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let userOrders = []
+  let userOrders: any[] = []
   if (user) {
     const { data } = await supabase
       .from('orders')

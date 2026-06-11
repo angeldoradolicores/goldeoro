@@ -85,7 +85,7 @@ export default function DevolucionesPage() {
               ¿Cómo iniciar un cambio?
             </h3>
             <p className="text-titanium text-sm leading-relaxed mb-6 font-sans font-light">
-              Es muy simple. Escríbele a nuestro asesor personal por WhatsApp al número +57 310 899 9049 con los siguientes datos:
+              Es muy simple. Escríbele a nuestro asesor personal por WhatsApp al número +57 300 657 7286 con los siguientes datos:
             </p>
             <ul className="list-none space-y-3 text-titanium text-xs md:text-sm mb-8 font-sans font-light">
               <li className="flex items-center gap-2">

@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Eye, EyeOff, Crown, Mail, Lock, ArrowRight, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Loader2 } from "lucide-react"
 import SparklesUI from '@/components/sparkles'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +26,42 @@ function LoginForm() {
     password: "",
   })
 
+  const [formErrors, setFormErrors] = useState({
+    email: "",
+    password: "",
+  })
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+  const validateField = (name: keyof typeof formErrors, value: string) => {
+    let error = ""
+
+    if (name === 'email') {
+      if (!value.trim()) {
+        error = 'El correo es obligatorio'
+      } else if (!emailRegex.test(value.trim())) {
+        error = 'Ingresa un correo válido'
+      }
+    }
+
+    if (name === 'password') {
+      if (!value) {
+        error = 'La contraseña es obligatoria'
+      } else if (value.length < 8) {
+        error = 'Debe tener al menos 8 caracteres'
+      }
+    }
+
+    setFormErrors((prev) => ({ ...prev, [name]: error }))
+    return error === ""
+  }
+
+  const validateLoginForm = () => {
+    const emailValid = validateField('email', formData.email)
+    const passwordValid = validateField('password', formData.password)
+    return emailValid && passwordValid
+  }
+
   useEffect(() => {
     // Reset auth state and switch cart/favorites back to guest mode.
     useAuthStore.getState().setUser(null)
@@ -39,17 +75,16 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!validateLoginForm()) {
+      return
+    }
+
     setIsLoading(true)
 
     try {
       const supabase = createClient()
       const email = formData.email.trim()
       const password = formData.password
-
-      if (!email || !password) {
-        toast.error('Email y contraseña son requeridos')
-        return
-      }
 
       // Step 1: Sign in
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -128,9 +163,9 @@ function LoginForm() {
     }
   }
 
-  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+  const handleOAuthSignIn = async (provider: 'google') => {
     setIsOAuthLoading(provider)
-    
+
     try {
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
@@ -144,7 +179,7 @@ function LoginForm() {
         toast.error(error.message)
         setIsOAuthLoading(null)
       }
-    } catch {
+    } catch (error) {
       toast.error('Error al iniciar sesion')
       setIsOAuthLoading(null)
     }
@@ -168,12 +203,12 @@ function LoginForm() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <Crown className="w-20 h-20 text-chrome mx-auto mb-6" />
+            <div className="mx-auto mb-6 text-chrome text-6xl font-black">✝</div>
             <h1 className="text-5xl font-bold text-foreground mb-4">
-              LUXURY<span className="text-chrome">HATS</span>
+              ✝ URBAN <span className="text-chrome">CROWN</span> ✝
             </h1>
             <p className="text-muted-foreground text-lg max-w-md">
-              Accede a tu cuenta y descubre las gorras mas exclusivas del mercado urbano
+              Accede a tu universo urbano exclusivo y descubre drops de calle premium.
             </p>
           </motion.div>
 
@@ -188,7 +223,6 @@ function LoginForm() {
                 key={i}
                 className="w-24 h-24 rounded-2xl bg-card/50 backdrop-blur border border-chrome/20 flex items-center justify-center"
               >
-                <Crown className="w-8 h-8 text-chrome/50" />
               </div>
             ))}
           </motion.div>
@@ -206,9 +240,9 @@ function LoginForm() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <Link href="/">
-              <Crown className="w-12 h-12 text-chrome mx-auto mb-4" />
+              <div className="mx-auto mb-4 text-chrome text-6xl font-black">✝</div>
               <h1 className="text-3xl font-bold">
-                LUXURY<span className="text-chrome">HATS</span>
+                URBAN <span className="text-chrome">CROWN</span>
               </h1>
             </Link>
           </div>
@@ -224,26 +258,39 @@ function LoginForm() {
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder="ejemplo@correo.com"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value })
+                      if (formErrors.email) validateField('email', e.target.value)
+                    }}
+                    onBlur={(e) => validateField('email', e.target.value)}
                     className="pl-12 h-14 bg-background/50 border-border rounded-xl focus:border-chrome focus:ring-chrome/20"
                     required
                     disabled={isLoading}
                     autoComplete="off"
                   />
+                  {formErrors.email ? (
+                    <p className="text-xs text-red-500 mt-1">{formErrors.email}</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-1">Ej: ejemplo@correo.com</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Contrasena</label>
+                <label className="text-sm font-medium text-foreground">Contraseña</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     type={showPassword ? "text" : "password"}
-                    placeholder="********"
+                    placeholder="Mínimo 8 caracteres"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, password: e.target.value })
+                      if (formErrors.password) validateField('password', e.target.value)
+                    }}
+                    onBlur={(e) => validateField('password', e.target.value)}
                     className="pl-12 pr-12 h-14 bg-background/50 border-border rounded-xl focus:border-chrome focus:ring-chrome/20"
                     required
                     disabled={isLoading}
@@ -257,6 +304,11 @@ function LoginForm() {
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                {formErrors.password ? (
+                  <p className="text-xs text-red-500 mt-1">{formErrors.password}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">Usa al menos 8 caracteres</p>
+                )}
               </div>
 
               <div className="flex items-center justify-end">
@@ -291,7 +343,7 @@ function LoginForm() {
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-4">
+              <div className="mt-6 grid grid-cols-1 gap-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -325,28 +377,8 @@ function LoginForm() {
                     </>
                   )}
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isOAuthLoading !== null}
-                  onClick={() => handleOAuthSignIn('facebook')}
-                  className="h-14 border-border hover:border-chrome/50 rounded-xl transition-all duration-300"
-                >
-                  {isOAuthLoading === 'facebook' ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                      </svg>
-                      Facebook
-                    </>
-                  )}
-                </Button>
               </div>
             </div>
-
-
 
             <p className="mt-8 text-center text-muted-foreground">
               No tienes cuenta?{" "}

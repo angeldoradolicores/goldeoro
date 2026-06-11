@@ -173,6 +173,7 @@ export default function CheckoutPage() {
 
   const fillAddressData = (address: any) => {
     setSelectedDepartment(address.state || '')
+    setMunicipalities(departmentMunicipalities[address.state] || [])
     setShippingData(prev => ({
       ...prev,
       city: address.city || '',
@@ -191,6 +192,10 @@ export default function CheckoutPage() {
   }
 
   const handleSaveNewAddress = async () => {
+    if (!user) {
+      toast.error('Debes iniciar sesión para guardar una dirección')
+      return
+    }
     if (!newAddress.full_name || !newAddress.street || !newAddress.city || !newAddress.state || !newAddress.postal_code || !newAddress.phone) {
       toast.error('Por favor completa todos los campos')
       return
@@ -571,7 +576,7 @@ export default function CheckoutPage() {
                                   <SelectValue placeholder="Departamento" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-graphite border-steel/30 rounded-none text-xs">
-                                  {departmentsData.map((dept) => (
+                                  {departmentsData?.data.map((dept: { id: number; name: string }) => (
                                     <SelectItem key={dept.id} value={dept.name}>{dept.name}</SelectItem>
                                   ))}
                                 </SelectContent>

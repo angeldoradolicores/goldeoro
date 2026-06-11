@@ -25,6 +25,14 @@ export interface WompiTransaction {
   customer_email: string
   currency: string
   payment_method_type: string
+  payment_method?: {
+    type: string
+    extra?: {
+      external_identifier?: string
+      [key: string]: any
+    }
+    [key: string]: any
+  }
   status: 'PENDING' | 'APPROVED' | 'DECLINED' | 'VOIDED' | 'ERROR'
   status_message?: string
   created_at: string

@@ -1,12 +1,81 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer'
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const gmailUser = process.env.GMAIL_USER
+const gmailPass = process.env.GMAIL_APP_PASSWORD
+const transporter = gmailUser && gmailPass ? nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: gmailUser,
+    pass: gmailPass,
+  },
+}) : null
 
 interface TrackingInfo {
   carrier?: string
   trackingNumber?: string
   trackingPhotoUrl?: string
   adminNote?: string
+}
+
+export async function sendConfirmationEmail(to: string, actionLink: string, fullName = '') {
+  const fromEmail = gmailUser ? `Urban Crown <${gmailUser}>` : 'Urban Crown <urbancrowncol4@gmail.com>'
+  const subject = '✨ Confirma tu cuenta URBAN CROWN'
+  const firstName = fullName?.split(' ')[0] || 'Amigo'
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>${subject}</title>
+      </head>
+      <body style="margin:0;padding:0;background:#050505;color:#ffffff;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <div style="max-width:680px;margin:0 auto;padding:40px 24px;">
+          <div style="background:#111111;border:1px solid rgba(255,255,255,.08);border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);">
+            <div style="padding:36px 32px 24px;text-align:center;background:linear-gradient(180deg, rgba(255,0,127,.12), transparent);">
+              <p style="margin:0;font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#E2B13C;">Urban Crown</p>
+              <h1 style="margin:16px 0 0 0;font-size:32px;line-height:1.1;color:#ffffff;">Bienvenido a la corona urbana</h1>
+              <p style="margin:12px 0 0 0;font-size:15px;color:#bbbbbb;">Confirma tu cuenta para acceder a drops exclusivos, envíos VIP y estilo que manda en la calle.</p>
+            </div>
+
+            <div style="padding:32px;background:#111111;">
+              <p style="margin:0 0 20px 0;font-size:16px;color:#dddddd;">Hola ${firstName},</p>
+              <p style="margin:0 0 24px 0;font-size:15px;color:#999999;line-height:1.8;">Tu cuenta URBAN CROWN ya está casi lista. Solo falta un paso: confirma tu email para activar tu acceso premium.</p>
+              <a href="${actionLink}" style="display:inline-flex;align-items:center;justify-content:center;width:100%;padding:16px 20px;margin:0 auto 24px auto;background:#E2B13C;color:#000000;font-weight:800;text-transform:uppercase;letter-spacing:1px;border-radius:14px;text-decoration:none;font-size:14px;">Confirmar mi cuenta</a>
+              <p style="margin:0;font-size:14px;color:#7f7f7f;line-height:1.8;">Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
+              <p style="margin:16px 0 0 0;padding:16px;background:rgba(255,255,255,.04);border-radius:14px;font-size:13px;color:#f2f2f2;word-break:break-all;">${actionLink}</p>
+            </div>
+
+            <div style="padding:24px 32px 32px;background:#0b0b0b;text-align:center;"> 
+              <p style="margin:0;font-size:12px;color:#666666;">URBAN CROWN — Estilo urbano, actitud exclusiva.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+
+  if (!transporter) {
+    console.warn('[mail] Gmail transporter is not configured. Skipping real send.')
+    console.log('=== MOCK URBAN CROWN CONFIRMATION EMAIL ===')
+    console.log(`FROM: ${fromEmail}`)
+    console.log(`TO: ${to}`)
+    console.log(`SUBJECT: ${subject}`)
+    console.log(`CONFIRMATION LINK: ${actionLink}`)
+    console.log('===========================================')
+    return
+  }
+
+  try {
+    await transporter.sendMail({
+      from: fromEmail,
+      to,
+      subject,
+      html,
+    })
+  } catch (err) {
+    console.error('[mail] sendConfirmationEmail failed:', err)
+  }
 }
 
 interface OrderItem {
@@ -65,7 +134,7 @@ export async function sendOrderStatusEmail(
     color: '#FF007F', // default neon-pink
   }
 
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+  const fromEmail = gmailUser ? `Urban Crown <${gmailUser}>` : 'Urban Crown <urbancrowncol4@gmail.com>'
 
   const formattedTotal = details
     ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(details.total)
@@ -221,27 +290,10 @@ export async function sendOrderStatusEmail(
 </html>
 `
 
-  if (resend) {
-    try {
-      const { data, error } = await resend.emails.send({
-        from: `Urban Crown <${fromEmail}>`,
-        to,
-        subject: config.subject,
-        html,
-      });
-
-      if (error) {
-        console.error('[mail] Resend API error response:', error);
-      } else {
-        console.log('[mail] Email sent successfully via Resend:', data?.id);
-      }
-    } catch (err) {
-      console.error('[mail] Failed to send email via Resend API:', err);
-    }
-  } else {
-    // Mock logging when RESEND_API_KEY is not defined
+  if (!transporter) {
+    console.warn('[mail] Gmail transporter is not configured. Skipping real send.')
     console.log('\n=================== MOCK EMAIL NOTIFICATION ===================')
-    console.log(`FROM: Urban Crown <${fromEmail}>`)
+    console.log(`FROM: ${fromEmail}`)
     console.log(`TO: ${to}`)
     console.log(`SUBJECT: ${config.subject}`)
     console.log(`ORDER STATUS UPDATE: ${status}`)
@@ -252,5 +304,17 @@ export async function sendOrderStatusEmail(
       console.log(`Carrier: ${tracking.carrier}, Tracking Number: ${tracking.trackingNumber}`)
     }
     console.log('===============================================================\n')
+    return
+  }
+
+  try {
+    await transporter.sendMail({
+      from: fromEmail,
+      to,
+      subject: config.subject,
+      html,
+    })
+  } catch (err) {
+    console.error('[mail] Failed to send email via Gmail SMTP:', err);
   }
 }

@@ -121,7 +121,7 @@ export default function ContactoPage() {
               {/* Info Cards */}
               <div className="space-y-4">
                 {[
-                  { icon: Phone, title: "Teléfono de Soporte", info: "+57 310 899 9049" },
+                  { icon: Phone, title: "Teléfono de Soporte", info: "+57 300 657 7286" },
                   { icon: Mail, title: "Correo Electrónico", info: "urbancrowncol4@gmail.com" },
                   { icon: Clock, title: "Horario de Atención", info: "Lun - Vie: 8:00 AM - 6:00 PM | Sáb: 9:00 AM - 7:00 PM" },
                 ].map((item, index) => (

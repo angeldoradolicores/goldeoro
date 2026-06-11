@@ -368,10 +368,7 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
                   <Shield className="w-5 h-5 text-gold-action mb-2" />
                   <span className="text-[10px] uppercase tracking-wider text-titanium font-medium">Garantía</span>
                 </div>
-                <div className="flex flex-col items-center text-center p-4 rounded-none bg-carbon border border-steel/30 shadow-lg">
-                  <RotateCcw className="w-5 h-5 text-gold-action mb-2" />
-                  <span className="text-[10px] uppercase tracking-wider text-titanium font-medium">30 Días Cambio</span>
-                </div>
+               
               </div>
             </motion.div>
           </div>

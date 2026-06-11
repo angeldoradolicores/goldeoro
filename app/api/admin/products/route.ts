@@ -10,7 +10,7 @@ function normalizeSlug(name: string) {
     .replace(/(^-|-$)/g, '')
 }
 
-async function generateUniqueSlug(supabase: ReturnType<typeof createClient>, name: string, excludeId?: string) {
+async function generateUniqueSlug(supabase: Awaited<ReturnType<typeof createClient>>, name: string, excludeId?: string) {
   const baseSlug = normalizeSlug(name || 'producto')
   let query = supabase
     .from('products')
@@ -39,7 +39,7 @@ async function generateUniqueSlug(supabase: ReturnType<typeof createClient>, nam
   return `${baseSlug}-${suffix}`
 }
 
-async function ensureAdmin(supabase: ReturnType<typeof createClient>) {
+async function ensureAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
@@ -110,6 +110,28 @@ export async function POST(request: Request) {
 
     const slug = await generateUniqueSlug(supabase, body.name)
 
+    // Resolve category_id
+    let categoryId = null
+    const reqCategory = body.category_id || body.category
+    if (reqCategory && reqCategory !== 'Todos') {
+      const uuidRegex = /^[0-9a-fA-F-]{36}$/
+      if (uuidRegex.test(reqCategory)) {
+        categoryId = reqCategory
+      } else {
+        // Try slug first
+        const { data: catBySlug } = await supabase.from('categories').select('id').eq('slug', reqCategory.toLowerCase()).limit(1)
+        if (catBySlug && catBySlug.length > 0) {
+          categoryId = catBySlug[0].id
+        } else {
+          // Try name
+          const { data: catByName } = await supabase.from('categories').select('id').ilike('name', reqCategory).limit(1)
+          if (catByName && catByName.length > 0) {
+            categoryId = catByName[0].id
+          }
+        }
+      }
+    }
+
     const { data: product, error } = await supabase
       .from('products')
       .insert({
@@ -118,13 +140,12 @@ export async function POST(request: Request) {
         description: body.description || '',
         price: body.price || 0,
         original_price: body.original_price || null,
-        category: body.category || 'Urban',
+        category_id: categoryId,
         stock: body.stock || 0,
         featured: body.featured || false,
         is_promotion: body.is_promotion || false,
-        images: body.images || [],
-        videos: body.videos || [],
         colors: body.colors || ['Negro'],
+        sizes: body.sizes || ['M'],
       })
       .select()
       .single()
@@ -134,7 +155,57 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ product }, { status: 201 })
+    // Insert images if provided
+    if (body.images && Array.isArray(body.images) && body.images.length > 0) {
+      const imageInserts = body.images.map((url: string, index: number) => ({
+        product_id: product.id,
+        url,
+        is_primary: index === 0,
+        sort_order: index,
+      }))
+      const { error: imgError } = await supabase.from('product_images').insert(imageInserts)
+      if (imgError) {
+        console.error('[v0] Product images insertion error:', imgError)
+      }
+    }
+
+    // Insert videos if provided
+    if (body.videos && Array.isArray(body.videos) && body.videos.length > 0) {
+      const videoInserts = body.videos.map((url: string) => ({
+        product_id: product.id,
+        url,
+      }))
+      const { error: vidError } = await supabase.from('product_videos').insert(videoInserts)
+      if (vidError) {
+        console.error('[v0] Product videos insertion error:', vidError)
+      }
+    }
+
+    // Get final product with resolved relations for client state sync
+    const { data: finalProduct } = await supabase
+      .from('products')
+      .select(`
+        *,
+        product_images(url, is_primary, sort_order),
+        category:categories(name, slug)
+      `)
+      .eq('id', product.id)
+      .maybeSingle()
+
+    let transformedProduct = product
+    if (finalProduct) {
+      const sortedImages = (finalProduct.product_images || [])
+        .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+        .map((img: any) => img.url)
+
+      transformedProduct = {
+        ...finalProduct,
+        images: sortedImages.length > 0 ? sortedImages : [],
+        category: finalProduct.category?.name || 'Premium',
+      }
+    }
+
+    return NextResponse.json({ product: transformedProduct }, { status: 201 })
   } catch (error) {
     console.error('[v0] Admin create product error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -170,6 +241,28 @@ export async function PUT(request: Request) {
 
     const slug = await generateUniqueSlug(supabase, body.name, body.id)
 
+    // Resolve category_id
+    let categoryId = null
+    const reqCategory = body.category_id || body.category
+    if (reqCategory && reqCategory !== 'Todos') {
+      const uuidRegex = /^[0-9a-fA-F-]{36}$/
+      if (uuidRegex.test(reqCategory)) {
+        categoryId = reqCategory
+      } else {
+        // Try slug first
+        const { data: catBySlug } = await supabase.from('categories').select('id').eq('slug', reqCategory.toLowerCase()).limit(1)
+        if (catBySlug && catBySlug.length > 0) {
+          categoryId = catBySlug[0].id
+        } else {
+          // Try name
+          const { data: catByName } = await supabase.from('categories').select('id').ilike('name', reqCategory).limit(1)
+          if (catByName && catByName.length > 0) {
+            categoryId = catByName[0].id
+          }
+        }
+      }
+    }
+
     const { data: product, error } = await supabase
       .from('products')
       .update({
@@ -178,13 +271,12 @@ export async function PUT(request: Request) {
         description: body.description,
         price: body.price,
         original_price: body.original_price || null,
-        category: body.category,
+        category_id: categoryId,
         stock: body.stock,
         featured: body.featured || false,
         is_promotion: body.is_promotion || false,
-        images: body.images || [],
-        videos: body.videos || [],
         colors: body.colors || ['Negro'],
+        sizes: body.sizes || ['M'],
       })
       .eq('id', body.id)
       .select()
@@ -195,7 +287,63 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ product })
+    // Update images if provided
+    if (body.images && Array.isArray(body.images)) {
+      await supabase.from('product_images').delete().eq('product_id', body.id)
+      if (body.images.length > 0) {
+        const imageInserts = body.images.map((url: string, index: number) => ({
+          product_id: body.id,
+          url,
+          is_primary: index === 0,
+          sort_order: index,
+        }))
+        const { error: imgError } = await supabase.from('product_images').insert(imageInserts)
+        if (imgError) {
+          console.error('[v0] Product images update insertion error:', imgError)
+        }
+      }
+    }
+
+    // Update videos if provided
+    if (body.videos && Array.isArray(body.videos)) {
+      await supabase.from('product_videos').delete().eq('product_id', body.id)
+      if (body.videos.length > 0) {
+        const videoInserts = body.videos.map((url: string) => ({
+          product_id: body.id,
+          url,
+        }))
+        const { error: vidError } = await supabase.from('product_videos').insert(videoInserts)
+        if (vidError) {
+          console.error('[v0] Product videos update insertion error:', vidError)
+        }
+      }
+    }
+
+    // Get final product with resolved relations for client state sync
+    const { data: finalProduct } = await supabase
+      .from('products')
+      .select(`
+        *,
+        product_images(url, is_primary, sort_order),
+        category:categories(name, slug)
+      `)
+      .eq('id', product.id)
+      .maybeSingle()
+
+    let transformedProduct = product
+    if (finalProduct) {
+      const sortedImages = (finalProduct.product_images || [])
+        .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+        .map((img: any) => img.url)
+
+      transformedProduct = {
+        ...finalProduct,
+        images: sortedImages.length > 0 ? sortedImages : [],
+        category: finalProduct.category?.name || 'Premium',
+      }
+    }
+
+    return NextResponse.json({ product: transformedProduct })
   } catch (error) {
     console.error('[v0] Admin update product error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

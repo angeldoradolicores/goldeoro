@@ -19,6 +19,9 @@ import { useCartStore, useFavoritesStore, useAuthStore } from '@/lib/store'
 import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import departmentsData from '@/departments.json'
+import citiesData from '@/cities.json'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(price)
@@ -113,6 +116,15 @@ const emptyAddress: Omit<Address, 'id'> = {
   full_name: '', street: '', city: '', state: '', country: 'Colombia', postal_code: '', phone: '', is_default: false,
 }
 
+// Build department to municipalities mapping
+const departmentMunicipalities: Record<string, string[]> = {}
+departmentsData.data.forEach((dept: { id: number; name: string }) => {
+  const towns = citiesData.data
+    .filter((c: { departmentId: number; name: string }) => c.departmentId === dept.id)
+    .map((c: { name: string }) => c.name)
+  departmentMunicipalities[dept.name] = towns
+})
+
 const menuItems = [
   { icon: User, label: 'Mis Datos', id: 'datos' },
   { icon: Package, label: 'Mis Pedidos', id: 'pedidos' },
@@ -161,6 +173,7 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
   const [showAddressForm, setShowAddressForm] = useState(false)
   const [editingAddress, setEditingAddress] = useState<Address | null>(null)
   const [addressForm, setAddressForm] = useState<Omit<Address, 'id'>>(emptyAddress)
+  const [municipalities, setMunicipalities] = useState<string[]>([])
 
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -217,6 +230,15 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
       subscription.unsubscribe()
     }
   }, [initialUser, supabase.auth, router, syncFavorites, userId])
+
+  // Load municipalities when address form's state changes
+  useEffect(() => {
+    if (addressForm.state) {
+      setMunicipalities(departmentMunicipalities[addressForm.state] || [])
+    } else {
+      setMunicipalities([])
+    }
+  }, [addressForm.state])
 
   const markAllRead = async () => {
     await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ all: true }) })
@@ -578,14 +600,13 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
                     <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Nombre completo</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.full_name} onChange={e => setAddressForm(f => ({ ...f, full_name: e.target.value }))} /></div>
                     <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Teléfono</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.phone} onChange={e => setAddressForm(f => ({ ...f, phone: e.target.value }))} /></div>
                     <div className="space-y-1 md:col-span-2"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Dirección</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.street} onChange={e => setAddressForm(f => ({ ...f, street: e.target.value }))} /></div>
-                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Ciudad</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.city} onChange={e => setAddressForm(f => ({ ...f, city: e.target.value }))} /></div>
-                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Departamento</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.state} onChange={e => setAddressForm(f => ({ ...f, state: e.target.value }))} /></div>
-                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">País</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.country} onChange={e => setAddressForm(f => ({ ...f, country: e.target.value }))} /></div>
+                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Departamento</label><Select value={addressForm.state} onValueChange={(value) => { setAddressForm(f => ({ ...f, state: value, city: '' })); setMunicipalities(departmentMunicipalities[value] || []); }}><SelectTrigger className="bg-graphite border-steel/50 rounded-none focus:border-chrome text-white-diamond text-sm font-sans"><SelectValue placeholder="Selecciona departamento" /></SelectTrigger><SelectContent className="bg-graphite border-steel/50 rounded-none text-xs text-white-diamond">{Object.keys(departmentMunicipalities).map((dept) => (<SelectItem key={dept} value={dept}>{dept}</SelectItem>))}</SelectContent></Select></div>
+                    <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Municipio</label><Select value={addressForm.city} onValueChange={(value) => setAddressForm(f => ({ ...f, city: value }))} disabled={!addressForm.state}><SelectTrigger className="bg-graphite border-steel/50 rounded-none focus:border-chrome text-white-diamond text-sm font-sans"><SelectValue placeholder="Selecciona municipio" /></SelectTrigger><SelectContent className="bg-graphite border-steel/50 rounded-none text-xs text-white-diamond">{municipalities.map((mun) => (<SelectItem key={mun} value={mun}>{mun}</SelectItem>))}</SelectContent></Select></div>
                     <div className="space-y-1"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Código Postal</label><Input className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" value={addressForm.postal_code} onChange={e => setAddressForm(f => ({ ...f, postal_code: e.target.value }))} /></div>
                   </div>
                   <div className="flex gap-4 pt-2">
                     <Button onClick={handleSaveAddress} className="btn-luxury rounded-none text-xs uppercase tracking-wider font-semibold" disabled={saving}>{saving ? <Loader2 className="w-4 h-4 animate-spin mr-1 text-obsidian" /> : null}Guardar</Button>
-                    <Button variant="ghost" className="text-chrome hover:text-white-diamond text-xs uppercase tracking-wider" onClick={() => { setShowAddressForm(false); setEditingAddress(null) }}>Cancelar</Button>
+                    <Button variant="ghost" className="text-chrome hover:text-white-diamond text-xs uppercase tracking-wider" onClick={() => { setShowAddressForm(false); setEditingAddress(null); setMunicipalities([]) }}>Cancelar</Button>
                   </div>
                 </motion.div>
               )}
@@ -603,7 +624,7 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
                         <p className="text-titanium mt-2 text-xs md:text-sm leading-relaxed font-sans font-light">{addr.street}<br />{addr.city}, {addr.state}<br />{addr.country} {addr.postal_code}<br />Tel: {addr.phone}</p>
                       </div>
                       <div className="flex flex-col gap-2 ml-4">
-                        <Button variant="ghost" size="sm" className="text-chrome hover:text-white-diamond hover:bg-graphite border border-transparent hover:border-steel/30 rounded-none" onClick={() => { setEditingAddress(addr); setAddressForm({ ...addr }); setShowAddressForm(true) }}><User className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="sm" className="text-chrome hover:text-white-diamond hover:bg-graphite border border-transparent hover:border-steel/30 rounded-none" onClick={() => { setEditingAddress(addr); setAddressForm({ ...addr }); setMunicipalities(departmentMunicipalities[addr.state] || []); setShowAddressForm(true) }}><User className="w-4 h-4" /></Button>
                         <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20 rounded-none" onClick={() => handleDeleteAddress(addr.id)}><Trash2 className="w-4 h-4" /></Button>
                       </div>
                     </div>

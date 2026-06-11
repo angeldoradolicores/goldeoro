@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, Crown, Mail, Lock, User, Phone, ArrowRight, Check, Loader2 } from "lucide-react"
-import SparklesUI from '@/components/sparkles'
+import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight, Check, Loader2 } from "lucide-react"
+const SparklesUI = dynamic(() => import('@/components/sparkles'), { ssr: false })
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
@@ -27,65 +28,147 @@ export default function RegistroPage() {
     confirmPassword: "",
   })
 
+  const [formErrors, setFormErrors] = useState({
+    nombre: "",
+    apellido: "",
+    email: "",
+    telefono: "",
+    password: "",
+    confirmPassword: "",
+  })
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const phoneRegex = /^[0-9+\s()-]{7,20}$/
+
+  const validateField = (name: keyof typeof formErrors, value: string) => {
+    let error = ""
+
+    switch (name) {
+      case "nombre":
+      case "apellido":
+        if (!value.trim()) {
+          error = "Este campo es obligatorio"
+        } else if (value.trim().length < 2) {
+          error = "Debe tener al menos 2 caracteres"
+        }
+        break
+      case "email":
+        if (!value.trim()) {
+          error = "El correo es obligatorio"
+        } else if (!emailRegex.test(value.trim())) {
+          error = "Ingresa un correo válido"
+        }
+        break
+      case "telefono":
+        if (!value.trim()) {
+          error = "El teléfono es obligatorio"
+        } else if (!phoneRegex.test(value.trim())) {
+          error = "El teléfono no es válido"
+        }
+        break
+      case "password":
+        if (!value) {
+          error = "La contraseña es obligatoria"
+        } else if (value.length < 8) {
+          error = "Debe tener al menos 8 caracteres"
+        } else if (!/[A-Z]/.test(value)) {
+          error = "Incluye una letra mayúscula"
+        } else if (!/[0-9]/.test(value)) {
+          error = "Incluye un número"
+        } else if (!/[^A-Za-z0-9]/.test(value)) {
+          error = "Incluye un carácter especial"
+        }
+        break
+      case "confirmPassword":
+        if (!value) {
+          error = "Confirma tu contraseña"
+        } else if (value !== formData.password) {
+          error = "Las contraseñas no coinciden"
+        }
+        break
+    }
+
+    setFormErrors((prev) => ({ ...prev, [name]: error }))
+    return error === ""
+  }
+
+  const validateStep1 = () => {
+    const nombreValid = validateField("nombre", formData.nombre)
+    const apellidoValid = validateField("apellido", formData.apellido)
+    const emailValid = validateField("email", formData.email)
+    const telefonoValid = validateField("telefono", formData.telefono)
+    return nombreValid && apellidoValid && emailValid && telefonoValid
+  }
+
+  const validateStep2 = () => {
+    const passwordValid = validateField("password", formData.password)
+    const confirmPasswordValid = validateField("confirmPassword", formData.confirmPassword)
+    return passwordValid && confirmPasswordValid
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (step === 1) {
+      if (!validateStep1()) {
+        return
+      }
       setStep(2)
       return
     }
 
+    if (!validateStep2()) {
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Las contrasenas no coinciden')
+      toast.error('Las contraseñas no coinciden')
       return
     }
 
     if (passwordStrength() < 3) {
-      toast.error('La contrasena debe ser mas segura')
+      toast.error('La contraseña debe ser más segura')
       return
     }
 
     setIsLoading(true)
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: `${formData.nombre} ${formData.apellido}`,
-            phone: formData.telefono,
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          fullName: `${formData.nombre} ${formData.apellido}`,
+          phone: formData.telefono,
+        }),
       })
 
-      if (error) {
-        if (error.message.includes('already registered')) {
-          toast.error('Este email ya esta registrado')
-        } else {
-          toast.error(error.message)
-        }
+      const result = await response.json()
+
+      if (!response.ok || result.error) {
+        toast.error(result.error || 'Error al crear la cuenta')
         return
       }
 
-      toast.success('Cuenta creada! Revisa tu email para confirmar tu cuenta.')
+      toast.success(result.message || 'Cuenta creada. Revisa tu email URBAN CROWN para confirmar tu acceso.')
       router.push('/auth/login')
-    } catch {
+    } catch (error) {
+      console.error('[registro] Submit error:', error)
       toast.error('Error al crear la cuenta')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleOAuthSignUp = async (provider: 'google' | 'facebook') => {
-    setIsOAuthLoading(provider)
-    
+  const handleOAuthSignUp = async () => {
+    setIsOAuthLoading('google')
+
     try {
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
+        provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
@@ -95,12 +178,11 @@ export default function RegistroPage() {
         toast.error(error.message)
         setIsOAuthLoading(null)
       }
-    } catch {
-      toast.error('Error al registrarse')
+    } catch (error) {
+      toast.error('Error al registrarte con Google')
       setIsOAuthLoading(null)
     }
   }
-
 
   const passwordStrength = () => {
     const { password } = formData
@@ -128,15 +210,16 @@ export default function RegistroPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <Link href="/">
-              <Crown className="w-12 h-12 text-gold mx-auto mb-4" />
-              <h1 className="text-3xl font-bold">
-                LUXURY<span className="text-gold">HATS</span>
+              <div className="mx-auto mb-4 text-gold text-5xl font-black">✝</div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                ✝ URBAN <span className="text-gold">CROWN</span> ✝
               </h1>
             </Link>
           </div>
 
-          <div className="bg-card/50 backdrop-blur-xl border border-border rounded-3xl p-8 shadow-2xl">
-            {/* Progress Steps */}
+          <div className="bg-card/60 backdrop-blur-2xl border border-border rounded-[2.5rem] p-8 shadow-[0_40px_120px_-50px_rgba(0,0,0,0.9)] relative overflow-hidden">
+            <div className="pointer-events-none absolute top-8 left-8 text-gold text-3xl opacity-20">✝</div>
+            <div className="pointer-events-none absolute bottom-10 right-10 text-gold text-3xl opacity-20">✝</div>
             <div className="flex items-center justify-center gap-4 mb-8">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${step >= 1 ? "bg-gold text-background" : "bg-muted text-muted-foreground"}`}>
                 {step > 1 ? <Check className="w-5 h-5" /> : "1"}
@@ -147,11 +230,11 @@ export default function RegistroPage() {
               </div>
             </div>
 
-            <h2 className="text-2xl font-bold text-foreground mb-2">
-              {step === 1 ? "Crea tu cuenta" : "Seguridad"}
+            <h2 className="text-3xl font-black text-foreground mb-2 tracking-tight">
+              {step === 1 ? "Crea tu cuenta" : "Eleva tu seguridad"}
             </h2>
-            <p className="text-muted-foreground mb-8">
-              {step === 1 ? "Ingresa tus datos personales" : "Crea una contrasena segura"}
+            <p className="text-muted-foreground mb-8 max-w-lg">
+              {step === 1 ? "Completa tu registro para acceder a productos exclusivos" : "Define una contraseña segura para proteger tu cuenta URBAN CROWN"}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -168,24 +251,44 @@ export default function RegistroPage() {
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
                           type="text"
-                          placeholder="Juan"
+                          placeholder="Urban"
                           value={formData.nombre}
-                          onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                          onChange={(e) => {
+                            setFormData({ ...formData, nombre: e.target.value })
+                            if (formErrors.nombre) validateField('nombre', e.target.value)
+                          }}
+                          onBlur={(e) => validateField('nombre', e.target.value)}
                           className="pl-12 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
                           required
                         />
+                        {formErrors.nombre ? (
+                          <p className="text-xs text-red-500 mt-1">{formErrors.nombre}</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground mt-1">Ingresa tu nombre</p>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-foreground">Apellido</label>
-                      <Input
-                        type="text"
-                        placeholder="Perez"
-                        value={formData.apellido}
-                        onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
-                        className="h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
-                        required
-                      />
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="Crown"
+                          value={formData.apellido}
+                          onChange={(e) => {
+                            setFormData({ ...formData, apellido: e.target.value })
+                            if (formErrors.apellido) validateField('apellido', e.target.value)
+                          }}
+                          onBlur={(e) => validateField('apellido', e.target.value)}
+                          className="pl-4 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
+                          required
+                        />
+                        {formErrors.apellido ? (
+                          <p className="text-xs text-red-500 mt-1">{formErrors.apellido}</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground mt-1">Ingresa tu apellido</p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -195,12 +298,21 @@ export default function RegistroPage() {
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <Input
                         type="email"
-                        placeholder="tu@email.com"
+                        placeholder="ejemplo@correo.com"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, email: e.target.value })
+                          if (formErrors.email) validateField("email", e.target.value)
+                        }}
+                        onBlur={(e) => validateField("email", e.target.value)}
                         className="pl-12 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
                         required
                       />
+                      {formErrors.email ? (
+                        <p className="text-xs text-red-500 mt-1">{formErrors.email}</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground mt-1">Ej: ejemplo@correo.com</p>
+                      )}
                     </div>
                   </div>
 
@@ -210,11 +322,20 @@ export default function RegistroPage() {
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <Input
                         type="tel"
-                        placeholder="+57 300 123 4567"
+                        placeholder="Ej: +57 300 123 4567"
                         value={formData.telefono}
-                        onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, telefono: e.target.value })
+                          if (formErrors.telefono) validateField("telefono", e.target.value)
+                        }}
+                        onBlur={(e) => validateField("telefono", e.target.value)}
                         className="pl-12 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
                       />
+                      {formErrors.telefono ? (
+                        <p className="text-xs text-red-500 mt-1">{formErrors.telefono}</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground mt-1">Solo números, espacios, guiones y prefijo +57.</p>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -230,12 +351,19 @@ export default function RegistroPage() {
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <Input
                         type={showPassword ? "text" : "password"}
-                        placeholder="********"
+                        placeholder="Mínimo 8 caracteres"
                         value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, password: e.target.value })
+                          if (formErrors.password) validateField("password", e.target.value)
+                        }}
+                        onBlur={(e) => validateField("password", e.target.value)}
                         className="pl-12 pr-12 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
                         required
                       />
+                      {formErrors.password && (
+                        <p className="text-xs text-red-500 mt-1">{formErrors.password}</p>
+                      )}
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
@@ -269,12 +397,19 @@ export default function RegistroPage() {
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <Input
                         type={showPassword ? "text" : "password"}
-                        placeholder="********"
+                        placeholder="Repite tu contraseña"
                         value={formData.confirmPassword}
-                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, confirmPassword: e.target.value })
+                          if (formErrors.confirmPassword) validateField("confirmPassword", e.target.value)
+                        }}
+                        onBlur={(e) => validateField("confirmPassword", e.target.value)}
                         className="pl-12 h-14 bg-background/50 border-border rounded-xl focus:border-gold focus:ring-gold/20"
                         required
                       />
+                      {formErrors.confirmPassword && (
+                        <p className="text-xs text-red-500 mt-1">{formErrors.confirmPassword}</p>
+                      )}
                     </div>
                     {formData.confirmPassword && formData.password !== formData.confirmPassword && (
                       <p className="text-xs text-red-500">Las contrasenas no coinciden</p>
@@ -331,62 +466,40 @@ export default function RegistroPage() {
               </div>
             </form>
 
-            {step === 1 && (
-              <>
-                <div className="mt-8">
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-border" />
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-card text-muted-foreground">O registrate con</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid grid-cols-2 gap-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={isOAuthLoading !== null}
-                      onClick={() => handleOAuthSignUp('google')}
-                      className="h-14 border-border hover:border-gold/50 rounded-xl transition-all duration-300"
-                    >
-                      {isOAuthLoading === 'google' ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <>
-                          <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                            <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                            <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                            <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                          </svg>
-                          Google
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={isOAuthLoading !== null}
-                      onClick={() => handleOAuthSignUp('facebook')}
-                      className="h-14 border-border hover:border-gold/50 rounded-xl transition-all duration-300"
-                    >
-                      {isOAuthLoading === 'facebook' ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <>
-                          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                          </svg>
-                          Facebook
-                        </>
-                      )}
-                    </Button>
-                  </div>
+            <div className="mt-8">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border" />
                 </div>
-              </>
-            )}
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-card text-muted-foreground">O registrate con</span>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isOAuthLoading !== null}
+                  onClick={handleOAuthSignUp}
+                  className="h-14 border-border hover:border-gold/50 rounded-xl transition-all duration-300"
+                >
+                  {isOAuthLoading === 'google' ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                      </svg>
+                      Google
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
 
             <p className="mt-8 text-center text-muted-foreground">
               Ya tienes cuenta?{" "}
@@ -421,12 +534,12 @@ export default function RegistroPage() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <Crown className="w-20 h-20 text-gold mx-auto mb-6" />
-            <h1 className="text-5xl font-bold text-foreground mb-4">
-              LUXURY<span className="text-gold">HATS</span>
+            <div className="mx-auto mb-6 text-gold text-6xl font-black">✝</div>
+            <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
+              ✝ URBAN <span className="text-gold">CROWN</span> ✝
             </h1>
             <p className="text-muted-foreground text-lg max-w-md">
-              Unete a nuestra comunidad exclusiva y accede a las mejores gorras urbanas del mercado
+              Únete a nuestra comunidad exclusiva y accede a las mejores gorras urbanas del mercado
             </p>
           </motion.div>
 
@@ -437,9 +550,9 @@ export default function RegistroPage() {
             className="mt-12 space-y-4"
           >
             {[
-              "Envio gratis en tu primera compra",
+              "Lujo exclusivo en cada gorra",
               "Acceso anticipado a nuevos lanzamientos",
-              "Descuentos exclusivos para miembros",
+              "Ofertas y promociones",
             ].map((benefit, i) => (
               <div key={i} className="flex items-center gap-3 text-muted-foreground">
                 <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center">

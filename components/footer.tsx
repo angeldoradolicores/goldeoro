@@ -202,9 +202,9 @@ export function Footer() {
             {/* Contact */}
             <div className="space-y-3" style={{ borderTop: '1px solid #1a1a1a', paddingTop: '20px' }}>
               {[
-                { icon: Phone, text: '+57 310 899 9049' },
+                { icon: Phone, text: '+57 300 657 7286' },
                 { icon: Mail, text: 'urbancrowncol4@gmail.com' },
-                { icon: MapPin, text: 'Bogotá, Colombia' },
+                { icon: MapPin, text: 'Colombia' },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-2.5">
                   <Icon style={{ width: '11px', height: '11px', color: '#C8A44D', flexShrink: 0 }} />

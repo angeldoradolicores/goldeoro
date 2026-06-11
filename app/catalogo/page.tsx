@@ -27,9 +27,13 @@ function CatalogoContent() {
   const searchParams = useSearchParams()
   const filter = searchParams.get('filter')
 
+  // Read search parameters on initial load
+  const initialCategory = searchParams.get('category') || 'Todos'
+  const initialSort = searchParams.get('sort') || 'featured'
+
   const [search, setSearch] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('Todos')
-  const [sortBy, setSortBy] = useState('featured')
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory)
+  const [sortBy, setSortBy] = useState(initialSort)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [showFilters, setShowFilters] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
@@ -44,6 +48,18 @@ function CatalogoContent() {
       setSelectedCategory('Todos')
     }
   }, [selectedCategory, validCategorySlugs, loadingCategories])
+
+  // Listen to searchParams changes to update local state (back/forward button compatibility)
+  useEffect(() => {
+    const categoryParam = searchParams.get('category') || 'Todos'
+    if (categoryParam !== selectedCategory) {
+      setSelectedCategory(categoryParam)
+    }
+    const sortParam = searchParams.get('sort') || 'featured'
+    if (sortParam !== sortBy) {
+      setSortBy(sortParam)
+    }
+  }, [searchParams])
 
   // Listen to filter search param changes to automatically update sorting
   useEffect(() => {
@@ -200,92 +216,104 @@ function CatalogoContent() {
       {/* Filters */}
       <section className="py-10 relative z-10">
         <div className="container mx-auto px-4 max-w-7xl">
+          
+          {/* Level 1: Category Selector (Desktop) */}
+          <div className="hidden lg:flex justify-center items-center mb-8 border-b border-steel/10 pb-4">
+            <div className="flex gap-8 items-center relative">
+              {([
+                { slug: 'Todos', label: 'Todos' },
+                ...adminCategories.map((c) => ({ slug: c.slug, label: c.name })),
+              ]).map(({ slug, label }) => {
+                const isActive = selectedCategory === slug
+                return (
+                  <button
+                    key={slug}
+                    onClick={() => setSelectedCategory(slug)}
+                    className="relative py-2 text-xs uppercase tracking-[0.2em] font-sans font-semibold transition-colors duration-300 focus:outline-none cursor-pointer"
+                    style={{ color: isActive ? '#DDE8F5' : '#8B8B8B' }}
+                  >
+                    <span className="hover:text-white-diamond transition-colors duration-200">
+                      {label}
+                    </span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeCategoryUnderline"
+                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold-action"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Level 2: Search, Sort, View mode */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 p-5 bg-carbon border border-steel/30 rounded-none shadow-xl"
+            className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 bg-carbon/40 backdrop-blur-md border border-steel/20 rounded-none shadow-2xl relative"
           >
             {/* Search */}
-            <div className="relative flex-1">
+            <div className="relative flex-1 max-w-md">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-titanium" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar gorras..."
-                className="pl-10 bg-graphite border-steel/30 focus:border-gold-action rounded-none text-sm placeholder-titanium"
+                className="pl-10 bg-graphite/40 border-steel/20 focus:border-gold-action focus:ring-1 focus:ring-gold-action/30 rounded-none text-sm placeholder-titanium transition-all duration-300"
               />
             </div>
 
-            {/* Categories - Desktop */}
-            <div className="hidden lg:flex items-center gap-2">
-              {([
-                { slug: 'Todos', label: 'Todos' },
-                ...adminCategories.map((c) => ({ slug: c.slug, label: c.name })),
-              ]).map(({ slug, label }) => (
-                <Button
-                  key={slug}
-                  variant={selectedCategory === slug ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedCategory(slug)}
-                  className={`${
-                    selectedCategory === slug
-                      ? 'btn-luxury rounded-none text-obsidian'
-                      : 'border-steel/50 text-chrome hover:border-gold-action/50 hover:text-gold-action rounded-none'
-                  } text-xs tracking-wider uppercase font-medium`}
+            <div className="flex items-center gap-3 justify-end">
+              {/* Mobile Filters Toggle */}
+              <Button
+                variant="outline"
+                className="lg:hidden border-steel/30 text-chrome hover:border-gold-action hover:bg-gold-action/5 rounded-none text-xs uppercase tracking-wider font-medium px-4 h-10"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="w-3.5 h-3.5 mr-2" />
+                Categorías
+              </Button>
+
+              {/* Sort */}
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full md:w-52 bg-graphite/40 border-steel/20 rounded-none text-xs uppercase tracking-wider font-medium text-chrome focus:border-gold-action h-10">
+                  <SelectValue placeholder="Ordenar por" />
+                </SelectTrigger>
+                <SelectContent className="bg-graphite border-steel/30 rounded-none text-xs uppercase tracking-wider font-medium text-chrome">
+                  <SelectItem value="featured">Destacados</SelectItem>
+                  <SelectItem value="newest">Novedades</SelectItem>
+                  <SelectItem value="price-asc">Precio: Menor a Mayor</SelectItem>
+                  <SelectItem value="price-desc">Precio: Mayor a Menor</SelectItem>
+                  <SelectItem value="name">Nombre</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* View Mode */}
+              <div className="hidden lg:flex items-center gap-1 p-1 bg-graphite/40 border border-steel/20 h-10">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 transition-all duration-300 rounded-none cursor-pointer ${
+                    viewMode === 'grid' 
+                      ? 'bg-gold-action text-obsidian shadow-lg' 
+                      : 'text-titanium hover:text-white-diamond'
+                  }`}
                 >
-                  {label}
-                </Button>
-              ))}
-              
-            </div>
-
-            {/* Mobile Filters Toggle */}
-            <Button
-              variant="outline"
-              className="lg:hidden border-steel/50 text-chrome hover:border-gold-action hover:bg-gold-action/5 rounded-none text-xs uppercase tracking-wider font-medium"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter className="w-4 h-4 mr-2" />
-              Filtros
-            </Button>
-
-            {/* Sort */}
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full lg:w-52 bg-graphite border-steel/30 rounded-none text-xs uppercase tracking-wider font-medium text-chrome focus:border-gold-action">
-                <SelectValue placeholder="Ordenar por" />
-              </SelectTrigger>
-              <SelectContent className="bg-graphite border-steel/30 rounded-none text-xs uppercase tracking-wider font-medium">
-                <SelectItem value="featured">Destacados</SelectItem>
-                <SelectItem value="newest">Novedades</SelectItem>
-                <SelectItem value="price-asc">Precio: Menor a Mayor</SelectItem>
-                <SelectItem value="price-desc">Precio: Mayor a Menor</SelectItem>
-                <SelectItem value="name">Nombre</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* View Mode */}
-            <div className="hidden lg:flex items-center gap-1 p-1 bg-graphite border border-steel/30">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 transition-all ${
-                  viewMode === 'grid' 
-                    ? 'bg-gold-action text-obsidian' 
-                    : 'text-titanium hover:text-white-diamond'
-                }`}
-              >
-                <Grid3X3 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 transition-all ${
-                  viewMode === 'list' 
-                    ? 'bg-gold-action text-obsidian' 
-                    : 'text-titanium hover:text-white-diamond'
-                }`}
-              >
-                <LayoutList className="w-4 h-4" />
-              </button>
+                  <Grid3X3 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 transition-all duration-300 rounded-none cursor-pointer ${
+                    viewMode === 'list' 
+                      ? 'bg-gold-action text-obsidian shadow-lg' 
+                      : 'text-titanium hover:text-white-diamond'
+                  }`}
+                >
+                  <LayoutList className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </motion.div>
 
@@ -305,28 +333,27 @@ function CatalogoContent() {
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {['Todos', ...adminCategories.map((c) => c.name)].map((categoryName, idx) => {
-                    const slug = idx === 0 ? 'Todos' : adminCategories[idx - 1].slug
-                    const label = idx === 0 ? 'Todos' : categoryName
-                    return (
-                      <Button
-                        key={slug}
-                        variant={selectedCategory === slug ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => {
-                          setSelectedCategory(slug)
-                          setShowFilters(false)
-                        }}
-                        className={`${
-                          selectedCategory === slug 
-                            ? 'btn-luxury text-obsidian' 
-                            : 'border-steel/50 text-chrome hover:border-gold-action/50'
-                        } text-xs tracking-wider uppercase font-medium rounded-none`}
-                      >
-                        {label}
-                      </Button>
-                    )
-                  })}
+                  {([
+                    { slug: 'Todos', label: 'Todos' },
+                    ...adminCategories.map((c) => ({ slug: c.slug, label: c.name })),
+                  ]).map(({ slug, label }) => (
+                    <Button
+                      key={slug}
+                      variant={selectedCategory === slug ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        setSelectedCategory(slug)
+                        setShowFilters(false)
+                      }}
+                      className={`${
+                        selectedCategory === slug 
+                          ? 'btn-luxury text-obsidian' 
+                          : 'border-steel/50 text-chrome hover:border-gold-action/50'
+                      } text-xs tracking-wider uppercase font-medium rounded-none`}
+                    >
+                      {label}
+                    </Button>
+                  ))}
                 </div>
               </motion.div>
             )}

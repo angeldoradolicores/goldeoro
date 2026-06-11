@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ShoppingBag, Heart, Eye } from 'lucide-react'
 import SparklesUI from './sparkles'
 import { useCartStore, useFavoritesStore } from '@/lib/store'
@@ -17,6 +17,7 @@ export interface Product {
   price: number
   original_price?: number | null
   category: string
+  category_slug?: string
   stock: number
   featured: boolean
   is_promotion?: boolean
@@ -76,6 +77,7 @@ function MetalBadge({ text, variant = 'gold' }: { text: string; variant?: 'gold'
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const addItem = useCartStore(state => state.addItem)
   const toggleFavorite = useFavoritesStore(state => state.toggleFavorite)
+  const router = useRouter()
   const isWishlisted = useFavoritesStore(state => state.items.some(i => i.id === product.id))
   const [isHovered, setIsHovered] = useState(false)
 
@@ -111,13 +113,25 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       className="group"
       style={{ transformStyle: 'preserve-3d' }}
     >
-      <Link href={`/producto/${product.slug || product.id}`}>
+      <div
+        role="link"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            router.push(`/producto/${product.slug || product.id}`)
+          }
+        }}
+        onClick={() => router.push(`/producto/${product.slug || product.id}`)}
+      >
         <div
           className="relative overflow-hidden transition-all duration-500"
           style={{
             background: '#0D0D0D',
-            border: isHovered ? '1px solid rgba(192,192,192,0.25)' : '1px solid #262626',
-            boxShadow: isHovered
+            border: product.featured || product.is_promotion ? '1px solid rgba(200,164,77,0.35)' : (isHovered ? '1px solid rgba(192,192,192,0.25)' : '1px solid #262626'),
+            boxShadow: product.featured || product.is_promotion
+              ? '0 28px 68px rgba(200,164,77,0.06), 0 6px 20px rgba(0,0,0,0.6)'
+              : isHovered
               ? '0 20px 48px rgba(0,0,0,0.75), 0 0 0 1px rgba(221,232,245,0.1)'
               : '0 4px 16px rgba(0,0,0,0.4)',
             transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
@@ -128,9 +142,10 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           {/* Image Container */}
             <div className="relative aspect-square overflow-hidden" style={{ background: '#171717' }}>
             <Image
-              src={product.images?.[0] || '/images/placeholder-hat.jpg'}
+              src={(product.images || []).find(Boolean) || '/images/placeholder-hat.jpg'}
               alt={product.name}
               fill
+              unoptimized
               className="object-cover transition-transform duration-700"
               style={{
                 transform: isHovered ? 'scale(1.07)' : 'scale(1)',
@@ -239,18 +254,45 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
           </div>
 
+          {/* Ribbon for featured/promotion (top-right) */}
+          {(product.featured || product.is_promotion) && (
+            <div className="absolute top-3 right-0 pointer-events-none" style={{ transform: 'translate(18px, -8px) rotate(12deg)' }}>
+              <div style={{ padding: '6px 14px', background: product.featured ? 'linear-gradient(90deg,#C9A84D,#FFD36A)' : 'linear-gradient(90deg,#F87171,#FB7185)', color: '#050505', fontWeight: 700, fontSize: '11px', borderRadius: '6px', boxShadow: '0 6px 20px rgba(0,0,0,0.4)' }}>
+                {product.featured ? 'EXCLUSIVO' : 'OFERTA'}
+              </div>
+            </div>
+          )}
+
           {/* Content */}
           <div className="p-4 pb-5">
             {/* Category */}
             <span
-              className="text-[9px] font-semibold uppercase block mb-2"
-              style={{
-                fontFamily: 'var(--font-sans)',
-                letterSpacing: '0.3em',
-                color: '#8B8B8B',
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation()
+                router.push(`/catalogo?category=${encodeURIComponent(product.category_slug || product.category)}`)
               }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  router.push(`/catalogo?category=${encodeURIComponent(product.category_slug || product.category)}`)
+                }
+              }}
+              className="inline-block mb-2"
+              style={{ cursor: 'pointer' }}
             >
-              {product.category}
+              <span
+                className="text-[9px] font-semibold uppercase block mb-2"
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  letterSpacing: '0.3em',
+                  color: '#8B8B8B',
+                }}
+              >
+                {product.category}
+              </span>
             </span>
 
             {/* Name */}
@@ -321,9 +363,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 : 'linear-gradient(to right, transparent, rgba(38,38,38,0.8), transparent)',
             }}
           />
-        </div>
-      </Link>
-    </motion.div>
+            </div>
+          </div>
+          </motion.div>
   )
 }
 

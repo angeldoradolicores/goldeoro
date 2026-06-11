@@ -9,15 +9,17 @@ export default function Cursor() {
     const el = ref.current
     if (!el) return
 
+    const activeEl = el;
+
     function move(e: MouseEvent) {
-      el.style.left = e.clientX + 'px'
-      el.style.top = e.clientY + 'px'
+      activeEl.style.left = e.clientX + 'px'
+      activeEl.style.top = e.clientY + 'px'
     }
     function addMagnetListeners() {
       const els = document.querySelectorAll('[data-uc-magnetic], button, a, .product-card')
       els.forEach((node) => {
-        node.addEventListener('mouseenter', () => el.classList.add('magnet'))
-        node.addEventListener('mouseleave', () => el.classList.remove('magnet'))
+        node.addEventListener('mouseenter', () => activeEl.classList.add('magnet'))
+        node.addEventListener('mouseleave', () => activeEl.classList.remove('magnet'))
       })
     }
 

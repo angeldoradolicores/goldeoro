@@ -17,7 +17,11 @@ export async function GET(
       // It's a UUID — fetch by id
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          product_images(url, is_primary, sort_order),
+          category:categories(name, slug)
+        `)
         .eq('id', slug)
         .maybeSingle()
 
@@ -32,7 +36,11 @@ export async function GET(
       // Try by slug
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          product_images(url, is_primary, sort_order),
+          category:categories(name, slug)
+        `)
         .eq('slug', slug)
         .maybeSingle()
 
@@ -47,7 +55,18 @@ export async function GET(
       return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 })
     }
 
-    return NextResponse.json({ product })
+    // Transform product fields to match client-side type
+    const sortedImages = (product.product_images || [])
+      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map((img: any) => img.url)
+
+    const transformedProduct = {
+      ...product,
+      images: sortedImages.length > 0 ? sortedImages : ['/images/placeholder-hat.jpg'],
+      category: product.category?.name || 'Premium',
+    }
+
+    return NextResponse.json({ product: transformedProduct })
   } catch (error) {
     console.error('[products/slug] Server error:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

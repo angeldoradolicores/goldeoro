@@ -31,7 +31,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: "¿Cómo me contacto si tengo un inconveniente?",
-    answer: "Puedes comunicarte directamente con nuestro asesor personal al WhatsApp +57 310 899 9049 o por correo electrónico a urbancrowncol4@gmail.com. Estamos listos para ayudarte al instante."
+    answer: "Puedes comunicarte directamente con nuestro asesor personal al WhatsApp +57 300 657 7286 o por correo electrónico a urbancrowncol4@gmail.com. Estamos listos para ayudarte al instante."
   }
 ]
 
@@ -104,7 +104,7 @@ export default function FAQPage() {
               Nuestro Crown Asistente o nuestro asesor por WhatsApp están disponibles para brindarte una atención preferencial.
             </p>
             <a
-              href="https://wa.me/573108999049"
+              href="https://wa.me/573006577286"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-8 py-4 bg-gold-action hover:bg-gold-action/90 text-obsidian font-bold text-xs uppercase tracking-widest rounded-none shadow-md transition-all"

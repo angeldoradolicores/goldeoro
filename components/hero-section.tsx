@@ -149,7 +149,7 @@ export function HeroSection() {
                 letterSpacing: '0.5em',
               }}
             >
-              Colección 2024
+              Colección 2026
             </span>
             <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to left, transparent, #DDE8F5)' }} />
           </motion.div>
@@ -278,7 +278,7 @@ export function HeroSection() {
           </motion.div>
 
           {/* Placa metálica 3D decorativa */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.05 }}
@@ -288,18 +288,17 @@ export function HeroSection() {
             <div className="metallic-plate-center">
               <Crown style={{ width: 56, height: 56, color: 'rgba(13,13,13,0.85)' }} />
             </div>
-          </motion.div>
+          </motion.div> */}
 
           {/* Stats */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 1.2 }}
+            transition={{ duration: 3, delay: 1.1 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-px"
             style={{ border: '1px solid #1a1a1a' }}
           >
             {[
-              { value: '1,000+', label: 'Clientes' },
               { value: '50+', label: 'Diseños' },
               { value: '24h', label: 'Despacho' },
               { value: '100%', label: 'Satisfacción' },
@@ -308,7 +307,7 @@ export function HeroSection() {
                 key={stat.label}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.3 + index * 0.1 }}
+                transition={{ delay: 2.9 + index * 0.1 }}
                 className="flex flex-col items-center justify-center py-8 px-4"
                 style={{ background: '#0D0D0D', borderRight: index < 3 ? '1px solid #1a1a1a' : 'none' }}
               >
