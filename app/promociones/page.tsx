@@ -21,8 +21,8 @@ const trustPromoCards = [
   },
   {
     id: 2,
-    title: "Garantía de Estilo",
-    description: "¿No te convence la horma o el color? Tienes 5 días para realizar tu cambio sin costo adicional.",
+    title: "Garantía",
+    description: "Todas nuestras gorras cuentan con garantía de autenticidad y calidad premium. ",
     icon: ShieldCheck,
     badge: "100% Confiable"
   },
@@ -48,16 +48,15 @@ export default function PromocionesPage() {
           if (Array.isArray(data) && data.length > 0) {
             setProducts(data)
           } else {
-            const filtered = mockProducts.filter(p => p.is_promotion || (p.original_price && p.original_price > p.price))
-            setProducts(filtered)
+            // No promotions from API — show empty state
+            setProducts([])
           }
         } else {
-          const filtered = mockProducts.filter(p => p.is_promotion || (p.original_price && p.original_price > p.price))
-          setProducts(filtered)
+          // Error fetching — treat as empty
+          setProducts([])
         }
       } catch {
-        const filtered = mockProducts.filter(p => p.is_promotion || (p.original_price && p.original_price > p.price))
-        setProducts(filtered)
+        setProducts([])
       } finally {
         setLoading(false)
       }

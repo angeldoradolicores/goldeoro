@@ -666,7 +666,7 @@ function ProductModal(props: {
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="URL de la imagen"
-                  className="bg-secondary border-border/50"
+                  className="bg-secondary border-border/50 text-black placeholder:text-slate-500"
                 />
                 <Button type="button" onClick={addImage} variant="outline">
                   <Plus className="w-4 h-4" />
@@ -720,7 +720,7 @@ function ProductModal(props: {
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
                   placeholder="URL del video (YouTube, Vimeo, etc.)"
-                  className="bg-secondary border-border/50"
+                  className="bg-secondary border-border/50 text-black placeholder:text-slate-500"
                 />
                 <Button type="button" onClick={addVideo} variant="outline">
                   <Plus className="w-4 h-4" />
@@ -766,7 +766,7 @@ function ProductModal(props: {
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1 bg-secondary border-border/50"
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
                 placeholder="Ej: Crown Elite Black"
                 required
               />
@@ -776,7 +776,7 @@ function ProductModal(props: {
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 bg-secondary border-border/50"
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
                 rows={3}
                 placeholder="Describe el producto..."
               />
@@ -791,7 +791,7 @@ function ProductModal(props: {
                   setDisplayPrice(formatted)
                   setFormData({ ...formData, price: parseFormattedNumber(formatted) })
                 }}
-                className="mt-1 bg-secondary border-border/50"
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
                 required
               />
             </div>
@@ -805,7 +805,7 @@ function ProductModal(props: {
                   setDisplayOriginalPrice(formatted)
                   setFormData({ ...formData, original_price: formatted ? parseFormattedNumber(formatted) : undefined })
                 }}
-                className="mt-1 bg-secondary border-border/50"
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
                 placeholder="Opcional"
               />
             </div>
@@ -815,7 +815,7 @@ function ProductModal(props: {
                 value={formData.category} 
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
               >
-                <SelectTrigger className="mt-1 bg-secondary border-border/50">
+                <SelectTrigger className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -837,7 +837,7 @@ function ProductModal(props: {
                   setDisplayStock(formatted)
                   setFormData({ ...formData, stock: parseFormattedNumber(formatted) })
                 }}
-                className="mt-1 bg-secondary border-border/50"
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
                 required
               />
             </div>

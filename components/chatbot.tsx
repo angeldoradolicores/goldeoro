@@ -255,7 +255,7 @@ export function ChatBot() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyPress}
                   placeholder="Escribe tu mensaje..."
-                  className="flex-1 bg-secondary border-border/50"
+                  className="flex-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
                   disabled={isTyping}
                 />
                 <Button

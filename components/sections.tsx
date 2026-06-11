@@ -8,7 +8,7 @@ const features = [
   {
     icon: Truck,
     title: 'Envío Nacional',
-    description: 'Envíos a toda Colombia con Interrapidísimo y Enviar. Cotiza tu envío al instante.',
+    description: 'Envíos a toda Colombia con Interrapidísimo. Cotiza tu envío al instante.',
   },
   {
     icon: Shield,
@@ -56,7 +56,7 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.7, delay: i * 0.1 },
   }),
 }
 
@@ -291,6 +291,106 @@ export function TestimonialsSection() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export function CuratedSection() {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: '-60px' })
+
+  const curatedItems = [
+    {
+      title: 'Diseño Exquisito',
+      description: 'Silhouettes pensadas para destacar con presencia y carácter en cada lanzamiento.',
+    },
+    {
+      title: 'Ajuste Premium',
+      description: 'Tallas precisas y acabados suaves para una sensación de confort superior.',
+    },
+    {
+      title: 'Despacho Exprés',
+      description: 'Entrega confiable y rápida en toda Colombia con seguimiento personalizado.',
+    },
+    {
+      title: 'Atención VIP',
+      description: 'Soporte directo para elegir el modelo ideal y resolver dudas en minutos.',
+    },
+  ]
+
+  return (
+    <section
+      ref={ref}
+      className="py-28 relative overflow-hidden"
+      style={{ background: '#090909' }}
+    >
+      <div className="container mx-auto px-4 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.45em] text-gold-action mb-4 font-semibold">Edición Limitada</p>
+            <motion.h2
+              initial={{ opacity: 0, y: 24 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6"
+            >
+              Cada lanzamiento es una pieza
+              <span
+                style={{
+                  background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 50%, #EAF2FF 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                {' '}Crown Collective
+              </span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+              className="text-base md:text-lg text-slate-300 leading-relaxed max-w-xl mb-8"
+            >
+              Solo colecciones hechas para quienes exigen estilo único. En nuestra casa no hay piezas normales: cada gorra es una declaración de exclusividad, actitud y trabajo artesanal.
+            </motion.p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="p-5 border border-steel/20 rounded-3xl bg-[#111111]"
+              >
+                <p className="text-sm uppercase tracking-[0.24em] text-gold-action mb-3">Artesanía selecta</p>
+                <p className="text-sm text-slate-400 leading-relaxed">Materiales de primera y detalles cuidados en cada costura.</p>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="p-5 border border-steel/20 rounded-3xl bg-[#111111]"
+              >
+                <p className="text-sm uppercase tracking-[0.24em] text-gold-action mb-3">Actitud urbana</p>
+                <p className="text-sm text-slate-400 leading-relaxed">Cada silueta está diseñada para destacarse en la ciudad y en la noche.</p>
+              </motion.div>
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {curatedItems.map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.8, delay: 0.2 + index * 0.12 }}
+                className="p-6 rounded-[2rem] bg-[#101010] border border-steel/20 shadow-[0_20px_80px_rgba(0,0,0,0.2)]"
+              >
+                <p className="text-sm uppercase tracking-[0.2em] text-slate-500 mb-3">{item.title}</p>
+                <p className="text-sm leading-relaxed text-slate-300">{item.description}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

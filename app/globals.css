@@ -15,7 +15,7 @@
   --graphite:         #161616; /* Grafito */
 
   /* Cromado / Plata */
-  --chrome:           #C9CDD2; /* Plata cromada */
+  --chrome:           #6c6e72; /* Plata cromada */
   --liquid-silver:    #DDE8F5; /* Plata líquida */
   --pearl-white:      #F8F9FB; /* Perla blanca */
   --crystal:          #EAF2FF; /* Cristal */
@@ -290,6 +290,28 @@
     height: 8px;
     filter: drop-shadow(0 0 14px rgba(221,232,245,0.6));
     animation-duration: 3.6s;
+  }
+
+  /* Subtle rain streaks for dramatic effect */
+  .sparkle-rain {
+    position: absolute;
+    width: 1px;
+    height: 28px;
+    background: linear-gradient(180deg, rgba(221,232,245,0.85), rgba(221,232,245,0.15));
+    filter: blur(0.6px) drop-shadow(0 0 6px rgba(221,232,245,0.15));
+    opacity: 0.6;
+    border-radius: 2px;
+  }
+
+  /* Lightning overlay */
+  .sparkle-lightning {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 20% 10%, rgba(255,255,255,0.18), transparent 12%), radial-gradient(circle at 80% 30%, rgba(255,245,220,0.12), transparent 10%);
+    mix-blend-mode: screen;
+    opacity: 0;
+    z-index: 6;
   }
 
   .glint-strong::before {
@@ -629,7 +651,8 @@
   }
 
   /* Custom cursor element will be rendered by a client component */
-  .uc-cursor { pointer-events: none; position: fixed; z-index: 9999; width: 14px; height: 14px; border-radius: 999px; background: linear-gradient(180deg, var(--chrome), var(--liquid-silver)); box-shadow: 0 2px 10px rgba(0,0,0,0.6); transform: translate(-50%, -50%); transition: transform 150ms ease, width 150ms ease, height 150ms ease, opacity 200ms ease; }
+  .uc-cursor { pointer-events: none; position: fixed; z-index: 9999; width: 18px; height: 18px; border-radius: 6px; background: transparent; border: 1px solid rgba(255,255,255,0.08); transform: translate(-50%, -50%); transition: transform 150ms ease, width 150ms ease, height 150ms ease, opacity 200ms ease; display:flex;align-items:center;justify-content:center;color:var(--chrome);font-size:12px }
+  .uc-cursor::before { content: '✚'; display:block; line-height:1; }
   .uc-cursor.magnet { transform: translate(-50%, -50%) scale(1.6); }
 
   @media (pointer: coarse) {

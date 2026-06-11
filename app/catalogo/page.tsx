@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useMemo, useEffect, Suspense } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Search, Grid3X3, LayoutList, X, Sparkles, Filter } from 'lucide-react'
-import { mockProducts, type Product } from '@/lib/store'
+import { type Product } from '@/lib/store'
 import SparklesUI from '@/components/sparkles'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
@@ -20,8 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-const categories = ['Todos', 'Urban', 'Streetwear', 'Premium', 'Sport', 'Classic']
+import { useCategories } from '@/lib/hooks/use-products'
 
 function CatalogoContent() {
   const searchParams = useSearchParams()
@@ -34,6 +34,16 @@ function CatalogoContent() {
   const [showFilters, setShowFilters] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const { categories: adminCategories = [], isLoading: loadingCategories } = useCategories()
+  const validCategorySlugs = adminCategories.map((category) => category.slug)
+  const router = useRouter()
+
+  useEffect(() => {
+    if (loadingCategories) return
+    if (selectedCategory !== 'Todos' && !validCategorySlugs.includes(selectedCategory)) {
+      setSelectedCategory('Todos')
+    }
+  }, [selectedCategory, validCategorySlugs, loadingCategories])
 
   // Listen to filter search param changes to automatically update sorting
   useEffect(() => {
@@ -59,16 +69,16 @@ function CatalogoContent() {
         const res = await fetch(`/api/products?${params}`)
         if (res.ok) {
           const data = await res.json()
-          if (Array.isArray(data) && data.length > 0) {
+          if (Array.isArray(data)) {
             setProducts(data)
           } else {
-            setProducts(mockProducts)
+            setProducts([])
           }
         } else {
-          setProducts(mockProducts)
+          setProducts([])
         }
       } catch {
-        setProducts(mockProducts)
+        setProducts([])
       } finally {
         setLoading(false)
       }
@@ -77,6 +87,26 @@ function CatalogoContent() {
     const debounce = setTimeout(fetchProducts, 300)
     return () => clearTimeout(debounce)
   }, [selectedCategory, search])
+
+  // Keep URL in sync with selected filters (category + sort) without causing replace loops
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (selectedCategory && selectedCategory !== 'Todos') params.set('category', selectedCategory)
+    if (sortBy) params.set('sort', sortBy)
+
+    // Build current minimal representation from actual search params
+    const currentCategory = searchParams.get('category') || ''
+    const currentSort = searchParams.get('sort') || ''
+    const current = new URLSearchParams()
+    if (currentCategory) current.set('category', currentCategory)
+    if (currentSort) current.set('sort', currentSort)
+
+    const desired = params.toString()
+    if (current.toString() !== desired) {
+      const href = desired ? `/catalogo?${desired}` : '/catalogo'
+      router.replace(href)
+    }
+  }, [selectedCategory, sortBy, router, searchParams])
 
   const filteredProducts = useMemo(() => {
     let filtered = [...products]
@@ -162,7 +192,7 @@ function CatalogoContent() {
             transition={{ delay: 0.2, duration: 0.8 }}
             className="mt-6 text-sm md:text-base text-titanium max-w-xl mx-auto leading-relaxed font-sans font-light tracking-wide"
           >
-            Explora nuestra selección exclusiva de gorras urbanas <span className="text-gold-action font-normal">premium de Medellín</span>.
+            Explora nuestra selección exclusiva de gorras urbanas <span className="text-gold-action font-normal">premium de COLOMBIA</span>.
           </motion.p>
         </div>
       </section>
@@ -189,21 +219,25 @@ function CatalogoContent() {
 
             {/* Categories - Desktop */}
             <div className="hidden lg:flex items-center gap-2">
-              {categories.map((category) => (
+              {([
+                { slug: 'Todos', label: 'Todos' },
+                ...adminCategories.map((c) => ({ slug: c.slug, label: c.name })),
+              ]).map(({ slug, label }) => (
                 <Button
-                  key={category}
-                  variant={selectedCategory === category ? 'default' : 'outline'}
+                  key={slug}
+                  variant={selectedCategory === slug ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() => setSelectedCategory(slug)}
                   className={`${
-                    selectedCategory === category 
-                      ? 'btn-luxury rounded-none text-obsidian' 
+                    selectedCategory === slug
+                      ? 'btn-luxury rounded-none text-obsidian'
                       : 'border-steel/50 text-chrome hover:border-gold-action/50 hover:text-gold-action rounded-none'
                   } text-xs tracking-wider uppercase font-medium`}
                 >
-                  {category}
+                  {label}
                 </Button>
               ))}
+              
             </div>
 
             {/* Mobile Filters Toggle */}
@@ -271,24 +305,28 @@ function CatalogoContent() {
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {categories.map((category) => (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => {
-                        setSelectedCategory(category)
-                        setShowFilters(false)
-                      }}
-                      className={`${
-                        selectedCategory === category 
-                          ? 'btn-luxury text-obsidian' 
-                          : 'border-steel/50 text-chrome hover:border-gold-action/50'
-                      } text-xs tracking-wider uppercase font-medium rounded-none`}
-                    >
-                      {category}
-                    </Button>
-                  ))}
+                  {['Todos', ...adminCategories.map((c) => c.name)].map((categoryName, idx) => {
+                    const slug = idx === 0 ? 'Todos' : adminCategories[idx - 1].slug
+                    const label = idx === 0 ? 'Todos' : categoryName
+                    return (
+                      <Button
+                        key={slug}
+                        variant={selectedCategory === slug ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setSelectedCategory(slug)
+                          setShowFilters(false)
+                        }}
+                        className={`${
+                          selectedCategory === slug 
+                            ? 'btn-luxury text-obsidian' 
+                            : 'border-steel/50 text-chrome hover:border-gold-action/50'
+                        } text-xs tracking-wider uppercase font-medium rounded-none`}
+                      >
+                        {label}
+                      </Button>
+                    )
+                  })}
                 </div>
               </motion.div>
             )}

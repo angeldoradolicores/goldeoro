@@ -51,6 +51,25 @@ export default function Sparkles({ className = '', extra = 0 }: { className?: st
           transition={{ duration: 3.6, repeat: Infinity, delay: p.delay, ease: 'easeInOut' }}
         />
       ))}
+
+      {/* Rain effect - subtle falling lines for luxe ambience */}
+      {[...Array(14)].map((_, i) => (
+        <motion.span
+          key={`r-${i}`}
+          className="sparkle-rain"
+          style={{ left: `${(i * 7) % 98}%`, top: `-10%` }}
+          animate={{ y: ['-10%', '120%'], opacity: [0, 0.6, 0] }}
+          transition={{ duration: 2.8 + (i % 3) * 0.4, repeat: Infinity, delay: (i % 5) * 0.2, ease: 'linear' }}
+        />
+      ))}
+
+      {/* Occasional lightning flash */}
+      <motion.div
+        className="sparkle-lightning"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0.9, 0] }}
+        transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 8, delay: 3 }}
+      />
     </div>
   )
 }

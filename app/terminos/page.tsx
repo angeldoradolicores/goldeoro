@@ -65,7 +65,7 @@ export default function TerminosPage() {
                 4. Cambios y Garantías
               </h3>
               <p className="text-xs md:text-sm">
-                Ofrecemos una Garantía de Satisfacción de 5 días hábiles desde la recepción de la mercancía. Los productos deben estar con sus etiquetas puestas, empaque original y sin signos de uso para ser elegibles para cambios. El primer cambio por talla, referencia o color es gratis.
+                Ofrecemos una Garantía de Satisfacción de 2 días hábiles desde la recepción de la mercancía. Los productos deben estar con sus etiquetas puestas, empaque original y sin signos de uso para ser elegibles para cambios. El primer cambio por talla, referencia o color es gratis.
               </p>
             </div>
 

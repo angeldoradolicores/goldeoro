@@ -1,7 +1,7 @@
 import { Navbar } from '@/components/navbar'
 import { HeroSection } from '@/components/hero-section'
 import { FeaturedProducts } from '@/components/featured-products'
-import { FeaturesSection, TestimonialsSection, BrandsSection, PromoBanner } from '@/components/sections'
+import { FeaturesSection, BrandsSection, CuratedSection } from '@/components/sections'
 import { Footer } from '@/components/footer'
 import { ChatBot } from '@/components/chatbot'
 
@@ -13,8 +13,7 @@ export default function HomePage() {
       <BrandsSection />
       <FeaturedProducts />
       <FeaturesSection />
-      <PromoBanner />
-      <TestimonialsSection />
+      <CuratedSection />
       <Footer />
       <ChatBot />
     </main>

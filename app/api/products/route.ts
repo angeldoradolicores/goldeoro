@@ -20,7 +20,25 @@ export async function GET(request: Request) {
 
     // Apply filters
     if (category && category !== 'Todos' && category !== 'all') {
-      query = query.eq('category', category)
+      // Accept either a category UUID (category_id) or a category slug/name.
+      const uuidRegex = /^[0-9a-fA-F-]{36}$/
+      if (uuidRegex.test(category)) {
+        query = query.eq('category_id', category)
+      } else {
+        // Try to resolve slug first, then name (case-insensitive)
+        const { data: catBySlug } = await supabase.from('categories').select('id').eq('slug', category).limit(1)
+        if (catBySlug && catBySlug.length > 0) {
+          query = query.eq('category_id', catBySlug[0].id)
+        } else {
+          const { data: catByName } = await supabase.from('categories').select('id').ilike('name', category).limit(1)
+          if (catByName && catByName.length > 0) {
+            query = query.eq('category_id', catByName[0].id)
+          } else {
+            // No matching category -> return empty set
+            return NextResponse.json([])
+          }
+        }
+      }
     }
 
     if (featured === 'true') {

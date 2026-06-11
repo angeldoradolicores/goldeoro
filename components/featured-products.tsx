@@ -23,13 +23,15 @@ export function FeaturedProducts() {
           if (Array.isArray(data) && data.length > 0) {
             setProducts(data)
           } else {
-            setProducts(mockProducts.filter(p => p.featured))
+            // No products from API — show empty state
+            setProducts([])
           }
         } else {
-          setProducts(mockProducts.filter(p => p.featured))
+          // Error fetching — treat as empty
+          setProducts([])
         }
       } catch {
-        setProducts(mockProducts.filter(p => p.featured))
+        setProducts([])
       } finally {
         setLoading(false)
       }
