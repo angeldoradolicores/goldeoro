@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Crown, Target, Award, Shield, Eye, CheckCircle } from "lucide-react"
+import { Crown, Target, Award, Shield, Eye, CheckCircle, Trophy, Star, Flag } from "lucide-react"
 import SparklesUI from '@/components/sparkles'
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -13,24 +13,56 @@ export default function NosotrosPage() {
 
       {/* Hero Section */}
       <section className="pt-40 pb-20 relative overflow-hidden bg-obsidian border-b border-steel/10">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(200,164,77,0.02)_0%,transparent_70%)] animate-pulse" />
+        {/* Tricolor accent strip */}
+        <div className="absolute top-0 left-0 right-0 h-1 flex z-10">
+          <div className="flex-1 bg-[#FCD116]" />
+          <div className="flex-1 bg-[#003893]" />
+          <div className="flex-1 bg-[#CE1126]" />
+        </div>
+        <div className="absolute inset-0 z-0">
+          {/* Imagen de Hinchada/Banderas de Fondo */}
+          <img
+            src="/gol_oro.png"
+            alt="Estadio y Banderas"
+            className="w-full h-full object-cover opacity-20 mix-blend-screen"
+          />
+          {/* Gradientes más fuertes con los colores de la bandera de Colombia */}
+          <div
+            className="absolute inset-0 opacity-80"
+            style={{
+              background: `
+                radial-gradient(circle at 50% 0%, rgba(252,209,22,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 0% 50%, rgba(0,56,147,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(206,17,38,0.15) 0%, transparent 50%),
+                linear-gradient(to bottom, #080b11 0%, rgba(8,11,17,0.85) 50%, #080b11 100%)
+              `,
+            }}
+          />
           <SparklesUI extra={1} />
         </div>
-        
+
         <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 500 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <Crown className="w-16 h-16 text-gold-action mx-auto mb-6" />
+            {/* <div className="flex items-center justify-center gap-2 mb-6">
+              <Trophy className="w-10 h-10 text-gold-action" />
+              <span className="text-4xl">⚽</span>
+              <Trophy className="w-10 h-10 text-gold-action" />
+            </div> */}
             <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight mb-4 text-gradient-gold uppercase">
-              URBAN CROWN
+              GOL DE ORO
             </h1>
             <p className="text-sm md:text-base text-titanium uppercase tracking-[0.3em] font-sans font-light">
-              Donde el lujo y la calle se encuentran
+              Pasión por el Fútbol · Orgullo Colombiano · Mundial 2026
             </p>
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <span className="w-5 h-5 rounded-sm bg-[#FCD116] shadow-md" />
+              <span className="w-5 h-5 rounded-sm bg-[#003893] shadow-md" />
+              <span className="w-5 h-5 rounded-sm bg-[#CE1126] shadow-md" />
+            </div>
           </motion.div>
         </div>
       </section>
@@ -49,13 +81,13 @@ export default function NosotrosPage() {
             <h2 className="text-2xl md:text-3xl font-display font-semibold text-white-diamond mb-6 uppercase">MANIFIESTO</h2>
             <div className="space-y-6 text-titanium text-sm md:text-base leading-relaxed font-sans font-light">
               <p>
-                Urban Crown nace de la pasión por la moda urbana y la búsqueda constante de productos que combinen diseño, exclusividad y personalidad.
+                Gol de Oro nació de la pasión genuina por el fútbol y el orgullo de ser colombiano. Somos una tienda especializada en camisetas 1.1, álbum Panini, cajas de sobres y productos exclusivos de la Selección Colombia.
               </p>
               <p>
-                Entendemos que una gorra es mucho más que un accesorio. Es una pieza que refleja identidad, confianza y estilo. Por eso, seleccionamos cuidadosamente cada producto para ofrecer opciones que destaquen por su calidad, estética y carácter.
+                Entendemos que una camiseta de Colombia es mucho más que una prenda. Es una pieza que refleja identidad, orgullo nacional y amor por el deporte. Por eso seleccionamos cuidadosamente cada producto para garantizar autenticidad, calidad y emoción en cada compra.
               </p>
               <p>
-                Nuestro compromiso es acercar a nuestros clientes las últimas tendencias del streetwear, creando una experiencia de compra basada en la confianza, el buen servicio y la atención a los detalles.
+                Con el Mundial 2026 en el horizonte, nuestro compromiso es acompañar a cada hincha colombiano con los mejores productos oficiales, coleccionables y artículos de la Tricolor — creando una experiencia de compra digna de campeones.
               </p>
             </div>
           </motion.div>
@@ -79,15 +111,15 @@ export default function NosotrosPage() {
                   <Target className="w-5 h-5 text-gold-action" />
                 </div>
                 <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-action mb-2">Nuestra Misión</h3>
-                <h4 className="text-xl md:text-2xl font-display font-semibold text-white-diamond mb-4">ELEVAR EL ESTILO URBANO</h4>
+                <h4 className="text-xl md:text-2xl font-display font-semibold text-white-diamond mb-4">ENCENDER LA PASIÓN FUTBOLERA</h4>
                 <p className="text-sm text-titanium leading-relaxed font-light">
-                  En Urban Crown trabajamos para ofrecer gorras y accesorios que representen la combinación perfecta entre la elegancia contemporánea y la esencia de la cultura urbana.
+                  En Gol de Oro trabajamos para llevar a cada hincha colombiano los mejores productos del fútbol: camisetas oficiales 1.1, álbum Panini, cajas de sobres y artículos exclusivos de la Selección.
                 </p>
                 <p className="text-sm text-titanium leading-relaxed mt-4 font-light">
-                  Nuestra misión es brindar productos cuidadosamente seleccionados que permitan a cada cliente expresar su personalidad con autenticidad, confianza y distinción.
+                  Nuestra misión es ser el puente entre el hincha y su pasión, ofreciendo productos auténticos que celebren el orgullo de ser colombiano y la emoción del Mundial 2026.
                 </p>
               </div>
-              <p className="text-gold-action font-medium italic mt-8 text-xs tracking-wider font-display">"Creemos que el verdadero estilo no sigue tendencias; las define."</p>
+              <p className="text-gold-action font-medium italic mt-8 text-xs tracking-wider font-display">"Donde hay fútbol, hay Gol de Oro."</p>
             </motion.div>
 
             {/* Vision */}
@@ -103,14 +135,14 @@ export default function NosotrosPage() {
                   <Eye className="w-5 h-5 text-chrome" />
                 </div>
                 <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-chrome mb-2">Nuestra Visión</h3>
-                <h4 className="text-xl md:text-2xl font-display font-semibold text-white-diamond mb-4">LIDERAR LA CULTURA STREETWEAR</h4>
+                <h4 className="text-xl md:text-2xl font-display font-semibold text-white-diamond mb-4">SER LA TIENDA #1 DE FÚTBOL EN COLOMBIA</h4>
                 <p className="text-sm text-titanium leading-relaxed font-light">
-                  Convertirnos en una marca referente de moda urbana en Colombia, reconocida por la calidad de nuestros productos, la confianza de nuestros clientes y la capacidad de fusionar el lujo contemporáneo con la esencia de la cultura streetwear.
+                  Ser la tienda de referencia de fútbol y coleccionismo en Colombia: reconocida por la autenticidad de nuestros productos, la pasión por la Tricolor y la capacidad de conectar a cada hincha con su amor por el deporte más hermoso del mundo.
                 </p>
               </div>
               <div className="border-t border-steel/20 pt-6 mt-8">
                 <p className="text-xs text-chrome font-semibold flex items-center gap-2 uppercase tracking-widest">
-                  <CheckCircle className="w-4 h-4 text-gold-action" /> MARCA REFERENTE EN COLOMBIA
+                  <CheckCircle className="w-4 h-4 text-gold-action" /> TIENDA OFICIAL FÚTBOL COLOMBIA 2026
                 </p>
               </div>
             </motion.div>
@@ -133,11 +165,11 @@ export default function NosotrosPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: "CALIDAD ABSOLUTA", desc: "Seleccionamos productos con altos estándares de diseño y fabricación para garantizar una durabilidad y estética impecables.", icon: Award },
-              { title: "AUTENTICIDAD", desc: "Creemos en la importancia de expresar una identidad propia y honesta a través de cada detalle.", icon: Shield },
-              { title: "EXCLUSIVIDAD", desc: "Buscamos modelos y diseños únicos que destaquen por su carácter exclusivo y diferenciación.", icon: Crown },
-              { title: "CONFIANZA", desc: "Construimos relaciones duraderas basadas en la transparencia, responsabilidad y un servicio al cliente impecable.", icon: Target },
-              { title: "EVOLUCIÓN", desc: "Nos mantenemos a la vanguardia de la moda para ofrecer propuestas alineadas con la cultura urbana global.", icon: Eye }
+              { title: "PASIÓN FUTBOLERA", desc: "El fútbol es mucho más que un deporte; es emoción, identidad y orgullo. Cada producto refleja esa pasión por la pelota.", icon: Trophy },
+              { title: "AUTENTICIDAD", desc: "Solo ofrecemos productos auténticos y oficiales. Camisetas 1.1, álbum Panini y coleccionables que cumplen con los más altos estándares.", icon: Shield },
+              { title: "ORGULLO COLOMBIANO", desc: "La Selección Colombia es nuestra mayor inspiración. Celebramos los colores amarillo, azul y rojo en cada rincón de nuestra tienda.", icon: Crown },
+              { title: "CONFIANZA", desc: "Construimos relaciones duraderas basadas en la transparencia, la calidad garantizada y un servicio al cliente impecable.", icon: Target },
+              { title: "COLECCIONISMO", desc: "Entendemos la emoción de completar un álbum o conseguir una camiseta histórica. Somos la casa del hincha coleccionista.", icon: Star }
             ].map((v, i) => {
               const Icon = v.icon
               return (
@@ -159,7 +191,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      {/* Por qué elegir Urban Crown */}
+      {/* Por qué elegir Gol de Oro */}
       <section className="py-24 bg-carbon border-t border-steel/20">
         <div className="container mx-auto px-4 max-w-5xl">
           <motion.div
@@ -168,16 +200,16 @@ export default function NosotrosPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl font-display font-bold text-white-diamond uppercase">¿Por qué elegir Urban Crown?</h2>
+            <h2 className="text-3xl font-display font-bold text-white-diamond uppercase">¿Por qué elegir Gol de Oro?</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: "Diseños Seleccionados", desc: "Una colección pensada para quienes valoran la calidad, el estilo y la exclusividad urbana." },
-              { title: "Atención Premium", desc: "Brindamos asesoría cercana y personalizada para ayudarte a encontrar la pieza ideal." },
-              { title: "Envíos Certificados", desc: "Realizamos envíos a nivel nacional con seguimiento y acompañamiento total en el proceso." },
-              { title: "Satisfacción Garantizada", desc: "Nos enfocamos en ofrecer un servicio impecable y una atención orientada a la perfección." },
-              { title: "Estilo Distintivo", desc: "Cada producto forma parte de una propuesta de diseño para quienes buscan diferenciarse con clase." }
+              { title: "⚽ Productos Oficiales", desc: "Camisetas de la Selección Colombia, álbum Panini, cajas y de sobres del Mundial 2026 — todo auténtico y certificado." },
+              { title: "🏆 Atención al Hincha", desc: "Asesoría cercana y personalizada para ayudarte a encontrar esa camiseta o álbum que buscas con tanto fervor." },
+              { title: "🚚 Envíos Nacionales", desc: "Enviamos a todo Colombia con seguimiento y acompañamiento total, para que tu pasión futbolera llegue a tiempo." },
+              { title: "✅ Satisfacción Total", desc: "Nos enfocamos en superar las expectativas del hincha. Tu experiencia de compra es tan importante como el partido." },
+              { title: "🇨🇴 Orgullo Tricolor", desc: "Cada producto celebra el amarillo, azul y rojo de Colombia. Somos la tienda del verdadero hincha colombiano." }
             ].map((choice, idx) => (
               <motion.div
                 key={idx}
@@ -205,8 +237,13 @@ export default function NosotrosPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-lg font-display font-bold text-gold-action uppercase tracking-[0.3em] mb-3">URBAN CROWN</h3>
-            <p className="text-sm text-titanium font-sans font-light uppercase tracking-widest">Donde el lujo y la calle se encuentran.</p>
+            <h3 className="text-lg font-display font-bold text-gold-action uppercase tracking-[0.3em] mb-3">⚽ GOL DE ORO</h3>
+            <p className="text-sm text-titanium font-sans font-light uppercase tracking-widest">Pasión Colombiana · Orgullo Tricolor · Mundial 2026</p>
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <span className="w-4 h-4 rounded-sm bg-[#FCD116]" />
+              <span className="w-4 h-4 rounded-sm bg-[#003893]" />
+              <span className="w-4 h-4 rounded-sm bg-[#CE1126]" />
+            </div>
           </motion.div>
         </div>
       </section>

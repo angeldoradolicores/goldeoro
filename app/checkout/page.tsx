@@ -406,7 +406,7 @@ export default function CheckoutPage() {
             <Package className="w-16 h-16 mx-auto text-steel mb-6" />
             <h1 className="text-xl font-display font-semibold uppercase tracking-wider text-white-diamond mb-4">Tu carrito está vacío</h1>
             <p className="text-titanium text-sm max-w-xs mx-auto mb-8 font-light leading-relaxed">
-              Agrega algunas gorras exclusivas para continuar con tu proceso de compra.
+              Agrega camisetas, álbumes Panini o coleccionables oficiales para continuar.
             </p>
             <Link href="/catalogo">
               <Button className="btn-luxury rounded-none text-xs uppercase tracking-widest font-semibold px-8 py-5">Explorar Catálogo</Button>
@@ -485,7 +485,7 @@ export default function CheckoutPage() {
                   >
                     <h2 className="text-sm font-display font-semibold uppercase tracking-widest text-white-diamond flex items-center gap-2 border-b border-steel/10 pb-3 mb-6">
                       <Package className="w-4 h-4 text-gold-action" />
-                      Tu Carrito ({items.length} {items.length === 1 ? 'pieza' : 'piezas'})
+                      Tu Carrito ({items.length} {items.length === 1 ? 'producto' : 'productos'})
                     </h2>
                     {items.map((item) => (
                       <div
@@ -1028,12 +1028,13 @@ export default function CheckoutPage() {
                       <Button
                         onClick={handleCompleteOrder}
                         disabled={isLoading}
-                        className="flex-grow btn-luxury rounded-none text-xs uppercase tracking-widest font-semibold py-6"
+                        className="flex-grow rounded-none text-xs uppercase tracking-[0.2em] font-bold py-6 text-white border-none shadow-lg transition-transform hover:scale-[1.02]"
+                        style={{ background: 'linear-gradient(90deg, #FCD116 0%, #003893 50%, #CE1126 100%)' }}
                       >
                         {isLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-obsidian" />
+                          <Loader2 className="w-4 h-4 animate-spin text-white" />
                         ) : (
-                          <>Pagar {formatPrice(finalTotal)}</>
+                          <span className="drop-shadow-md flex items-center gap-2">⚽ Pagar {formatPrice(finalTotal)}</span>
                         )}
                       </Button>
                     </div>

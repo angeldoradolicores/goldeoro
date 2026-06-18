@@ -104,11 +104,19 @@ export async function POST(request: Request) {
     // Update product stock
     for (const item of items) {
       try {
-        await supabaseAdmin.rpc('decrement_stock', { 
-          product_id: item.productId, 
-          quantity: item.quantity 
+        await supabaseAdmin.rpc('decrement_size_stock', { 
+          p_product_id: item.productId, 
+          p_size: item.size || '',
+          p_quantity: item.quantity 
         })
       } catch {
+        // Fallback to old RPC if the new one doesn't exist yet
+        try {
+          await supabaseAdmin.rpc('decrement_stock', { 
+            product_id: item.productId, 
+            quantity: item.quantity 
+          })
+        } catch {
         // If RPC doesn't exist, do it manually
         await supabaseAdmin
           .from('products')
@@ -123,6 +131,7 @@ export async function POST(request: Request) {
                 .eq('id', item.productId)
             }
           })
+        }
       }
     }
 

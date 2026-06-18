@@ -139,8 +139,8 @@ export function CartDrawer() {
                     className="px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300"
                     style={{
                       fontFamily: 'var(--font-sans)',
-                      background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5)',
-                      color: '#050505',
+                      background: '#FCD116',
+                      color: '#111827',
                       letterSpacing: '0.2em',
                     }}
                   >
@@ -150,9 +150,14 @@ export function CartDrawer() {
               ) : (
                 <div className="space-y-1">
                   <AnimatePresence>
-                    {items.map((item, index) => (
-                      <motion.div
-                        key={item.id}
+                    {items.map((item, index) => {
+                      const availableStock = item.selectedSize && item.product.sizes_stock 
+                        ? (item.product.sizes_stock[item.selectedSize] || 0) 
+                        : (item.product.stock || 0);
+
+                      return (
+                        <motion.div
+                          key={item.id}
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: 60 }}
@@ -184,20 +189,25 @@ export function CartDrawer() {
                           </h4>
                           {item.selectedColor && (
                             <p
+                              className="text-[10px] uppercase tracking-[0.15em] mb-1"
+                              style={{ fontFamily: 'var(--font-sans)', color: '#555', letterSpacing: '0.15em' }}
+                            >
+                              Color: {item.selectedColor}
+                            </p>
+                          )}
+                          {item.selectedSize && (
+                            <p
                               className="text-[10px] uppercase tracking-[0.15em] mb-2"
                               style={{ fontFamily: 'var(--font-sans)', color: '#555', letterSpacing: '0.15em' }}
                             >
-                              {item.selectedColor}
+                              Talla: {item.selectedSize}
                             </p>
                           )}
                           <p
                             className="text-xs font-bold"
                             style={{
                               fontFamily: 'var(--font-cinzel)',
-                              background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5)',
-                              WebkitBackgroundClip: 'text',
-                              WebkitTextFillColor: 'transparent',
-                              backgroundClip: 'text',
+                              color: '#FCD116',
                             }}
                           >
                             {formatPrice(item.product.price)}
@@ -239,18 +249,18 @@ export function CartDrawer() {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => item.quantity < item.product.stock && updateQuantity(item.id, item.quantity + 1)}
-                              disabled={item.quantity >= item.product.stock}
-                              className={`w-6 h-6 flex items-center justify-center transition-all duration-200 ${item.quantity >= item.product.stock ? 'opacity-40 cursor-not-allowed' : ''}`}
+                              onClick={() => item.quantity < availableStock && updateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= availableStock}
+                              className={`w-6 h-6 flex items-center justify-center transition-all duration-200 ${item.quantity >= availableStock ? 'opacity-40 cursor-not-allowed' : ''}`}
                               style={{ border: '1px solid #262626', color: '#8B8B8B' }}
                               onMouseEnter={e => {
-                                if (item.quantity < item.product.stock) {
+                                if (item.quantity < availableStock) {
                                   (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(221,232,245,0.35)'
                                   ;(e.currentTarget as HTMLButtonElement).style.color = '#DDE8F5'
                                 }
                               }}
                               onMouseLeave={e => {
-                                if (item.quantity < item.product.stock) {
+                                if (item.quantity < availableStock) {
                                   (e.currentTarget as HTMLButtonElement).style.borderColor = '#262626'
                                   ;(e.currentTarget as HTMLButtonElement).style.color = '#8B8B8B'
                                 }
@@ -261,7 +271,8 @@ export function CartDrawer() {
                           </div>
                         </div>
                       </motion.div>
-                    ))}
+                    );
+                  })}
                   </AnimatePresence>
                 </div>
               )}
@@ -326,10 +337,7 @@ export function CartDrawer() {
                     className="text-lg font-black"
                     style={{
                       fontFamily: 'var(--font-cinzel)',
-                      background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5, #EAF2FF)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
+                      color: '#FCD116',
                     }}
                   >
                     {formatPrice(cartTotal)}
@@ -340,24 +348,22 @@ export function CartDrawer() {
                 <div className="space-y-3">
                   <button
                     onClick={handleCheckout}
-                    className="group w-full py-4 flex items-center justify-center gap-3 text-[11px] font-bold uppercase transition-all duration-300"
+                    className="group w-full py-4 flex items-center justify-center gap-3 text-[11px] font-bold uppercase transition-all duration-300 shadow-lg text-white"
                     style={{
                       fontFamily: 'var(--font-sans)',
                       letterSpacing: '0.2em',
-                      background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 100%)',
-                      color: '#050505',
+                      background: 'linear-gradient(90deg, #FCD116 0%, #003893 50%, #CE1126 100%)',
+                      border: 'none',
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, #DDE8F5 0%, #C9CDD2 100%)'
-                      ;(e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(221, 232, 245, 0.35)'
+                      (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 100%)'
-                      ;(e.currentTarget as HTMLButtonElement).style.boxShadow = 'none'
+                      (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'
                     }}
                   >
-                    Finalizar Compra
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    <span className="drop-shadow-md flex items-center gap-2">⚽ Finalizar Compra</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform drop-shadow-md" />
                   </button>
 
                   <button

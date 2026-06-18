@@ -68,6 +68,14 @@ interface Product {
   videos: string[]
   colors: string[]
   created_at: string
+  product_type?: string
+  team?: string
+  season?: string
+  player?: string
+  jersey_type?: string
+  collection_type?: string
+  edition?: string
+  year?: number
 }
 
 const defaultCategories = ['Todos', 'Premium', 'Urban', 'Snapback', 'Classic', 'Sport', 'Limited Edition']
@@ -226,7 +234,7 @@ export default function ProductosPage() {
         <div>
           <h1 className="text-2xl md:text-3xl font-display font-bold">Productos</h1>
           <p className="text-muted-foreground">
-            Gestiona tu catalogo de gorras ({products.length} productos)
+            Gestiona tu catálogo de productos ({products.length} productos)
           </p>
         </div>
         <Button onClick={handleAddProduct} className="btn-luxury">
@@ -458,7 +466,17 @@ function ProductModal(props: {
     stock: 0,
     featured: false,
     is_promotion: false,
+    product_type: 'gorra',
+    team: '',
+    season: '',
+    player: '',
+    jersey_type: '',
+    collection_type: '',
+    edition: '',
+    year: undefined,
     colors: ['Negro'],
+    sizes: [],
+    sizes_stock: {},
     images: [],
     videos: [],
   })
@@ -467,6 +485,14 @@ function ProductModal(props: {
   const [uploadingImage, setUploadingImage] = useState(false)
   const [uploadingVideo, setUploadingVideo] = useState(false)
   const [newColor, setNewColor] = useState('')
+  const [newSize, setNewSize] = useState('')
+  const [customProductType, setCustomProductType] = useState(false)
+
+  const availableSizes = [
+    'S', 'M', 'L', 'XL', 'XXL',
+    '7', '7 1/8', '7 1/4', '7 3/8', '7 1/2', '7 5/8', '7 3/4', '7 7/8', '8',
+    'Ajustable', 'Única'
+  ]
 
   const availableColors = [
     'Negro',
@@ -502,6 +528,50 @@ function ProductModal(props: {
     })
   }
 
+  const addSize = () => {
+    if (!newSize) return
+    const currentSizes = formData.sizes || []
+    if (currentSizes.includes(newSize)) {
+      toast.error('La talla ya está agregada')
+      return
+    }
+    const newSizes = [...currentSizes, newSize]
+    const newSizesStock = { ...(formData.sizes_stock || {}), [newSize]: 0 }
+    setFormData({ ...formData, sizes: newSizes, sizes_stock: newSizesStock })
+    setNewSize('')
+  }
+
+  const removeSize = (size: string) => {
+    const newSizes = (formData.sizes || []).filter((item) => item !== size)
+    const newSizesStock = { ...(formData.sizes_stock || {}) }
+    delete newSizesStock[size]
+    
+    // Recalculate total stock
+    const newTotalStock = Object.values(newSizesStock).reduce((acc, val) => acc + (val || 0), 0)
+    
+    setFormData({
+      ...formData,
+      sizes: newSizes,
+      sizes_stock: newSizesStock,
+      stock: newTotalStock > 0 ? newTotalStock : formData.stock
+    })
+    if (newTotalStock > 0) {
+      setDisplayStock(formatNumberInput(newTotalStock.toString()))
+    }
+  }
+
+  const updateSizeStock = (size: string, quantity: number) => {
+    const newSizesStock = { ...(formData.sizes_stock || {}), [size]: quantity }
+    const newTotalStock = Object.values(newSizesStock).reduce((acc, val) => acc + (val || 0), 0)
+    
+    setFormData({
+      ...formData,
+      sizes_stock: newSizesStock,
+      stock: newTotalStock
+    })
+    setDisplayStock(formatNumberInput(newTotalStock.toString()))
+  }
+
   // Formatting helpers
   const formatNumberInput = (val: string) => {
     // Remove all non-digits
@@ -532,10 +602,22 @@ function ProductModal(props: {
         stock: product.stock,
         featured: product.featured,
         is_promotion: product.is_promotion,
+        product_type: product.product_type || 'gorra',
+        team: product.team || '',
+        season: product.season || '',
+        player: product.player || '',
+        jersey_type: product.jersey_type || '',
+        collection_type: product.collection_type || '',
+        edition: product.edition || '',
+        year: product.year,
         colors: product.colors || ['Negro'],
+        sizes: product.sizes || [],
+        sizes_stock: product.sizes_stock || {},
         images: product.images || [],
         videos: product.videos || [],
       })
+      const isCustom = !!(product.product_type && !['gorra', 'camiseta', 'album', 'sobre', 'caja', 'coleccionable'].includes(product.product_type))
+      setCustomProductType(isCustom)
       setDisplayPrice(product.price ? formatNumberInput(product.price.toString()) : '')
       setDisplayOriginalPrice(product.original_price ? formatNumberInput(product.original_price.toString()) : '')
       setDisplayStock(product.stock !== undefined ? formatNumberInput(product.stock.toString()) : '')
@@ -550,9 +632,12 @@ function ProductModal(props: {
         featured: false,
         is_promotion: false,
         colors: ['Negro'],
+        sizes: [],
+        sizes_stock: {},
         images: [],
         videos: [],
       })
+      setCustomProductType(false)
       setDisplayPrice('')
       setDisplayOriginalPrice('')
       setDisplayStock('')
@@ -649,40 +734,199 @@ function ProductModal(props: {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-[90vw] lg:max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-display">
+          <DialogTitle className="text-2xl font-display">
             {product ? 'Editar Producto' : 'Agregar Producto'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Images */}
-          <div>
-            <Label>Imagenes</Label>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          
+          {/* General Information Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold border-b border-border/50 pb-2">Información General</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-3">
+                <Label>Nombre del Producto</Label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                  placeholder="Ej: Gol de Oro Elite Black"
+                  required
+                />
+              </div>
+              <div className="md:col-span-3">
+                <Label>Descripcion</Label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                  rows={3}
+                  placeholder="Describe el producto..."
+                />
+              </div>
+              <div>
+                <Label>Precio (COP)</Label>
+                <Input
+                  type="text"
+                  value={displayPrice}
+                  onChange={(e) => {
+                    const formatted = formatNumberInput(e.target.value)
+                    setDisplayPrice(formatted)
+                    setFormData({ ...formData, price: parseFormattedNumber(formatted) })
+                  }}
+                  className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                  required
+                />
+              </div>
+              <div>
+                <Label>Precio Original (Promocion)</Label>
+                <Input
+                  type="text"
+                  value={displayOriginalPrice}
+                  onChange={(e) => {
+                    const formatted = formatNumberInput(e.target.value)
+                    setDisplayOriginalPrice(formatted)
+                    setFormData({ ...formData, original_price: formatted ? parseFormattedNumber(formatted) : undefined })
+                  }}
+                  className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                  placeholder="Opcional"
+                />
+              </div>
+              <div>
+                <Label>Stock</Label>
+                <Input
+                  type="text"
+                  value={displayStock}
+                  onChange={(e) => {
+                    const formatted = formatNumberInput(e.target.value)
+                    setDisplayStock(formatted)
+                    setFormData({ ...formData, stock: parseFormattedNumber(formatted) })
+                  }}
+                  className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                  required
+                />
+              </div>
+              <div>
+                <Label>Categoria</Label>
+                <Select 
+                  value={formData.category} 
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.filter(c => c !== 'Todos').map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <div className="flex items-center justify-between">
+                  <Label>Tipo de Producto</Label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newMode = !customProductType
+                      setCustomProductType(newMode)
+                      if (!newMode) {
+                        setFormData({ ...formData, product_type: 'gorra' })
+                      } else {
+                        setFormData({ ...formData, product_type: '' })
+                      }
+                    }}
+                    className="text-xs text-primary hover:underline hover:text-primary-focus cursor-pointer"
+                  >
+                    {customProductType ? 'Seleccionar predeterminado' : 'Escribir personalizado'}
+                  </button>
+                </div>
+                {customProductType ? (
+                  <Input
+                    type="text"
+                    placeholder="Ej. accesorio, llavero, etc."
+                    value={formData.product_type || ''}
+                    onChange={(e) => setFormData({ ...formData, product_type: e.target.value })}
+                    className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                  />
+                ) : (
+                  <Select
+                    value={formData.product_type || 'gorra'}
+                    onValueChange={(value) => setFormData({ ...formData, product_type: value })}
+                  >
+                    <SelectTrigger className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['gorra', 'camiseta', 'album', 'sobre', 'caja', 'coleccionable'].map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              <div className="flex flex-col justify-end space-y-2 pb-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.featured}
+                    onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                    className="w-4 h-4 rounded border-border accent-primary"
+                  />
+                  <span>Producto Destacado</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_promotion}
+                    onChange={(e) => setFormData({ ...formData, is_promotion: e.target.checked })}
+                    className="w-4 h-4 rounded border-border accent-primary"
+                  />
+                  <span>En Promocion</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Multimedia Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold border-b border-border/50 pb-2">Multimedia</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label>Imagenes</Label>
             <div className="mt-2 space-y-3">
-              <div className="flex gap-2">
+              <div className="flex flex-col xl:flex-row gap-2">
                 <Input
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="URL de la imagen"
                   className="bg-secondary border-border/50 text-black placeholder:text-slate-500"
                 />
-                <Button type="button" onClick={addImage} variant="outline">
-                  <Plus className="w-4 h-4" />
-                </Button>
-                <div className="relative">
-                  <Button type="button" variant="outline" disabled={uploadingImage} className="relative overflow-hidden">
-                    {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                    {uploadingImage ? '' : 'Subir'}
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileUpload(e, 'image')}
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
-                      disabled={uploadingImage}
-                    />
+                <div className="flex gap-2">
+                  <Button type="button" onClick={addImage} variant="outline" className="flex-1">
+                    <Plus className="w-4 h-4 mr-2" />
+                    URL
                   </Button>
+                  <div className="relative flex-1">
+                    <Button type="button" variant="outline" disabled={uploadingImage} className="relative overflow-hidden w-full">
+                      {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      {uploadingImage ? '' : 'Subir'}
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e, 'image')}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
+                        disabled={uploadingImage}
+                      />
+                    </Button>
+                  </div>
                 </div>
               </div>
               {formData.images && formData.images.length > 0 && (
@@ -715,28 +959,31 @@ function ProductModal(props: {
           <div>
             <Label>Videos</Label>
             <div className="mt-2 space-y-3">
-              <div className="flex gap-2">
+              <div className="flex flex-col xl:flex-row gap-2">
                 <Input
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="URL del video (YouTube, Vimeo, etc.)"
+                  placeholder="URL del video (YouTube, etc.)"
                   className="bg-secondary border-border/50 text-black placeholder:text-slate-500"
                 />
-                <Button type="button" onClick={addVideo} variant="outline">
-                  <Plus className="w-4 h-4" />
-                </Button>
-                <div className="relative">
-                  <Button type="button" variant="outline" disabled={uploadingVideo} className="relative overflow-hidden">
-                    {uploadingVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                    {uploadingVideo ? '' : 'Subir'}
-                    <Input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => handleFileUpload(e, 'video')}
-                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
-                      disabled={uploadingVideo}
-                    />
+                <div className="flex gap-2">
+                  <Button type="button" onClick={addVideo} variant="outline" className="flex-1">
+                    <Plus className="w-4 h-4 mr-2" />
+                    URL
                   </Button>
+                  <div className="relative flex-1">
+                    <Button type="button" variant="outline" disabled={uploadingVideo} className="relative overflow-hidden w-full">
+                      {uploadingVideo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                      {uploadingVideo ? '' : 'Subir'}
+                      <Input
+                        type="file"
+                        accept="video/*"
+                        onChange={(e) => handleFileUpload(e, 'video')}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
+                        disabled={uploadingVideo}
+                      />
+                    </Button>
+                  </div>
                 </div>
               </div>
               {formData.videos && formData.videos.length > 0 && (
@@ -759,92 +1006,10 @@ function ProductModal(props: {
             </div>
           </div>
 
-          {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <Label>Nombre del Producto</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
-                placeholder="Ej: Crown Elite Black"
-                required
-              />
-            </div>
-            <div className="md:col-span-2">
-              <Label>Descripcion</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
-                rows={3}
-                placeholder="Describe el producto..."
-              />
-            </div>
-            <div>
-              <Label>Precio (COP)</Label>
-              <Input
-                type="text"
-                value={displayPrice}
-                onChange={(e) => {
-                  const formatted = formatNumberInput(e.target.value)
-                  setDisplayPrice(formatted)
-                  setFormData({ ...formData, price: parseFormattedNumber(formatted) })
-                }}
-                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
-                required
-              />
-            </div>
-            <div>
-              <Label>Precio Original (Promocion)</Label>
-              <Input
-                type="text"
-                value={displayOriginalPrice}
-                onChange={(e) => {
-                  const formatted = formatNumberInput(e.target.value)
-                  setDisplayOriginalPrice(formatted)
-                  setFormData({ ...formData, original_price: formatted ? parseFormattedNumber(formatted) : undefined })
-                }}
-                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
-                placeholder="Opcional"
-              />
-            </div>
-            <div>
-              <Label>Categoria</Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
-              >
-                <SelectTrigger className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.filter(c => c !== 'Todos').map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Stock</Label>
-              <Input
-                type="text"
-                value={displayStock}
-                onChange={(e) => {
-                  const formatted = formatNumberInput(e.target.value)
-                  setDisplayStock(formatted)
-                  setFormData({ ...formData, stock: parseFormattedNumber(formatted) })
-                }}
-                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Colors */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Variantes Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold border-b border-border/50 pb-2">Variantes y Stock Específico</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label>Selecciona colores</Label>
               <div className="mt-1 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
@@ -891,33 +1056,139 @@ function ProductModal(props: {
                 </p>
               )}
             </div>
+
+            {/* Sizes */}
+            <div>
+              <Label>Selecciona tallas y stock</Label>
+              <div className="mt-1 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2">
+                <Select value={newSize} onValueChange={setNewSize}>
+                  <SelectTrigger className="bg-secondary border-border/50">
+                    <SelectValue placeholder="Selecciona una talla" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSizes.map((size) => (
+                      <SelectItem key={size} value={size}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button type="button" variant="outline" onClick={addSize} className="sm:mt-0">
+                  Agregar
+                </Button>
+              </div>
+              <div className="mt-3 flex flex-col gap-2">
+                {(formData.sizes || []).map((size) => (
+                  <div key={size} className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border border-border/50 bg-secondary px-3 py-2 text-sm gap-2">
+                    <span className="font-medium">{size}</span>
+                    <div className="flex items-center gap-2 self-end sm:self-auto">
+                      <Label className="text-xs text-muted-foreground mb-0">Stock:</Label>
+                      <Input 
+                        type="number" 
+                        min="0"
+                        className="w-20 h-8 text-center bg-card border-border/50 text-black"
+                        value={formData.sizes_stock?.[size] ?? 0}
+                        onChange={(e) => updateSizeStock(size, parseInt(e.target.value) || 0)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeSize(size)}
+                        className="text-destructive hover:text-destructive/80 ml-2 font-bold text-lg"
+                        aria-label={`Eliminar talla ${size}`}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {formData.sizes && formData.sizes.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  El stock total se calculará automáticamente como la suma del stock de cada talla.
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Options */}
-          <div className="flex flex-wrap gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.featured}
-                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                className="w-4 h-4 rounded border-border accent-primary"
+            </div>
+          </div>
+
+          {/* Metadatos Avanzados Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold border-b border-border/50 pb-2">Metadatos Avanzados</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div>
+              <Label>Equipo / marca</Label>
+              <Input
+                value={formData.team || ''}
+                onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                placeholder="Ej: Seleccion Colombia, NBA"
               />
-              <span>Producto Destacado</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.is_promotion}
-                onChange={(e) => setFormData({ ...formData, is_promotion: e.target.checked })}
-                className="w-4 h-4 rounded border-border accent-primary"
+            </div>
+            <div>
+              <Label>Temporada</Label>
+              <Input
+                value={formData.season || ''}
+                onChange={(e) => setFormData({ ...formData, season: e.target.value })}
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                placeholder="Ej: 2024, edición 2025"
               />
-              <span>En Promocion</span>
-            </label>
+            </div>
+            <div>
+              <Label>Jugador / coleccion</Label>
+              <Input
+                value={formData.player || ''}
+                onChange={(e) => setFormData({ ...formData, player: e.target.value })}
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                placeholder="Ej: James, Premium"
+              />
+            </div>
+            <div>
+              <Label>Tipo de Camiseta</Label>
+              <Input
+                value={formData.jersey_type || ''}
+                onChange={(e) => setFormData({ ...formData, jersey_type: e.target.value })}
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                placeholder="Ej: Replica, Auténtica"
+              />
+            </div>
+            <div>
+              <Label>Tipo de Colección</Label>
+              <Input
+                value={formData.collection_type || ''}
+                onChange={(e) => setFormData({ ...formData, collection_type: e.target.value })}
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                placeholder="Ej: Edición limitada"
+              />
+            </div>
+            <div>
+              <Label>Edición</Label>
+              <Input
+                value={formData.edition || ''}
+                onChange={(e) => setFormData({ ...formData, edition: e.target.value })}
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                placeholder="Ej: Gold, Anniversary"
+              />
+            </div>
+            <div>
+              <Label>Año</Label>
+              <Input
+                type="number"
+                value={formData.year || ''}
+                onChange={(e) => setFormData({ ...formData, year: e.target.value ? Number(e.target.value) : undefined })}
+                className="mt-1 bg-secondary border-border/50 text-black placeholder:text-slate-500"
+                placeholder="Ej: 2024"
+              />
+            </div>
+          </div>
+
+            </div>
           </div>
 
           {/* Actions */}
-          <div className="flex gap-4 pt-4 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1" disabled={saving}>
+          <div className="flex justify-end gap-4 pt-6 border-t border-border/50">
+            <Button type="button" variant="outline" onClick={onClose} disabled={saving} className="w-32">
               Cancelar
             </Button>
             <Button type="submit" className="flex-1 btn-luxury" disabled={saving}>

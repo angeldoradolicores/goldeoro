@@ -5,63 +5,70 @@
 
 :root {
   /* ═══════════════════════════════════════════
-     URBAN CROWN — REFINED PALETTE (Updated)
-     Base palette strictly aligned with product brief
+     GOL DE ORO — MUNDIAL 2026 PALETTE
+     Football premium palette for Gol de Oro
+     Colombia Tricolor: Yellow (#FCD116), Blue (#003893), Red (#CE1126)
   ═══════════════════════════════════════════ */
 
   /* Bases */
-  --obsidian:         #050505; /* Negro absoluto */
-  --satin-black:      #0B0B0B; /* Negro satinado */
-  --graphite:         #161616; /* Grafito */
+  --obsidian:         #080b11; /* Negro profundo azulado */
+  --satin-black:      #111827; /* Negro solicitado */
+  --graphite:         #1f2937; /* Grafito profundo */
+  --carbon:           #0f172a; /* Fondo carbón */
 
-  /* Cromado / Plata */
-  --chrome:           #6c6e72; /* Plata cromada */
-  --liquid-silver:    #DDE8F5; /* Plata líquida */
-  --pearl-white:      #F8F9FB; /* Perla blanca */
-  --crystal:          #EAF2FF; /* Cristal */
-  --diamond-reflect:  #BFCEDF; /* Reflejo diamante */
+  /* Tricolor Colombia & Metal accents */
+  --chrome:           #FCD116; /* Amarillo Colombia */
+  --liquid-silver:    #003893; /* Azul Colombia */
+  --pearl-white:      #FFFFFF; /* Blanco */
+  --crystal:          #FFF8EA; /* Cristal */
+  --diamond-reflect:  #FCD116; /* Destello Amarillo */
 
-  /* Soft metallic accents */
-  --old-gold:         #BFCEDF;
-  --imperial-gold:    #DDE8F5;
-  --champagne:        #EAF2FF;
-  --gold-action:      #DDE8F5; /* used as premium metallic accent */
-  --gold:             #DDE8F5;
+  --steel:            #374151;
+  --titanium:         #E5E7EB; /* Gris claro para texto */
+  --white-diamond:    #FFFFFF;
+  --ivory:            #F3F4F6;
+
+  /* Gold/Tricolor accents */
+  --old-gold:         #FFD700;
+  --imperial-gold:    #FFDF00;
+  --champagne:        #FFE55C;
+  --gold-action:      #FFD700;
+  --gold:             #FFD700;
 
   /* Semantic tokens */
   --background: var(--obsidian);
-  --foreground: rgba(255,255,255,0.95);
+  --foreground: rgba(255,255,255,0.96);
   --card: var(--satin-black);
   --card-foreground: var(--pearl-white);
-  --popover: var(--graphite);
+  --popover: var(--satin-black);
   --popover-foreground: var(--pearl-white);
-  --primary: var(--liquid-silver);
-  --primary-foreground: var(--obsidian);
-  --secondary: var(--chrome);
+  --primary: var(--gold-action);
+  --primary-foreground: var(--satin-black);
+  --secondary: var(--liquid-silver);
   --secondary-foreground: var(--pearl-white);
-  --muted: var(--graphite);
-  --muted-foreground: rgba(255,255,255,0.60);
-  --accent: var(--chrome);
+  --muted: #4B5563;
+  --muted-foreground: rgba(255,255,255,0.72);
+  --accent: #CE1126; /* Rojo Colombia */
   --accent-foreground: var(--pearl-white);
-  --destructive: oklch(0.55 0.25 25);
+  --destructive: #CE1126; /* Rojo Colombia */
   --destructive-foreground: var(--pearl-white);
-  --border: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.08);
   --input: var(--graphite);
-  --ring: var(--liquid-silver);
-  --radius: 0.5rem;
+  --ring: var(--gold-action);
+  --radius: 0.75rem;
 
   /* Glass / sparkle */
-  --glass: rgba(255,255,255,0.03);
-  --glass-border: rgba(221,232,245,0.06);
+  --glass: rgba(17,24,39,0.7);
+  --glass-border: rgba(252,209,22,0.15);
 
   --sidebar: var(--obsidian);
   --sidebar-foreground: var(--pearl-white);
-  --sidebar-primary: var(--liquid-silver);
-  --sidebar-primary-foreground: var(--obsidian);
-  --sidebar-accent: var(--chrome);
+  --sidebar-primary: var(--gold-action);
+  --sidebar-primary-foreground: var(--satin-black);
+  --sidebar-accent: var(--liquid-silver);
   --sidebar-accent-foreground: var(--pearl-white);
-  --sidebar-border: rgba(255,255,255,0.06);
-  --sidebar-ring: var(--liquid-silver);
+  --sidebar-border: rgba(255,255,255,0.08);
+  --sidebar-ring: var(--gold-action);
 }
 
 /* Global input / placeholder / focus rules to enforce legibility */
@@ -95,10 +102,10 @@
 }
 
 @theme inline {
-  --font-sans: 'Montserrat', 'Inter', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', monospace;
-  --font-display: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
-  --font-graffiti: 'Cinzel', serif;
+  --font-sans: var(--font-sans), 'Montserrat', system-ui, sans-serif;
+  --font-mono: var(--font-mono), monospace;
+  --font-display: var(--font-cinzel), sans-serif;
+  --font-graffiti: var(--font-cinzel), sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -167,7 +174,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: var(--carbon);
+    background-color: var(--background);
   }
 
   html {
@@ -199,7 +206,7 @@
   ═══════════════════════════════════════════ */
 
   .text-gradient-gold {
-    background: linear-gradient(135deg, var(--old-gold) 0%, var(--imperial-gold) 50%, var(--champagne) 100%);
+    background: linear-gradient(135deg, var(--gold-action) 0%, var(--gold) 55%, var(--champagne) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -348,61 +355,62 @@
   }
 
   .glass-luxury {
-    background: oklch(0.06 0 0 / 0.92);
-    backdrop-filter: blur(32px) saturate(150%);
-    -webkit-backdrop-filter: blur(32px) saturate(150%);
-    border: 1px solid oklch(0.7 0 0 / 0.1);
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+    border: 1px solid rgba(224,179,59,0.16);
   }
 
   /* ═══════════════════════════════════════════
-     BOTONES LUXURY
+     BOTONES GOL DE ORO
   ═══════════════════════════════════════════ */
 
   .btn-luxury {
-    background: linear-gradient(135deg, var(--gold-action) 0%, var(--old-gold) 100%);
+    background: linear-gradient(135deg, var(--gold-action) 0%, var(--champagne) 100%);
     color: var(--obsidian);
     font-family: var(--font-sans);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.12em;
+    transition: all 0.25s ease;
     border: 1px solid transparent;
+    box-shadow: 0 18px 35px rgba(224,179,59,0.14);
   }
 
   .btn-luxury:hover {
-    background: linear-gradient(135deg, var(--imperial-gold) 0%, var(--champagne) 100%);
+    background: linear-gradient(135deg, var(--imperial-gold) 0%, var(--gold) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 32px oklch(0.72 0.12 75 / 0.4);
+    box-shadow: 0 22px 40px rgba(224,179,59,0.18);
   }
 
   .btn-imperial {
     background: transparent;
     color: var(--gold-action);
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.14em;
     border: 1px solid var(--gold-action);
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
   }
 
   .btn-imperial:hover {
     background: var(--gold-action);
     color: var(--obsidian);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   .btn-chrome {
     background: transparent;
-    color: var(--chrome);
-    font-weight: 600;
+    color: var(--gold-action);
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    border: 1px solid var(--steel);
+    border: 1px solid rgba(255,255,255,0.12);
     transition: all 0.25s ease;
   }
 
   .btn-chrome:hover {
-    border-color: var(--chrome);
+    border-color: var(--gold-action);
     color: var(--white-diamond);
     transform: translateY(-1px);
   }
@@ -542,7 +550,7 @@
   }
 
   .glow-chrome {
-    box-shadow: 0 0 20px oklch(0.7 0 0 / 0.15);
+    box-shadow: 0 0 24px rgba(224,179,59,0.22);
   }
 
   /* Legacy mapped */
@@ -652,7 +660,7 @@
 
   /* Custom cursor element will be rendered by a client component */
   .uc-cursor { pointer-events: none; position: fixed; z-index: 9999; width: 18px; height: 18px; border-radius: 6px; background: transparent; border: 1px solid rgba(255,255,255,0.08); transform: translate(-50%, -50%); transition: transform 150ms ease, width 150ms ease, height 150ms ease, opacity 200ms ease; display:flex;align-items:center;justify-content:center;color:var(--chrome);font-size:12px }
-  .uc-cursor::before { content: '✚'; display:block; line-height:1; }
+  .uc-cursor::before { content: '⚽'; display:block; line-height:1; }
   .uc-cursor.magnet { transform: translate(-50%, -50%) scale(1.6); }
 
   @media (pointer: coarse) {
@@ -693,7 +701,7 @@
   ═══════════════════════════════════════════ */
 
   .bg-gradient-neon {
-    background: linear-gradient(135deg, var(--gold-action), var(--old-gold));
+    background: linear-gradient(135deg, var(--gold-action), var(--gold));
   }
 
   .text-gold {

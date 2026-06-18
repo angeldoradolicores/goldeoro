@@ -339,7 +339,7 @@ function OrdersContent({ initialUser, initialOrders }: { initialUser: any, initi
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24 bg-carbon border border-steel/30 rounded-none p-8 shadow-xl">
               <Package className="w-16 h-16 text-steel mx-auto mb-6" />
               <h3 className="text-lg font-display uppercase tracking-widest mb-2 text-white-diamond">Aún no tienes pedidos</h3>
-              <p className="text-titanium text-sm max-w-sm mx-auto mb-8 font-light">Explora nuestra colección luxury streetwear y estrena una pieza exclusiva hoy mismo.</p>
+              <p className="text-titanium text-sm max-w-sm mx-auto mb-8 font-light">Explora nuestro catálogo de camisetas, álbumes Panini y coleccionables oficiales del Mundial 2026.</p>
               <Link href="/catalogo">
                 <Button className="btn-luxury py-5 px-8 font-bold uppercase tracking-widest text-xs rounded-none">
                   Explorar Catálogo

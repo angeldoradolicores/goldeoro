@@ -457,8 +457,8 @@ ON CONFLICT (slug) DO NOTHING;
 -- Insert sample products
 INSERT INTO products (name, slug, description, price, original_price, category_id, brand, colors, sizes, stock, featured, is_promotion, is_new, rating, review_count) VALUES
   (
-    'Crown Elite Black',
-    'crown-elite-black',
+    'Gol de Oro Elite Black',
+    'gol-de-oro-elite-black',
     'Gorra premium de edicion limitada con bordado en oro de 24k. Confeccionada en algodon egipcio de la mas alta calidad con acabados de lujo.',
     289000,
     350000,

@@ -24,7 +24,7 @@ export default function RecuperarPage() {
     setError('')
     const supabase = createClient()
     const { error: supaErr } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/nueva-contrasena`,
+      redirectTo: `${window.location.origin}/auth/reset-password`,
     })
     setLoading(false)
     if (supaErr) {

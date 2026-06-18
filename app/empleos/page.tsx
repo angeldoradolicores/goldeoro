@@ -84,10 +84,10 @@ export default function EmpleosPage() {
             <Mail className="w-12 h-12 text-gold mx-auto mb-4" />
             <h3 className="text-2xl font-bold mb-3">¿Listo para postularte?</h3>
             <p className="text-muted-foreground max-w-2xl mx-auto mb-6 leading-relaxed">
-              Envíanos tu hoja de vida o portafolio creativo al correo electrónico urbancrowncol4@gmail.com con el nombre de la vacante en el asunto. ¡Queremos conocer tu talento!
+              Envíanos tu hoja de vida o portafolio creativo al correo electrónico info@goldeoro.co con el nombre de la vacante en el asunto. ¡Queremos conocer tu talento!
             </p>
             <a
-              href="mailto:urbancrowncol4@gmail.com"
+              href="mailto:info@goldeoro.co"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold hover:bg-gold/90 text-background font-bold rounded-full transition-colors"
             >
               <Send className="w-4 h-4" />

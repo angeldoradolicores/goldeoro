@@ -50,17 +50,17 @@ export function FeaturedProducts() {
           >
             <Award className="w-4 h-4 text-chrome" />
             <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-chrome font-sans">
-              Edición Limitada
+              Edición Oficial
             </span>
           </motion.div>
-          
+
           <h2 className="text-4xl md:text-5xl font-display font-bold leading-none tracking-tight">
-            <span className="text-gradient-chrome">PIEZAS</span>
+            <span className="text-[#FCD116]">COLECCIÓN</span>
             <br />
-            <span className="text-white-diamond mt-2 inline-block">DESTACADAS</span>
+            <span className="text-white-diamond mt-2 inline-block">MUNDIALISTA 2026</span>
           </h2>
           <p className="mt-6 text-sm md:text-base text-titanium max-w-xl mx-auto leading-relaxed font-sans font-light tracking-wide">
-            Descubre nuestras piezas más exclusivas, seleccionadas para quienes buscan la máxima expresión del <span className="text-chrome font-normal">lujo urbano</span>.
+            Encuentra las camisetas oficiales de la Selección Colombia y el Álbum Oficial Panini para vivir la pasión del Mundial.
           </p>
         </motion.div>
 
@@ -88,7 +88,7 @@ export function FeaturedProducts() {
         >
           <Link href="/catalogo">
             <Button size="lg" className="btn-luxury px-12 py-6 text-xs font-semibold uppercase tracking-[0.25em] group rounded-none">
-              <span>Explorar el Catálogo</span>
+              <span>Ver Colección 2026</span>
               <motion.span
                 className="ml-2 inline-block"
                 animate={{ x: [0, 5, 0] }}

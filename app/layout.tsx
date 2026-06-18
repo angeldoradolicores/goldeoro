@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cinzel, Montserrat, Cormorant_Garamond } from 'next/font/google'
+import { Oswald, Montserrat, Outfit } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
@@ -7,11 +7,11 @@ import Preloader from '@/components/preloader'
 import Cursor from '@/components/cursor'
 import { CartDrawer } from '@/components/cart-drawer'
 
-const cinzel = Cinzel({
+const oswald = Oswald({
   subsets: ['latin'],
-  variable: '--font-cinzel',
+  variable: '--font-cinzel', // mapped to original variable to avoid breaking font-cinzel references
   display: 'swap',
-  weight: ['400', '500', '600', '700', '800', '900'],
+  weight: ['300', '400', '500', '600', '700'],
 })
 
 const montserrat = Montserrat({
@@ -21,21 +21,21 @@ const montserrat = Montserrat({
   weight: ['300', '400', '500', '600', '700', '800', '900'],
 })
 
-const cormorant = Cormorant_Garamond({
+const outfit = Outfit({
   subsets: ['latin'],
-  variable: '--font-cormorant',
+  variable: '--font-cormorant', // mapped to original variable to avoid breaking font-cormorant references
   display: 'swap',
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
 })
 
 export const metadata: Metadata = {
-  title: 'Urban Crown | Luxury Streetwear Premium Caps',
-  description: 'Gorras exclusivas que fusionan el lujo contemporáneo con la esencia de la cultura streetwear. Diseños seleccionados para quienes valoran la autenticidad.',
-  keywords: ['gorras', 'streetwear', 'urban', 'luxury', 'premium', 'caps', 'Urban Crown', 'Colombia', 'street culture'],
-  authors: [{ name: 'Urban Crown' }],
+  title: 'GOL DE ORO',
+  description: 'La tienda oficial para apasionados del fútbol. Encuentra camisetas oficiales de la Selección Colombia, álbumes y sobres Panini, cajas coleccionables y artículos deportivos del Mundial 2026.',
+  keywords: ['camisetas de fútbol', 'Selección Colombia', 'Mundial 2026', 'Álbum Panini', 'Sobres Panini', 'Cajas coleccionables', 'Gol de Oro', 'Colombia', 'fútbol'],
+  authors: [{ name: 'Gol de Oro' }],
   openGraph: {
-    title: 'Urban Crown | Luxury Streetwear',
-    description: 'Donde el lujo y la calle se encuentran. Colecciones exclusivas.',
+    title: 'GOL DE ORO',
+    description: 'Vive la pasión del Mundial 2026 con las mejores camisetas de fútbol, álbumes Panini y coleccionables premium.',
     type: 'website',
   },
 }
@@ -52,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${cinzel.variable} ${montserrat.variable} ${cormorant.variable} bg-background`}>
+    <html lang="es" className={`${oswald.variable} ${montserrat.variable} ${outfit.variable} bg-background`}>
       <head>
         <style>{`
           :root {

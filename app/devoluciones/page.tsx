@@ -22,7 +22,7 @@ export default function DevolucionesPage() {
             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-action block mb-2">Garantía Asegurada</span>
             <h1 className="text-3xl md:text-5xl font-display font-bold mt-2 text-gradient-gold uppercase">DEVOLUCIONES & CAMBIOS</h1>
             <p className="text-titanium mt-4 text-sm md:text-base font-sans font-light tracking-wide max-w-xl mx-auto leading-relaxed">
-              Queremos que lleves tu corona con total orgullo. Conoce nuestra política de satisfacción y cambios garantizados.
+              Tu satisfacción es nuestra prioridad. Conoce nuestra política de cambios y devoluciones para productos de fútbol y coleccionables.
             </p>
           </motion.div>
 
@@ -30,16 +30,9 @@ export default function DevolucionesPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.8 }}
-            className="p-8 rounded-none border border-steel/30 bg-carbon mb-16 text-center shadow-2xl relative"
           >
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gold-action" />
-            <div className="w-12 h-12 rounded-none bg-graphite border border-steel/30 flex items-center justify-center mx-auto mb-6">
-              <ShieldCheck className="w-6 h-6 text-gold-action" />
-            </div>
-            <h3 className="text-xl font-display font-semibold mb-3 text-white-diamond uppercase tracking-wide">Garantía de Satisfacción 100%</h3>
-            <p className="text-titanium text-xs md:text-sm max-w-xl mx-auto leading-relaxed font-sans font-light">
-              Si tu gorra no te queda a la perfección, no estás conforme con la horma, o simplemente prefieres otra referencia, tienes 2 días hábiles desde la entrega para realizar tu cambio.
-            </p>
+
+
           </motion.div>
 
           <div className="space-y-8 mb-16">
@@ -49,7 +42,7 @@ export default function DevolucionesPage() {
                 {
                   icon: ShieldCheck,
                   title: "Estado del Producto",
-                  desc: "La gorra debe estar en perfecto estado, limpia, sin signos de uso y con todas sus etiquetas y empaques originales."
+                  desc: "El producto debe estar en perfecto estado, sin signos de uso y con todas sus etiquetas y empaques originales."
                 },
                 {
                   icon: RefreshCw,
@@ -92,7 +85,7 @@ export default function DevolucionesPage() {
                 <span className="w-1.5 h-1.5 bg-gold-action" /> Nombre completo y número de pedido.
               </li>
               <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-gold-action" /> Fotos de la gorra (para constatar que está con etiquetas y sin uso).
+                <span className="w-1.5 h-1.5 bg-gold-action" /> Fotos del producto (para constatar que está con etiquetas y sin uso).
               </li>
               <li className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-gold-action" /> Referencia nueva por la cual deseas hacer el cambio.

@@ -21,7 +21,7 @@ export async function GET() {
         quantity,
         selected_color,
         selected_size,
-        product:products(*)
+        product:products(*, product_images(url, is_primary, sort_order))
       `)
       .eq('user_id', user.id)
 
@@ -32,26 +32,32 @@ export async function GET() {
 
     const items = (dbItems ?? [])
       .filter((item: any) => item.product)
-      .map((item: any) => ({
-        id: `${item.product.id}::${item.selected_color || 'default'}::${item.selected_size || 'default'}`,
-        product: {
-          id: item.product.id,
-          name: item.product.name,
-          slug: item.product.slug,
-          description: item.product.description,
-          price: item.product.price,
-          original_price: item.product.original_price,
-          images: item.product.images || [],
-          category: item.product.category || 'Premium',
-          colors: item.product.colors || [],
-          sizes: item.product.sizes || [],
-          stock: item.product.stock || 0,
-          featured: item.product.featured || false,
-        },
-        quantity: item.quantity,
-        selectedColor: item.selected_color,
-        selectedSize: item.selected_size,
-      }))
+      .map((item: any) => {
+        const sortedImages = (item.product.product_images || [])
+          .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+          .map((img: any) => img.url)
+
+        return {
+          id: `${item.product.id}::${item.selected_color || 'default'}::${item.selected_size || 'default'}`,
+          product: {
+            id: item.product.id,
+            name: item.product.name,
+            slug: item.product.slug,
+            description: item.product.description,
+            price: item.product.price,
+            original_price: item.product.original_price,
+            images: sortedImages.length > 0 ? sortedImages : ['/images/placeholder-hat.jpg'],
+            category: item.product.category || 'Premium',
+            colors: item.product.colors || [],
+            sizes: item.product.sizes || [],
+            stock: item.product.stock || 0,
+            featured: item.product.featured || false,
+          },
+          quantity: item.quantity,
+          selectedColor: item.selected_color,
+          selectedSize: item.selected_size,
+        }
+      })
 
     return NextResponse.json({ items, userId: user.id })
   } catch (err) {

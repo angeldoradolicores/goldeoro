@@ -6,25 +6,26 @@ import Link from 'next/link'
 import { useRef, useState, useEffect } from 'react'
 import SparklesUI from './sparkles'
 
-// Partícula brillante mínima
+// Partícula brillante mínima tricolor
 function Particle({ delay, x, y }: { delay: number; x: string; y: string }) {
+  const colors = ['#FCD116', '#003893', '#CE1126'];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+
   return (
     <motion.div
       className="absolute rounded-full pointer-events-none"
       style={{
-        left: x,
-        top: y,
-        width: '2px',
-        height: '2px',
-        background: 'rgba(221, 232, 245, 0.75)',
-        filter: 'drop-shadow(0 0 12px rgba(221,232,245,0.35))',
+        left: x, top: y,
+        width: '3px', height: '3px',
+        background: color,
+        boxShadow: `0 0 12px ${color}`
       }}
       animate={{
         opacity: [0, 1, 0],
         scale: [0, 1.5, 0],
       }}
       transition={{
-        duration: 3 + Math.random() * 2,
+        duration: 4 + Math.random() * 3,
         repeat: Infinity,
         delay,
         ease: 'easeInOut',
@@ -73,33 +74,43 @@ export function HeroSection() {
     <section
       ref={containerRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden noise"
-      style={{ backgroundColor: '#050505' }}
+      style={{ backgroundColor: '#080b11' }}
     >
-      {/* ── Fondo: textura satinada + destellos ────────────── */}
+      {/* ── Fondo: bandera tricolor + Estadio ────────────── */}
       <div className="absolute inset-0 z-0">
-        {/* Gradiente radial central muy sutil */}
+        {/* Imagen de Hinchada/Banderas de Fondo */}
+        <img
+          src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1920&q=80"
+          alt="Estadio y Banderas"
+          className="w-full h-full object-cover opacity-20 mix-blend-screen"
+        />
+
+        {/* Gradientes más fuertes con los colores de la bandera de Colombia */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 opacity-80"
           style={{
             background: `
-              radial-gradient(ellipse 80% 60% at 50% 50%, rgba(13,13,13,1) 0%, rgba(5,5,5,1) 100%),
-              radial-gradient(ellipse 40% 40% at 20% 80%, rgba(221,232,245,0.06) 0%, transparent 70%),
-              radial-gradient(ellipse 40% 40% at 80% 20%, rgba(221,232,245,0.04) 0%, transparent 70%)
+              radial-gradient(circle at 50% 0%, rgba(252,209,22,0.15) 0%, transparent 50%),
+              radial-gradient(circle at 0% 50%, rgba(0,56,147,0.15) 0%, transparent 50%),
+              radial-gradient(circle at 100% 100%, rgba(206,17,38,0.15) 0%, transparent 50%),
+              linear-gradient(to bottom, #080b11 0%, rgba(8,11,17,0.85) 50%, #080b11 100%)
             `,
           }}
         />
 
-        {/* Línea horizontal sutil de "reflejo" */}
+        {/* Línea horizontal brillante tricolor */}
         <div
-          className="absolute left-0 right-0"
+          className="absolute left-0 right-0 z-10"
           style={{
-            top: '45%',
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(221,232,245,0.04) 30%, rgba(201,205,210,0.06) 50%, rgba(221,232,245,0.04) 70%, transparent 100%)',
+            top: '30%',
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent 0%, #FCD116 30%, #003893 50%, #CE1126 70%, transparent 100%)',
+            opacity: 0.4,
+            filter: 'blur(1px)'
           }}
         />
 
-        {/* Partículas brillantes estáticas */}
+        {/* Partículas de balones y confeti */}
         {mounted && particles.map((p, i) => (
           <Particle key={i} x={p.x} y={p.y} delay={p.delay} />
         ))}
@@ -107,18 +118,11 @@ export function HeroSection() {
         {/* Capa de micro-brillos (reusable). `extraSparkles` aumenta según scrollYProgress */}
         {mounted && <SparklesUI extra={extraSparkles} />}
 
-        {/* Humo sutil en esquinas */}
+        {/* Humo dorado brillante para darle toque "exclusivo doradito" */}
         <div
-          className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(221,232,245,0.03) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-          }}
-        />
-        <div
-          className="absolute -top-10 -right-10 w-80 h-80 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(201,205,210,0.03) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse, rgba(255,215,0,0.08) 0%, transparent 70%)',
             filter: 'blur(50px)',
           }}
         />
@@ -138,20 +142,20 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="flex items-center justify-center gap-4 mb-10"
+            className="flex items-center justify-center gap-4 mb-8"
           >
-            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to right, transparent, #DDE8F5)' }} />
+            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to right, transparent, #FCD116)' }} />
             <span
-              className="text-[10px] font-semibold tracking-[0.5em] uppercase"
+              className="text-[10px] font-bold tracking-[0.5em] uppercase"
               style={{
                 fontFamily: 'var(--font-sans)',
-                color: '#DDE8F5',
+                color: '#FCD116',
                 letterSpacing: '0.5em',
               }}
             >
-              Colección 2026
+              Mundial 2026
             </span>
-            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to left, transparent, #DDE8F5)' }} />
+            <div style={{ width: '32px', height: '1px', background: 'linear-gradient(to left, transparent, #FCD116)' }} />
           </motion.div>
 
           {/* Título principal — Cinzel, fade secuencial */}
@@ -162,14 +166,14 @@ export function HeroSection() {
               transition={{ duration: 1.1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 fontFamily: 'var(--font-cinzel)',
-                fontSize: 'clamp(3.5rem, 10vw, 9rem)',
+                fontSize: 'clamp(2.5rem, 7vw, 6.5rem)',
                 fontWeight: 900,
-                lineHeight: 0.92,
+                lineHeight: 0.95,
                 letterSpacing: '-0.02em',
-                color: '#F8F9FB',
+                color: '#FFFFFF',
               }}
             >
-              URBAN
+              VIVE LA PASIÓN
             </motion.h1>
             <motion.h1
               initial={{ opacity: 0, y: 60 }}
@@ -177,17 +181,17 @@ export function HeroSection() {
               transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 fontFamily: 'var(--font-cinzel)',
-                fontSize: 'clamp(3.5rem, 10vw, 9rem)',
+                fontSize: 'clamp(2.5rem, 7vw, 6.5rem)',
                 fontWeight: 900,
-                lineHeight: 0.92,
+                lineHeight: 0.95,
                 letterSpacing: '-0.02em',
-                background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 40%, #EAF2FF 60%, #BFCEDF 100%)',
+                background: 'linear-gradient(135deg, #FCD116 0%, #003893 50%, #CE1126 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
             >
-              CROWN
+              DEL MUNDIAL 2026
             </motion.h1>
           </div>
 
@@ -200,7 +204,7 @@ export function HeroSection() {
             style={{
               width: '80px',
               height: '1px',
-              background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.2), transparent)',
+              background: 'linear-gradient(to right, transparent, rgba(252,209,22,0.3), transparent)',
             }}
           />
 
@@ -212,18 +216,16 @@ export function HeroSection() {
             className="mb-14"
             style={{
               fontFamily: 'var(--font-sans)',
-              fontSize: 'clamp(0.9rem, 2vw, 1.15rem)',
-              fontWeight: 300,
-              letterSpacing: '0.08em',
-              color: '#BFCEDF',
-              maxWidth: '540px',
+              fontSize: 'clamp(0.95rem, 2vw, 1.25rem)',
+              fontWeight: 400,
+              letterSpacing: '0.04em',
+              color: '#E5E7EB',
+              maxWidth: '680px',
               margin: '0 auto 3.5rem',
               lineHeight: 1.8,
             }}
           >
-            Donde el lujo y la calle se encuentran.{' '}
-            <span style={{ color: '#DDE8F5', fontWeight: 500 }}>Diseños exclusivos</span>{' '}
-            para quienes definen su propio estándar.
+            Las mejores camisetas, álbum <span style={{ color: '#FCD116', fontWeight: 700 }}>Panini</span> y artículos de las selecciones más importantes del mundo.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -231,48 +233,49 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
+            className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-20"
           >
-            <Link href="/catalogo">
+            <Link href="/catalogo?category=camisetas">
               <motion.button
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
-                className="group flex items-center gap-3 px-10 py-4 text-xs font-bold uppercase transition-all duration-300"
+                className="group flex items-center gap-3 px-10 py-4 text-xs font-black uppercase transition-all duration-300 rounded-none cursor-pointer"
                 style={{
                   fontFamily: 'var(--font-sans)',
                   letterSpacing: '0.2em',
-                  background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 100%)',
-                  color: '#050505',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                  background: '#FCD116',
+                  color: '#111827',
+                  boxShadow: '0 8px 32px rgba(252,209,22,0.15)',
                 }}
               >
-                Explorar Colección
+                Comprar Camisetas
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </motion.button>
             </Link>
 
-            <Link href="/promociones">
+            <Link href="/catalogo?category=albumes">
               <motion.button
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-3 px-10 py-4 text-xs font-bold uppercase transition-all duration-300"
+                className="flex items-center gap-3 px-10 py-4 text-xs font-black uppercase transition-all duration-300 rounded-none cursor-pointer"
                 style={{
                   fontFamily: 'var(--font-sans)',
                   letterSpacing: '0.2em',
-                  color: '#C9CDD2',
-                  border: '1px solid #161616',
-                  background: 'transparent',
+                  color: '#FFFFFF',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.05)',
+                  backdropFilter: 'blur(4px)',
                 }}
                 onMouseEnter={e => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#C9CDD2'
-                  ;(e.currentTarget as HTMLButtonElement).style.color = '#F8F9FB'
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#FCD116'
+                    ; (e.currentTarget as HTMLButtonElement).style.color = '#FCD116'
                 }}
                 onMouseLeave={e => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#161616'
-                  ;(e.currentTarget as HTMLButtonElement).style.color = '#C9CDD2'
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.2)'
+                    ; (e.currentTarget as HTMLButtonElement).style.color = '#FFFFFF'
                 }}
               >
-                Nuevos Lanzamientos
+                Ver Colección Panini
               </motion.button>
             </Link>
           </motion.div>
@@ -298,7 +301,7 @@ export function HeroSection() {
             className="grid grid-cols-2 md:grid-cols-4 gap-px"
             style={{ border: '1px solid #1a1a1a' }}
           >
-            {[
+            {/* {[
               { value: '50+', label: 'Diseños' },
               { value: '24h', label: 'Despacho' },
               { value: '100%', label: 'Satisfacción' },
@@ -330,7 +333,7 @@ export function HeroSection() {
                   {stat.label}
                 </span>
               </motion.div>
-            ))}
+            ))} */}
           </motion.div>
         </div>
       </motion.div>

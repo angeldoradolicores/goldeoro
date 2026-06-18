@@ -38,7 +38,7 @@ export default function EnviosPage() {
               </div>
               <h3 className="text-lg font-display font-semibold mb-3 text-white-diamond uppercase tracking-wide">Envíos por Interrapidísimo</h3>
               <p className="text-titanium text-xs md:text-sm leading-relaxed font-sans font-light">
-                Todos nuestros despachos nacionales se realizan de forma exclusiva a través de Interrapidísimo, garantizando que tu gorra llegue en perfectas condiciones y con seguimiento certificado en tiempo real.
+                Todos nuestros despachos nacionales se realizan de forma exclusiva a través de Interrapidísimo, garantizando que tu producto llegue en perfectas condiciones y con seguimiento certificado en tiempo real.
               </p>
             </motion.div>
 
@@ -69,11 +69,15 @@ export default function EnviosPage() {
             <ul className="space-y-4 text-titanium text-xs md:text-sm font-sans font-light">
               <li className="flex items-center gap-3">
                 <ShieldCheck className="w-4 h-4 text-gold-action shrink-0" />
-                <span><strong>Envío Gratis:</strong> En compras superiores a <strong>$200.000 COP</strong> a nivel nacional.</span>
+                <span><strong>Envío Gratis:</strong> En compras superiores a <strong>$300.000 COP</strong> a nivel nacional.</span>
               </li>
               <li className="flex items-center gap-3">
                 <ShieldCheck className="w-4 h-4 text-gold-action shrink-0" />
-                <span><strong>Tarifa Plana:</strong> Para compras menores a $200.000 COP, el costo de envío estándar es de $17.000 COP.</span>
+                <span><strong>Tarifa Plana:</strong> Para compras menores a $300.000 COP, el costo de envío estándar es de $17.000 COP.</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <ShieldCheck className="w-4 h-4 text-gold-action shrink-0" />
+                <span><strong>Tarifa Especial para Pasto:</strong> Si tu pedido tiene destino dentro de la ciudad de Pasto, Nariño, el costo de envío es de solo $5.000 COP, sin importar el valor de la compra.</span>
               </li>
               <li className="flex items-center gap-3">
                 <ShieldCheck className="w-4 h-4 text-gold-action shrink-0" />
@@ -90,7 +94,7 @@ export default function EnviosPage() {
           >
             <h3 className="text-lg font-display font-semibold mb-3 text-white-diamond uppercase tracking-wide">¿Tienes alguna duda sobre tu despacho?</h3>
             <p className="text-titanium text-xs md:text-sm mb-6 max-w-md mx-auto font-sans font-light leading-relaxed">
-              Comunícate directamente con nuestro asesor de estilo de Urban Crown para recibir soporte personalizado en tiempo real.
+              Comunícate directamente con nuestro asesor de estilo de Gol de Oro para recibir soporte personalizado en tiempo real.
             </p>
             <a
               href="https://wa.me/573108999049"

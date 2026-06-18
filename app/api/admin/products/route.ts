@@ -67,7 +67,11 @@ export async function GET() {
 
     const { data: products, error } = await supabase
       .from('products')
-      .select('*')
+      .select(`
+        *,
+        product_images(url, is_primary, sort_order),
+        category:categories(name, slug)
+      `)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -75,7 +79,20 @@ export async function GET() {
       return NextResponse.json({ error: error.message, products: [] }, { status: 500 })
     }
 
-    return NextResponse.json({ products: products || [] })
+    const transformedProducts = (products || []).map((p: any) => {
+      const sortedImages = (p.product_images || [])
+        .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+        .map((img: any) => img.url)
+
+      return {
+        ...p,
+        images: sortedImages.length > 0 ? sortedImages : [],
+        category: p.category?.name || 'Premium',
+        category_slug: p.category?.slug || '',
+      }
+    })
+
+    return NextResponse.json({ products: transformedProducts })
   } catch (error) {
     console.error('[v0] Admin products error:', error)
     return NextResponse.json({ error: 'Internal server error', products: [] }, { status: 500 })
@@ -146,6 +163,15 @@ export async function POST(request: Request) {
         is_promotion: body.is_promotion || false,
         colors: body.colors || ['Negro'],
         sizes: body.sizes || ['M'],
+        sizes_stock: body.sizes_stock || null,
+        product_type: body.product_type || 'gorra',
+        team: body.team || null,
+        season: body.season || null,
+        player: body.player || null,
+        jersey_type: body.jersey_type || null,
+        collection_type: body.collection_type || null,
+        edition: body.edition || null,
+        year: body.year || null,
       })
       .select()
       .single()
@@ -186,6 +212,14 @@ export async function POST(request: Request) {
       .from('products')
       .select(`
         *,
+        product_type,
+        team,
+        season,
+        player,
+        jersey_type,
+        collection_type,
+        edition,
+        year,
         product_images(url, is_primary, sort_order),
         category:categories(name, slug)
       `)
@@ -202,6 +236,14 @@ export async function POST(request: Request) {
         ...finalProduct,
         images: sortedImages.length > 0 ? sortedImages : [],
         category: finalProduct.category?.name || 'Premium',
+        product_type: finalProduct.product_type,
+        team: finalProduct.team,
+        season: finalProduct.season,
+        player: finalProduct.player,
+        jersey_type: finalProduct.jersey_type,
+        collection_type: finalProduct.collection_type,
+        edition: finalProduct.edition,
+        year: finalProduct.year,
       }
     }
 
@@ -277,6 +319,15 @@ export async function PUT(request: Request) {
         is_promotion: body.is_promotion || false,
         colors: body.colors || ['Negro'],
         sizes: body.sizes || ['M'],
+        sizes_stock: body.sizes_stock || null,
+        product_type: body.product_type || 'gorra',
+        team: body.team || null,
+        season: body.season || null,
+        player: body.player || null,
+        jersey_type: body.jersey_type || null,
+        collection_type: body.collection_type || null,
+        edition: body.edition || null,
+        year: body.year || null,
       })
       .eq('id', body.id)
       .select()
@@ -324,6 +375,14 @@ export async function PUT(request: Request) {
       .from('products')
       .select(`
         *,
+        product_type,
+        team,
+        season,
+        player,
+        jersey_type,
+        collection_type,
+        edition,
+        year,
         product_images(url, is_primary, sort_order),
         category:categories(name, slug)
       `)
@@ -340,6 +399,14 @@ export async function PUT(request: Request) {
         ...finalProduct,
         images: sortedImages.length > 0 ? sortedImages : [],
         category: finalProduct.category?.name || 'Premium',
+        product_type: finalProduct.product_type,
+        team: finalProduct.team,
+        season: finalProduct.season,
+        player: finalProduct.player,
+        jersey_type: finalProduct.jersey_type,
+        collection_type: finalProduct.collection_type,
+        edition: finalProduct.edition,
+        year: finalProduct.year,
       }
     }
 

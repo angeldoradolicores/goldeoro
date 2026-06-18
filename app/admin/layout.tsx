@@ -157,15 +157,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen flex bg-background">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-card">
+      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-card relative">
+        {/* Tricolor top accent */}
+        <div className="absolute top-0 left-0 right-0 h-1 flex">
+          <div className="flex-1 bg-[#FCD116]" />
+          <div className="flex-1 bg-[#003893]" />
+          <div className="flex-1 bg-[#CE1126]" />
+        </div>
         {/* Logo */}
-        <div className="p-6 border-b border-border">
+        <div className="p-6 border-b border-border mt-1">
           <Link href="/" className="flex flex-col">
-            <span className="text-2xl font-display font-bold text-gradient-gold tracking-wider">
-              LUXURY
-            </span>
-            <span className="text-xs tracking-[0.4em] text-muted-foreground -mt-1">
-              HATS ADMIN
+            <div className="flex items-center gap-2">
+              <span className="text-xl">⚽</span>
+              <span className="text-xl font-display font-bold text-gradient-gold tracking-wider">
+                GOL DE ORO
+              </span>
+            </div>
+            <span className="text-xs tracking-[0.3em] text-muted-foreground mt-0.5 uppercase">
+              Panel Admin · 2026
             </span>
           </Link>
         </div>
@@ -178,9 +187,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link key={link.href} href={link.href}>
                 <motion.div
                   whileHover={{ x: 4 }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                     isActive
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-[#FCD116] text-[#080b11] font-bold shadow-md'
                       : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                   }`}
                 >
@@ -195,12 +204,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* User */}
         <div className="p-4 border-t border-border">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-sm font-bold text-primary">AD</span>
+            <div className="w-10 h-10 rounded-full bg-[#FCD116]/20 border border-[#FCD116]/30 flex items-center justify-center">
+              <span className="text-sm font-bold text-[#FCD116]">⚽</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm truncate">Admin</p>
-              <p className="text-xs text-muted-foreground truncate">admin@luxuryhats.co</p>
+              <p className="font-medium text-sm truncate">Admin · Gol de Oro</p>
+              <p className="text-xs text-muted-foreground truncate">Panel de Control</p>
             </div>
             <Link href="/">
               <Button variant="ghost" size="icon" className="shrink-0">
@@ -227,12 +236,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border z-50 lg:hidden flex flex-col"
+              className="fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border z-50 lg:hidden flex flex-col relative"
             >
-              <div className="p-6 border-b border-border flex items-center justify-between">
+              {/* Tricolor top accent mobile */}
+              <div className="absolute top-0 left-0 right-0 h-1 flex">
+                <div className="flex-1 bg-[#FCD116]" />
+                <div className="flex-1 bg-[#003893]" />
+                <div className="flex-1 bg-[#CE1126]" />
+              </div>
+              <div className="p-6 border-b border-border flex items-center justify-between mt-1">
                 <Link href="/" className="flex flex-col">
-                  <span className="text-xl font-display font-bold text-gradient-gold">LUXURY</span>
-                  <span className="text-xs tracking-[0.3em] text-muted-foreground -mt-1">HATS ADMIN</span>
+                  <div className="flex items-center gap-2">
+                    <span>⚽</span>
+                    <span className="text-xl font-display font-bold text-gradient-gold">GOL DE ORO</span>
+                  </div>
+                  <span className="text-xs tracking-[0.3em] text-muted-foreground mt-0.5 uppercase">Admin 2026</span>
                 </Link>
                 <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}>
                   <X className="w-5 h-5" />
@@ -243,9 +261,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   const isActive = pathname === link.href
                   return (
                     <Link key={link.href} href={link.href} onClick={() => setSidebarOpen(false)}>
-                      <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                      <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                         isActive
-                          ? 'bg-primary text-primary-foreground'
+                          ? 'bg-[#FCD116] text-[#080b11] font-bold'
                           : 'text-muted-foreground hover:bg-secondary'
                       }`}>
                         <link.icon className="w-5 h-5" />
@@ -309,8 +327,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Button>
             </Link>
             <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-border">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-xs font-bold text-primary">AD</span>
+              <div className="w-8 h-8 rounded-full bg-[#FCD116]/20 border border-[#FCD116]/30 flex items-center justify-center">
+                <span className="text-xs font-bold text-[#FCD116]">⚽</span>
               </div>
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </div>

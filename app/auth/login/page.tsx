@@ -20,7 +20,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/'
-  
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -81,10 +81,23 @@ function LoginForm() {
 
     setIsLoading(true)
 
+    // Safety timeout: force reset loading after 15s in case something hangs
+    const safetyTimer = setTimeout(() => {
+      setIsLoading(false)
+      toast.error('La solicitud tardó demasiado. Intenta de nuevo.')
+    }, 15000)
+
     try {
       const supabase = createClient()
       const email = formData.email.trim()
       const password = formData.password
+
+      // Clean up any partial session from a previous failed attempt
+      try {
+        await supabase.auth.signOut({ scope: 'local' })
+      } catch {
+        // Ignore sign-out errors
+      }
 
       // Step 1: Sign in
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -93,9 +106,21 @@ function LoginForm() {
       })
 
       if (signInError) {
-        const errorMsg = signInError.message === 'Invalid login credentials'
-          ? 'Email o contraseña incorrectos'
-          : signInError.message || 'Error al iniciar sesión'
+        // Map known Supabase error messages to Spanish
+        let errorMsg: string
+        switch (signInError.message) {
+          case 'Invalid login credentials':
+            errorMsg = 'Email o contraseña incorrectos'
+            break
+          case 'Email not confirmed':
+            errorMsg = 'Tu correo no ha sido confirmado. Revisa tu bandeja de entrada o spam.'
+            break
+          case 'Too many requests':
+            errorMsg = 'Demasiados intentos. Espera un momento antes de intentar de nuevo.'
+            break
+          default:
+            errorMsg = signInError.message || 'Error al iniciar sesión'
+        }
         console.error('[login] Sign in error:', signInError)
         toast.error(errorMsg)
         return
@@ -130,11 +155,14 @@ function LoginForm() {
       useCartStore.getState().setUserId(user.id)
       useFavoritesStore.getState().setUserId(user.id)
 
-      // Step 5: Sync data from server
+      // Step 5: Sync data from server (with timeout to prevent hanging)
       try {
-        await Promise.all([
-          useCartStore.getState().syncCartFromServer(),
-          useFavoritesStore.getState().syncFavoritesFromServer(),
+        await Promise.race([
+          Promise.all([
+            useCartStore.getState().syncCartFromServer(),
+            useFavoritesStore.getState().syncFavoritesFromServer(),
+          ]),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Sync timeout')), 5000)),
         ])
       } catch (syncErr) {
         console.warn('[login] Sync error (non-blocking):', syncErr)
@@ -159,6 +187,7 @@ function LoginForm() {
       const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión'
       toast.error(errorMessage)
     } finally {
+      clearTimeout(safetyTimer)
       setIsLoading(false)
     }
   }
@@ -187,14 +216,21 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen bg-background flex">
+      {/* Tricolor top strip */}
+      <div className="fixed top-0 left-0 right-0 h-[2px] flex z-50">
+        <div className="flex-1 bg-[#FCD116]" />
+        <div className="flex-1 bg-[#003893]" />
+        <div className="flex-1 bg-[#CE1126]" />
+      </div>
       {/* Left Side - Decorative */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-chrome/20 via-background to-background" />
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-chrome/20 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-chrome/10 rounded-full blur-3xl animate-pulse delay-1000" />
-          </div>
-          <SparklesUI extra={2} />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FCD116]/10 via-[#003893]/10 to-[#CE1126]/10" />
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#FCD116]/15 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#003893]/15 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute bottom-1/2 left-1/2 w-64 h-64 bg-[#CE1126]/15 rounded-full blur-3xl animate-pulse delay-500" />
+        </div>
+        <SparklesUI extra={2} />
 
         <div className="relative z-10 flex flex-col justify-center items-center w-full p-12">
           <motion.div
@@ -203,13 +239,17 @@ function LoginForm() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="mx-auto mb-6 text-chrome text-6xl font-black">✝</div>
             <h1 className="text-5xl font-bold text-foreground mb-4">
-              ✝ URBAN <span className="text-chrome">CROWN</span> ✝
+              GOL DE ORO
             </h1>
             <p className="text-muted-foreground text-lg max-w-md">
-              Accede a tu universo urbano exclusivo y descubre drops de calle premium.
+              Accede a tu universo futbolero. Camisetas oficiales, álbum Panini y coleccionables del Mundial 2026 te esperan.
             </p>
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <span className="w-5 h-5 rounded-sm bg-[#FCD116] shadow-md" />
+              <span className="w-5 h-5 rounded-sm bg-[#003893] shadow-md" />
+              <span className="w-5 h-5 rounded-sm bg-[#CE1126] shadow-md" />
+            </div>
           </motion.div>
 
           <motion.div
@@ -217,15 +257,8 @@ function LoginForm() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 1 }}
             className="mt-12 grid grid-cols-3 gap-4"
-          >
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="w-24 h-24 rounded-2xl bg-card/50 backdrop-blur border border-chrome/20 flex items-center justify-center"
-              >
-              </div>
-            ))}
-          </motion.div>
+          />
+
         </div>
       </div>
 
@@ -240,9 +273,9 @@ function LoginForm() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <Link href="/">
-              <div className="mx-auto mb-4 text-chrome text-6xl font-black">✝</div>
+              <div className="mx-auto mb-4 text-gold-action text-6xl font-black">⚽</div>
               <h1 className="text-3xl font-bold">
-                URBAN <span className="text-chrome">CROWN</span>
+                GOL DE ORO
               </h1>
             </Link>
           </div>

@@ -35,41 +35,48 @@ export default function Sparkles({ className = '', extra = 0 }: { className?: st
       {positions.map((p, i) => (
         <motion.span
           key={`s-${i}`}
-          className="sparkle"
-          style={{ left: p.left, top: p.top }}
-          animate={{ opacity: [0, 1, 0], scale: [0.2, 1.2, 0.2] }}
-          transition={{ duration: 2.6, repeat: Infinity, delay: p.delay, ease: 'easeInOut' }}
+          className="absolute rounded-full"
+          style={{ 
+            left: p.left, top: p.top, 
+            width: '3px', height: '3px',
+            background: i % 3 === 0 ? '#FCD116' : i % 3 === 1 ? '#003893' : '#CE1126',
+            boxShadow: `0 0 10px ${i % 3 === 0 ? '#FCD116' : i % 3 === 1 ? '#003893' : '#CE1126'}`
+          }}
+          animate={{ opacity: [0, 1, 0], scale: [0.5, 1.5, 0.5] }}
+          transition={{ duration: 3.5, repeat: Infinity, delay: p.delay, ease: 'easeInOut' }}
         />
       ))}
 
       {extras.map((p, i) => (
         <motion.span
           key={`e-${i}`}
-          className="sparkle sparkle-lg"
-          style={{ left: p.left, top: p.top }}
-          animate={{ opacity: [0, 1, 0], scale: [0.4, 1.6, 0.3] }}
-          transition={{ duration: 3.6, repeat: Infinity, delay: p.delay, ease: 'easeInOut' }}
+          className="absolute rounded-full"
+          style={{ 
+            left: p.left, top: p.top,
+            width: '5px', height: '5px',
+            background: '#FCD116',
+            boxShadow: '0 0 15px #FCD116'
+          }}
+          animate={{ opacity: [0, 1, 0], scale: [0.8, 1.8, 0.8], y: [-10, -30, -10] }}
+          transition={{ duration: 4.5, repeat: Infinity, delay: p.delay, ease: 'easeInOut' }}
         />
       ))}
 
-      {/* Rain effect - subtle falling lines for luxe ambience */}
+      {/* Rain effect - subtle tricolor falling lines */}
       {[...Array(14)].map((_, i) => (
         <motion.span
           key={`r-${i}`}
-          className="sparkle-rain"
-          style={{ left: `${(i * 7) % 98}%`, top: `-10%` }}
-          animate={{ y: ['-10%', '120%'], opacity: [0, 0.6, 0] }}
-          transition={{ duration: 2.8 + (i % 3) * 0.4, repeat: Infinity, delay: (i % 5) * 0.2, ease: 'linear' }}
+          className="absolute w-px h-6 rounded-full"
+          style={{ 
+            left: `${(i * 7) % 98}%`, 
+            top: `-10%`,
+            background: `linear-gradient(180deg, ${i % 3 === 0 ? '#FCD116' : i % 3 === 1 ? '#003893' : '#CE1126'}, transparent)`,
+            opacity: 0.6
+          }}
+          animate={{ y: ['-10vh', '120vh'], opacity: [0, 0.6, 0] }}
+          transition={{ duration: 3.5 + (i % 3) * 0.5, repeat: Infinity, delay: (i % 5) * 0.4, ease: 'linear' }}
         />
       ))}
-
-      {/* Occasional lightning flash */}
-      <motion.div
-        className="sparkle-lightning"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 0.9, 0] }}
-        transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 8, delay: 3 }}
-      />
     </div>
   )
 }

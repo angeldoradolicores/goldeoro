@@ -18,8 +18,8 @@ interface TrackingInfo {
 }
 
 export async function sendConfirmationEmail(to: string, actionLink: string, fullName = '') {
-  const fromEmail = gmailUser ? `Urban Crown <${gmailUser}>` : 'Urban Crown <urbancrowncol4@gmail.com>'
-  const subject = '✨ Confirma tu cuenta URBAN CROWN'
+  const fromEmail = gmailUser ? `Gol de Oro <${gmailUser}>` : 'Gol de Oro <info@goldeoro.co>'
+  const subject = '✨ Confirma tu cuenta GOL DE ORO'
   const firstName = fullName?.split(' ')[0] || 'Amigo'
 
   const html = `
@@ -33,21 +33,21 @@ export async function sendConfirmationEmail(to: string, actionLink: string, full
         <div style="max-width:680px;margin:0 auto;padding:40px 24px;">
           <div style="background:#111111;border:1px solid rgba(255,255,255,.08);border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);">
             <div style="padding:36px 32px 24px;text-align:center;background:linear-gradient(180deg, rgba(255,0,127,.12), transparent);">
-              <p style="margin:0;font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#E2B13C;">Urban Crown</p>
-              <h1 style="margin:16px 0 0 0;font-size:32px;line-height:1.1;color:#ffffff;">Bienvenido a la corona urbana</h1>
-              <p style="margin:12px 0 0 0;font-size:15px;color:#bbbbbb;">Confirma tu cuenta para acceder a drops exclusivos, envíos VIP y estilo que manda en la calle.</p>
+              <p style="margin:0;font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#E2B13C;">Gol de Oro</p>
+              <h1 style="margin:16px 0 0 0;font-size:32px;line-height:1.1;color:#ffffff;">Bienvenido a Gol de Oro</h1>
+              <p style="margin:12px 0 0 0;font-size:15px;color:#bbbbbb;">Confirma tu cuenta para acceder a lanzamientos exclusivos, envíos VIP y estilo ganador.</p>
             </div>
 
             <div style="padding:32px;background:#111111;">
               <p style="margin:0 0 20px 0;font-size:16px;color:#dddddd;">Hola ${firstName},</p>
-              <p style="margin:0 0 24px 0;font-size:15px;color:#999999;line-height:1.8;">Tu cuenta URBAN CROWN ya está casi lista. Solo falta un paso: confirma tu email para activar tu acceso premium.</p>
+              <p style="margin:0 0 24px 0;font-size:15px;color:#999999;line-height:1.8;">Tu cuenta GOL DE ORO ya está casi lista. Solo falta un paso: confirma tu email para activar tu acceso premium.</p>
               <a href="${actionLink}" style="display:inline-flex;align-items:center;justify-content:center;width:100%;padding:16px 20px;margin:0 auto 24px auto;background:#E2B13C;color:#000000;font-weight:800;text-transform:uppercase;letter-spacing:1px;border-radius:14px;text-decoration:none;font-size:14px;">Confirmar mi cuenta</a>
               <p style="margin:0;font-size:14px;color:#7f7f7f;line-height:1.8;">Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
               <p style="margin:16px 0 0 0;padding:16px;background:rgba(255,255,255,.04);border-radius:14px;font-size:13px;color:#f2f2f2;word-break:break-all;">${actionLink}</p>
             </div>
 
             <div style="padding:24px 32px 32px;background:#0b0b0b;text-align:center;"> 
-              <p style="margin:0;font-size:12px;color:#666666;">URBAN CROWN — Estilo urbano, actitud exclusiva.</p>
+              <p style="margin:0;font-size:12px;color:#666666;">GOL DE ORO — Estilo ganador, pasión por el fútbol.</p>
             </div>
           </div>
         </div>
@@ -61,7 +61,7 @@ export async function sendConfirmationEmail(to: string, actionLink: string, full
 
   if (!transporter) {
     console.warn('[mail] Gmail transporter is not configured. Skipping real send.')
-    console.log('=== MOCK URBAN CROWN CONFIRMATION EMAIL ===')
+    console.log('=== MOCK GOL DE ORO CONFIRMATION EMAIL ===')
     console.log(`FROM: ${fromEmail}`)
     console.log(`TO: ${cleanedTo}`)
     console.log(`SUBJECT: ${subject}`)
@@ -78,10 +78,10 @@ export async function sendConfirmationEmail(to: string, actionLink: string, full
       html,
       // Envelope forces SMTP MAIL FROM and RCPT TO, useful to control return-path
       envelope: {
-        from: gmailUser || 'urbancrowncol4@gmail.com',
+        from: gmailUser || 'info@goldeoro.co',
         to: cleanedTo,
       },
-      replyTo: gmailUser || 'urbancrowncol4@gmail.com',
+      replyTo: gmailUser || 'info@goldeoro.co',
     })
     console.log('[mail] Confirmation email sent to', cleanedTo)
   } catch (err) {
@@ -106,25 +106,25 @@ interface OrderDetails {
 
 const statusMap: Record<string, { subject: string; title: string; desc: string; color: string }> = {
   processing: {
-    subject: '🛒 Tu pedido está siendo preparado - Urban Crown',
+    subject: '🛒 Tu pedido está siendo preparado - Gol de Oro',
     title: '¡Estamos preparando tu pedido!',
     desc: 'Tu pedido ya fue confirmado y está en proceso de preparación en nuestro centro de distribución de lujo.',
     color: '#3b82f6', // blue
   },
   shipped: {
-    subject: '🚚 ¡Tu pedido fue enviado! - Urban Crown',
+    subject: '🚚 ¡Tu pedido fue enviado! - Gol de Oro',
     title: '¡Tu pedido va en camino!',
     desc: 'Tu paquete ha sido entregado a la transportadora. Abajo encontrarás los detalles del envío para rastrearlo.',
     color: '#a855f7', // purple
   },
   delivered: {
-    subject: '✅ ¡Tu pedido fue entregado! - Urban Crown',
+    subject: '✅ ¡Tu pedido fue entregado! - Gol de Oro',
     title: '¡Pedido Entregado!',
-    desc: 'Tu pedido ha sido entregado con éxito. ¡Esperamos que disfrutes tus nuevas prendas exclusivas!',
+    desc: 'Tu pedido ha sido entregado con éxito. ¡Esperamos que disfrutes tus nuevos artículos exclusivos!',
     color: '#10b981', // emerald
   },
   cancelled: {
-    subject: '❌ Actualización de tu pedido - Urban Crown',
+    subject: '❌ Actualización de tu pedido - Gol de Oro',
     title: 'Pedido Cancelado',
     desc: 'Lamentamos informarte que tu pedido ha sido cancelado. Si tienes dudas, por favor contáctanos.',
     color: '#ef4444', // red
@@ -145,7 +145,7 @@ export async function sendOrderStatusEmail(
     color: '#FF007F', // default neon-pink
   }
 
-  const fromEmail = gmailUser ? `Urban Crown <${gmailUser}>` : 'Urban Crown <urbancrowncol4@gmail.com>'
+  const fromEmail = gmailUser ? `Gol de Oro <${gmailUser}>` : 'Gol de Oro <info@goldeoro.co>'
 
   const formattedTotal = details
     ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(details.total)
@@ -234,10 +234,10 @@ export async function sendOrderStatusEmail(
     <!-- Header -->
     <div style="padding: 30px; text-align: center; border-bottom: 1px solid #151515;">
       <h1 style="margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 2px; color: #ffffff;">
-        URBAN <span style="color: #FF007F;">CROWN</span>
+        GOL DE ORO
       </h1>
       <p style="margin: 4px 0 0 0; font-size: 10px; text-transform: uppercase; letter-spacing: 4px; color: #E2B13C; font-weight: 600;">
-        Luxury Streetwear
+        Streetwear y coleccionables premium
       </p>
     </div>
 
@@ -285,15 +285,15 @@ export async function sendOrderStatusEmail(
 
     <!-- Call to Action -->
     <div style="padding: 0 30px 40px 30px; text-align: center;">
-      <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://urbancrown.co'}/pedidos?order_number=${orderNumber}&email=${encodeURIComponent(to)}" target="_blank" style="display: inline-block; background-color: #E2B13C; color: #000000; padding: 14px 28px; border-radius: 9999px; text-decoration: none; font-weight: bold; font-size: 14px; letter-spacing: 1px; transition: transform 0.2s;">
+      <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://goldeoro.co'}/pedidos?order_number=${orderNumber}&email=${encodeURIComponent(to)}" target="_blank" style="display: inline-block; background-color: #E2B13C; color: #000000; padding: 14px 28px; border-radius: 9999px; text-decoration: none; font-weight: bold; font-size: 14px; letter-spacing: 1px; transition: transform 0.2s;">
         SEGUIR MI PEDIDO EN LA WEB
       </a>
     </div>
 
     <!-- Footer -->
     <div style="padding: 30px; background-color: #080808; text-align: center; border-top: 1px solid #111; font-size: 12px; color: #666666;">
-      <p style="margin: 0 0 8px 0;">© 2026 Urban Crown. Todos los derechos reservados.</p>
-      <p style="margin: 0;">Si tienes alguna pregunta, responde a este correo o escríbenos a <a href="mailto:urbancrowncol4@gmail.com" style="color: #FF007F; text-decoration: none;">urbancrowncol4@gmail.com</a></p>
+      <p style="margin: 0 0 8px 0;">© 2026 Gol de Oro. Todos los derechos reservados.</p>
+      <p style="margin: 0;">Si tienes alguna pregunta, responde a este correo o escríbenos a <a href="mailto:info@goldeoro.co" style="color: #FF007F; text-decoration: none;">info@goldeoro.co</a></p>
     </div>
 
   </div>

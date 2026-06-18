@@ -17,6 +17,7 @@ export interface Product {
   category: string
   colors: string[]
   sizes: string[]
+  sizes_stock?: Record<string, number>
   stock: number
   featured: boolean
   is_promotion?: boolean
@@ -42,11 +43,11 @@ export interface User {
 }
 
 function getCartStorageKey(userId: string | null = null) {
-  return userId ? `urban-crown-cart-${userId}` : 'urban-crown-cart-guest'
+  return userId ? `gol-de-oro-cart-${userId}` : 'gol-de-oro-cart-guest'
 }
 
 function getFavoritesStorageKey(userId: string | null = null) {
-  return userId ? `urban-crown-favorites-${userId}` : 'urban-crown-favorites-guest'
+  return userId ? `gol-de-oro-favorites-${userId}` : 'gol-de-oro-favorites-guest'
 }
 
 function createCartItemId(productId: string, color: string, size: string) {
@@ -407,7 +408,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
         quantity,
         selected_color,
         selected_size,
-        product:products(*)
+        product:products(*, product_images(url, is_primary, sort_order))
       `)
       .eq('user_id', currentUserId)
 
@@ -422,26 +423,33 @@ export const useCartStore = create<CartStore>((set, get) => ({
     if (dbItems) {
       dbItems
         .filter((item: any) => item.product)
-        .map((item: any) => ({
-          id: createCartItemId(item.product.id, item.selected_color, item.selected_size),
-          product: {
-            id: item.product.id,
-            name: item.product.name,
-            slug: item.product.slug,
-            description: item.product.description,
-            price: item.product.price,
-            original_price: item.product.original_price,
-            images: item.product.images || [],
-            category: item.product.category || 'Premium',
-            colors: item.product.colors || [],
-            sizes: item.product.sizes || [],
-            stock: item.product.stock || 0,
-            featured: item.product.featured || false,
-          } as Product,
-          quantity: item.quantity,
-          selectedColor: item.selected_color,
-          selectedSize: item.selected_size,
-        }))
+        .map((item: any) => {
+          const sortedImages = (item.product.product_images || [])
+            .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+            .map((img: any) => img.url)
+
+          return {
+            id: createCartItemId(item.product.id, item.selected_color, item.selected_size),
+            product: {
+              id: item.product.id,
+              name: item.product.name,
+              slug: item.product.slug,
+              description: item.product.description,
+              price: item.product.price,
+              original_price: item.product.original_price,
+              images: sortedImages.length > 0 ? sortedImages : ['/images/placeholder-hat.jpg'],
+              category: item.product.category || 'Premium',
+              colors: item.product.colors || [],
+              sizes: item.product.sizes || [],
+              sizes_stock: item.product.sizes_stock || {},
+              stock: item.product.stock || 0,
+              featured: item.product.featured || false,
+            } as Product,
+            quantity: item.quantity,
+            selectedColor: item.selected_color,
+            selectedSize: item.selected_size,
+          }
+        })
         .forEach((item: CartItem) => mergedMap.set(item.id, item))
     }
 
@@ -632,7 +640,7 @@ export const useFavoritesStore = create<FavoritesStore>((set, get) => ({
 
     const { data: dbFavs, error } = await supabase
       .from('favorites')
-      .select('product:products(*)')
+      .select('product:products(*, product_images(url, is_primary, sort_order))')
       .eq('user_id', currentUserId)
 
     if (error) {
@@ -646,20 +654,27 @@ export const useFavoritesStore = create<FavoritesStore>((set, get) => ({
     if (dbFavs) {
       dbFavs
         .filter((f: any) => f.product)
-        .map((f: any) => ({
-          id: f.product.id,
-          name: f.product.name,
-          slug: f.product.slug,
-          description: f.product.description,
-          price: f.product.price,
-          original_price: f.product.original_price,
-          images: f.product.images || [],
-          category: f.product.category || 'Premium',
-          colors: f.product.colors || [],
-          sizes: f.product.sizes || [],
-          stock: f.product.stock || 0,
-          featured: f.product.featured || false,
-        } as Product))
+        .map((f: any) => {
+          const sortedImages = (f.product.product_images || [])
+            .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+            .map((img: any) => img.url)
+
+          return {
+            id: f.product.id,
+            name: f.product.name,
+            slug: f.product.slug,
+            description: f.product.description,
+            price: f.product.price,
+            original_price: f.product.original_price,
+            images: sortedImages.length > 0 ? sortedImages : ['/images/placeholder-hat.jpg'],
+            category: f.product.category || 'Premium',
+            colors: f.product.colors || [],
+            sizes: f.product.sizes || [],
+            sizes_stock: f.product.sizes_stock || {},
+            stock: f.product.stock || 0,
+            featured: f.product.featured || false,
+          } as Product
+        })
         .forEach((item: Product) => mergedMap.set(item.id, item))
     }
 
@@ -676,8 +691,38 @@ export const useFavoritesStore = create<FavoritesStore>((set, get) => ({
     })
   },
   clearFavorites: () => {
-    saveLocalFavorites([], get().userId)
     set({ items: [] })
+    let currentUserId = get().userId
+    saveLocalFavorites([], currentUserId)
+
+    const persistViaAPI = async (uid: string | null) => {
+      if (!uid) return
+      try {
+        const res = await fetch('/api/favorites', {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clear_all: true }),
+        })
+        if (!res.ok && res.status !== 401) {
+          const text = await res.text()
+          console.error('Error clearing favorites in DB:', text)
+        }
+      } catch (err) {
+        console.error('Error clearing favorites:', err)
+      }
+    }
+
+    if (currentUserId) {
+      persistViaAPI(currentUserId)
+    } else {
+      get().syncFavoritesFromServer().then(() => {
+        const uid = get().userId
+        if (uid) {
+          persistViaAPI(uid)
+        }
+      })
+    }
   },
   // Loads favorites via server API route — bypasses client JWT timing issues on Vercel
   syncFavoritesFromServer: async () => {
@@ -760,109 +805,106 @@ export const useAuthStore = create<AuthStore>((set) => ({
 export const mockProducts: Product[] = [
   {
     id: '1',
-    name: 'Crown Elite Black',
-    slug: 'crown-elite-black',
-    description: 'Gorra premium de edicion limitada con bordado en oro de 24k. Confeccionada en algodon egipcio de la mas alta calidad con acabados de lujo.',
-    price: 289000,
-    original_price: 350000,
-    images: [
-      'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800&q=80',
-      'https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=800&q=80',
-    ],
-    category: 'Premium',
-    colors: ['Negro', 'Dorado', 'Blanco'],
-    sizes: ['S', 'M', 'L', 'XL'],
-    stock: 15,
-    featured: true,
-    is_promotion: true,
-  },
-  {
-    id: '2',
-    name: 'Urban Legend',
-    slug: 'urban-legend',
-    description: 'Diseno urbano exclusivo con detalles reflectivos y cierre ajustable de metal. Perfecta para el streetwear de alto nivel.',
+    name: 'Camiseta Selección Colombia Local 2026',
+    slug: 'camiseta-colombia-local-2026',
+    description: 'Camiseta oficial versión local para el Mundial 2026. Tecnología de tejido de secado rápido, transpirable y escudo de la FCF bordado en alta definición.',
     price: 199000,
     original_price: null,
     images: [
-      'https://images.unsplash.com/photo-1521369909029-2afed882baee?w=800&q=80',
-      'https://images.unsplash.com/photo-1556306535-0f09a537f0a3?w=800&q=80',
+      'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&q=80',
+      'https://images.unsplash.com/photo-1579952362224-4bb3e5716477?w=800&q=80',
     ],
-    category: 'Urban',
-    colors: ['Negro', 'Gris', 'Azul'],
-    sizes: ['M', 'L', 'XL'],
-    stock: 23,
+    category: 'Camisetas',
+    colors: ['Amarillo', 'Azul', 'Rojo'],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    sizes_stock: { 'S': 20, 'M': 40, 'L': 40, 'XL': 10, 'XXL': 10 },
+    stock: 120,
+    featured: true,
+    is_promotion: false,
+  },
+  {
+    id: '2',
+    name: 'Camiseta Selección Colombia Visitante 2026',
+    slug: 'camiseta-colombia-visitante-2026',
+    description: 'Camiseta oficial versión visitante para las eliminatorias y el Mundial 2026. Ajuste atlético de alto rendimiento con detalles tricolor en cuello y mangas.',
+    price: 199000,
+    original_price: null,
+    images: [
+      'https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80',
+    ],
+    category: 'Camisetas',
+    colors: ['Negro', 'Amarillo', 'Rojo'],
+    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+    sizes_stock: { 'S': 10, 'M': 30, 'L': 25, 'XL': 10, 'XXL': 10 },
+    stock: 85,
     featured: true,
     is_promotion: false,
   },
   {
     id: '3',
-    name: 'Medellin Heat',
-    slug: 'medellin-heat',
-    description: 'Inspirada en las calles de Medellin. Colores vibrantes y diseno unico que representa la cultura paisa.',
-    price: 175000,
-    original_price: 220000,
-    images: [
-      'https://images.unsplash.com/photo-1572307480813-ceb0e59d8325?w=800&q=80',
-      'https://images.unsplash.com/photo-1534215754734-18e55d13e346?w=800&q=80',
-    ],
-    category: 'Urban',
-    colors: ['Rojo', 'Negro', 'Blanco'],
-    sizes: ['S', 'M', 'L'],
-    stock: 8,
-    featured: true,
-    is_promotion: true,
-  },
-  {
-    id: '4',
-    name: 'Street Graffiti',
-    slug: 'street-graffiti',
-    description: 'Arte urbano en tu cabeza. Cada gorra es una pieza unica con grafitis originales de artistas locales.',
-    price: 245000,
+    name: 'Álbum Mundial 2026 - Tapa Dura',
+    slug: 'album-mundial-2026-tapa-dura',
+    description: 'Álbum oficial Panini FIFA World Cup 2026 edición especial de tapa dura. Conserva tus estampas en la mejor calidad del mercado.',
+    price: 129000,
     original_price: null,
     images: [
-      'https://images.unsplash.com/photo-1529025530948-67e8a5f2179c?w=800&q=80',
-      'https://images.unsplash.com/photo-1555487505-8603a1a69755?w=800&q=80',
+      'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=800&q=80',
     ],
-    category: 'Streetwear',
-    colors: ['Multicolor', 'Negro', 'Blanco'],
-    sizes: ['M', 'L', 'XL'],
-    stock: 12,
+    category: 'Álbumes',
+    colors: ['Multicolor'],
+    sizes: ['Única'],
+    stock: 60,
     featured: true,
     is_promotion: false,
   },
   {
-    id: '5',
-    name: 'Neon Nights',
-    slug: 'neon-nights',
-    description: 'Brilla en la oscuridad. Detalles neon que te hacen destacar en cualquier fiesta o evento nocturno.',
-    price: 159000,
-    original_price: 199000,
+    id: '4',
+    name: 'Caja Completa de 50 Sobres Panini',
+    slug: 'caja-50-sobres-panini',
+    description: 'Caja oficial que contiene 50 sobres del Álbum Panini Mundial 2026. Cada sobre contiene 5 estampas aleatorias para llenar tu álbum.',
+    price: 185000,
+    original_price: 220000,
     images: [
-      'https://images.unsplash.com/photo-1517941823-815bea90d291?w=800&q=80',
-      'https://images.unsplash.com/photo-1516442423278-18a8d30c5b5c?w=800&q=80',
+      'https://images.unsplash.com/photo-1540747737956-37872d7f9cdb?w=800&q=80',
     ],
-    category: 'Urban',
-    colors: ['Rosa', 'Verde', 'Azul'],
-    sizes: ['S', 'M', 'L', 'XL'],
+    category: 'Cajas',
+    colors: ['Multicolor'],
+    sizes: ['Única'],
+    stock: 40,
+    featured: true,
+    is_promotion: true,
+  },
+  {
+    id: '5',
+    name: 'Box Coleccionista Gol de Oro 2026',
+    slug: 'box-coleccionista-gol-de-oro',
+    description: 'Edición exclusiva de la casa. Caja de metal coleccionista que contiene 1 Álbum tapa dura, 20 sobres oficiales y stickers edición especial limitada.',
+    price: 349000,
+    original_price: 399000,
+    images: [
+      'https://images.unsplash.com/photo-1518063319789-7217e6706b04?w=800&q=80',
+    ],
+    category: 'Cajas',
+    colors: ['Negro', 'Dorado'],
+    sizes: ['Única'],
     stock: 30,
-    featured: false,
+    featured: true,
     is_promotion: true,
   },
   {
     id: '6',
-    name: 'Classic Heritage',
-    slug: 'classic-heritage',
-    description: 'La tradicion colombiana en una gorra. Materiales premium y bordados tradicionales que cuentan historias.',
-    price: 320000,
+    name: 'Sticker James Rodríguez - Leyenda',
+    slug: 'sticker-james-rodriguez-leyenda',
+    description: 'Estampa coleccionable holográfica de James Rodríguez. Serie limitada de la Selección Colombia, imprescindible para los verdaderos hinchas.',
+    price: 1200,
     original_price: null,
     images: [
-      'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=800&q=80',
-      'https://images.unsplash.com/photo-1581795669633-91ef7c9699a8?w=800&q=80',
+      'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&q=80',
     ],
-    category: 'Premium',
-    colors: ['Negro', 'Cafe', 'Beige'],
-    sizes: ['M', 'L', 'XL'],
-    stock: 5,
+    category: 'Coleccionables',
+    colors: ['Dorado'],
+    sizes: ['Única'],
+    stock: 500,
     featured: false,
     is_promotion: false,
   },

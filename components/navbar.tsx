@@ -97,8 +97,8 @@ export function Navbar() {
     // Fallback sync: attempt to fetch cart/favorites from server on mount.
     // This helps on production (Vercel) when the auth session cookie is available
     // but the auth change event wasn't observed by the client yet.
-    useCartStore.getState().syncCartFromServer().catch(() => {})
-    useFavoritesStore.getState().syncFavoritesFromServer().catch(() => {})
+    useCartStore.getState().syncCartFromServer().catch(() => { })
+    useFavoritesStore.getState().syncFavoritesFromServer().catch(() => { })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const currentUser = session?.user || null
@@ -115,11 +115,11 @@ export function Navbar() {
           .eq('id', currentUser.id)
           .maybeSingle()
         setIsAdmin(profile?.is_admin || false)
-        
+
         // Set userId in cart/favorites stores BEFORE syncing
         useCartStore.getState().setUserId(currentUser.id)
         useFavoritesStore.getState().setUserId(currentUser.id)
-        
+
         // On auth state change events (login/session-refresh), await the sync
         await Promise.all([
           useCartStore.getState().syncCartFromServer(),
@@ -143,13 +143,18 @@ export function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
-          isScrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${isScrolled
             ? 'bg-carbon/95 backdrop-blur-2xl border-b border-steel/50 py-3 shadow-[0_4px_32px_rgba(0,0,0,0.6)]'
             : 'bg-transparent py-5'
-        }`}
+          }`}
         style={{ backgroundColor: isScrolled ? 'rgba(13,13,13,0.96)' : 'transparent' }}
       >
+        {/* Tricolor accent strip */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] flex">
+          <div className="flex-1 bg-[#FCD116]" />
+          <div className="flex-1 bg-[#003893]" />
+          <div className="flex-1 bg-[#CE1126]" />
+        </div>
         <div className="container mx-auto px-4 lg:px-8">
           <nav className="flex items-center justify-between">
 
@@ -164,13 +169,13 @@ export function Navbar() {
                   className="text-xl md:text-2xl font-black tracking-[0.22em] text-white-diamond uppercase"
                   style={{ fontFamily: 'var(--font-cinzel), serif', letterSpacing: '0.22em' }}
                 >
-                  URBAN CROWN
+                  GOL DE ORO
                 </span>
                 <span
-                  className="text-[9px] tracking-[0.5em] uppercase mt-0.5 text-chrome"
+                  className="text-[9px] tracking-[0.5em] uppercase mt-0.5 text-gold-action"
                   style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.45em' }}
                 >
-                  Luxury Streetwear
+                  FÚTBOL · PANINI · CAMISETAS
                 </span>
                 {/* Silver underline on hover */}
                 <motion.div
@@ -290,8 +295,8 @@ export function Navbar() {
                       exit={{ scale: 0, opacity: 0 }}
                       className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center text-[9px] font-bold rounded-full"
                       style={{
-                        background: 'linear-gradient(135deg, rgba(221,232,245,1), rgba(185,195,212,0.9))',
-                        color: '#050505',
+                        background: 'linear-gradient(135deg, #FCD116, #f0c400)',
+                        color: '#080b11',
                         fontFamily: 'var(--font-sans)',
                       }}
                     >
@@ -353,11 +358,11 @@ export function Navbar() {
                     className="text-base font-black tracking-[0.2em] text-white-diamond"
                     style={{ fontFamily: 'var(--font-cinzel)' }}
                   >
-                    URBAN CROWN
+                    GOL DE ORO
                   </span>
                   <span className="text-[9px] tracking-[0.4em] text-chrome mt-0.5 uppercase"
                     style={{ fontFamily: 'var(--font-sans)' }}>
-                    Luxury Streetwear
+                    Streetwear & Coleccionables
                   </span>
                 </div>
                 <Button
@@ -446,7 +451,7 @@ export function Navbar() {
               {/* Footer mobile */}
               <div className="p-6 border-t border-steel/40">
                 <p className="text-[10px] text-steel tracking-[0.3em] uppercase" style={{ fontFamily: 'var(--font-sans)' }}>
-                  © 2026 Urban Crown
+                  © 2026 Gol de Oro
                 </p>
               </div>
             </motion.div>

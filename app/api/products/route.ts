@@ -25,6 +25,15 @@ export async function GET(request: Request) {
         is_promotion,
         colors,
         sizes,
+        sizes_stock,
+        product_type,
+        team,
+        season,
+        player,
+        jersey_type,
+        collection_type,
+        edition,
+        year,
         created_at,
         product_images(url, is_primary, sort_order),
         category:categories(name, slug)
@@ -98,6 +107,14 @@ export async function GET(request: Request) {
         images: sortedImages.length > 0 ? sortedImages : ['/images/placeholder-hat.jpg'],
         category: p.category?.name || 'Premium',
         category_slug: p.category?.slug || '',
+        product_type: p.product_type,
+        team: p.team,
+        season: p.season,
+        player: p.player,
+        jersey_type: p.jersey_type,
+        collection_type: p.collection_type,
+        edition: p.edition,
+        year: p.year,
       }
     })
 

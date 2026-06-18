@@ -18,7 +18,7 @@ export default function RegistroPage() {
   const [isOAuthLoading, setIsOAuthLoading] = useState<string | null>(null)
   const [step, setStep] = useState(1)
   const router = useRouter()
-  
+
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
@@ -108,7 +108,7 @@ export default function RegistroPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (step === 1) {
       if (!validateStep1()) {
         return
@@ -152,7 +152,7 @@ export default function RegistroPage() {
         return
       }
 
-      toast.success(result.message || 'Cuenta creada. Revisa tu email URBAN CROWN para confirmar tu acceso.')
+      toast.success(result.message || 'Cuenta creada. Revisa tu email GOL DE ORO para confirmar tu acceso.')
       router.push('/auth/login')
     } catch (error) {
       console.error('[registro] Submit error:', error)
@@ -199,6 +199,12 @@ export default function RegistroPage() {
 
   return (
     <div className="min-h-screen bg-background flex">
+      {/* Tricolor top strip */}
+      <div className="fixed top-0 left-0 right-0 h-[2px] flex z-50">
+        <div className="flex-1 bg-[#FCD116]" />
+        <div className="flex-1 bg-[#003893]" />
+        <div className="flex-1 bg-[#CE1126]" />
+      </div>
       {/* Left Side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <motion.div
@@ -210,16 +216,16 @@ export default function RegistroPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <Link href="/">
-              <div className="mx-auto mb-4 text-gold text-5xl font-black">✝</div>
+              <div className="mx-auto mb-4 text-gold-action text-5xl font-black">⚽</div>
               <h1 className="text-3xl font-bold tracking-tight">
-                ✝ URBAN <span className="text-gold">CROWN</span> ✝
+                GOL DE ORO
               </h1>
             </Link>
           </div>
 
           <div className="bg-card/60 backdrop-blur-2xl border border-border rounded-[2.5rem] p-8 shadow-[0_40px_120px_-50px_rgba(0,0,0,0.9)] relative overflow-hidden">
-            <div className="pointer-events-none absolute top-8 left-8 text-gold text-3xl opacity-20">✝</div>
-            <div className="pointer-events-none absolute bottom-10 right-10 text-gold text-3xl opacity-20">✝</div>
+            <div className="pointer-events-none absolute top-8 left-8 text-gold-action text-3xl opacity-20">⚽</div>
+            <div className="pointer-events-none absolute bottom-10 right-10 text-gold-action text-3xl opacity-20">⚽</div>
             <div className="flex items-center justify-center gap-4 mb-8">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all ${step >= 1 ? "bg-gold text-background" : "bg-muted text-muted-foreground"}`}>
                 {step > 1 ? <Check className="w-5 h-5" /> : "1"}
@@ -234,7 +240,7 @@ export default function RegistroPage() {
               {step === 1 ? "Crea tu cuenta" : "Eleva tu seguridad"}
             </h2>
             <p className="text-muted-foreground mb-8 max-w-lg">
-              {step === 1 ? "Completa tu registro para acceder a productos exclusivos" : "Define una contraseña segura para proteger tu cuenta URBAN CROWN"}
+              {step === 1 ? "Completa tu registro para acceder a productos exclusivos" : "Define una contraseña segura para proteger tu cuenta GOL DE ORO"}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -251,7 +257,7 @@ export default function RegistroPage() {
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <Input
                           type="text"
-                          placeholder="Urban"
+                          placeholder="Nombre"
                           value={formData.nombre}
                           onChange={(e) => {
                             setFormData({ ...formData, nombre: e.target.value })
@@ -273,7 +279,7 @@ export default function RegistroPage() {
                       <div className="relative">
                         <Input
                           type="text"
-                          placeholder="Crown"
+                          placeholder="Apellido"
                           value={formData.apellido}
                           onChange={(e) => {
                             setFormData({ ...formData, apellido: e.target.value })
@@ -372,7 +378,7 @@ export default function RegistroPage() {
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
-                    
+
                     {/* Password Strength */}
                     {formData.password && (
                       <div className="space-y-2">
@@ -520,13 +526,14 @@ export default function RegistroPage() {
 
       {/* Right Side - Decorative */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-bl from-gold/20 via-background to-background" />
+        <div className="absolute inset-0 bg-gradient-to-bl from-[#FCD116]/10 via-[#003893]/10 to-[#CE1126]/10" />
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-gold/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/3 left-1/4 w-72 h-72 bg-gold/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-[#FCD116]/15 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/3 left-1/4 w-72 h-72 bg-[#003893]/15 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute bottom-1/2 right-1/2 w-64 h-64 bg-[#CE1126]/15 rounded-full blur-3xl animate-pulse delay-500" />
         </div>
         <SparklesUI extra={2} />
-        
+
         <div className="relative z-10 flex flex-col justify-center items-center w-full p-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -534,13 +541,18 @@ export default function RegistroPage() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="mx-auto mb-6 text-gold text-6xl font-black">✝</div>
+            <div className="mx-auto mb-6 text-gold-action text-6xl font-black">⚽</div>
             <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
-              ✝ URBAN <span className="text-gold">CROWN</span> ✝
+              GOL DE ORO
             </h1>
             <p className="text-muted-foreground text-lg max-w-md">
-              Únete a nuestra comunidad exclusiva y accede a las mejores gorras urbanas del mercado
+              Únete a la comunidad de hinchas colombianos. Camisetas oficiales, álbum Panini y coleccionables del Mundial 2026.
             </p>
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <span className="w-5 h-5 rounded-sm bg-[#FCD116] shadow-md" />
+              <span className="w-5 h-5 rounded-sm bg-[#003893] shadow-md" />
+              <span className="w-5 h-5 rounded-sm bg-[#CE1126] shadow-md" />
+            </div>
           </motion.div>
 
           <motion.div
@@ -550,9 +562,9 @@ export default function RegistroPage() {
             className="mt-12 space-y-4"
           >
             {[
-              "Lujo exclusivo en cada gorra",
-              "Acceso anticipado a nuevos lanzamientos",
-              "Ofertas y promociones",
+              "Camisetas y coleccionables oficiales Colombia",
+              "Acceso anticipado a nuevos lanzamientos mundialistas",
+              "Álbum Panini y sobres del Mundial 2026",
             ].map((benefit, i) => (
               <div key={i} className="flex items-center gap-3 text-muted-foreground">
                 <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center">

@@ -1,7 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Crown, MapPin, Phone, Mail, Clock, Instagram } from "lucide-react"
+import { MapPin, Phone, Mail, Clock, Instagram } from "lucide-react"
+import SparklesUI from '@/components/sparkles'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/navbar"
@@ -14,8 +15,26 @@ export default function ContactoPage() {
 
       {/* Hero */}
       <section className="pt-40 pb-20 relative overflow-hidden bg-obsidian border-b border-steel/10">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(200,164,77,0.02)_0%,transparent_70%)]" />
+        <div className="absolute inset-0 z-0">
+          {/* Imagen de Hinchada/Banderas de Fondo */}
+          <img
+            src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1920&q=80"
+            alt="Estadio y Banderas"
+            className="w-full h-full object-cover opacity-20 mix-blend-screen"
+          />
+          {/* Gradientes más fuertes con los colores de la bandera de Colombia */}
+          <div
+            className="absolute inset-0 opacity-80"
+            style={{
+              background: `
+                radial-gradient(circle at 50% 0%, rgba(252,209,22,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 0% 50%, rgba(0,56,147,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(206,17,38,0.15) 0%, transparent 50%),
+                linear-gradient(to bottom, #080b11 0%, rgba(8,11,17,0.85) 50%, #080b11 100%)
+              `,
+            }}
+          />
+          <SparklesUI extra={1} />
         </div>
 
         <div className="container mx-auto px-4 relative z-10 max-w-4xl text-center">
@@ -24,7 +43,7 @@ export default function ContactoPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <Crown className="w-16 h-16 text-gold-action mx-auto mb-6" />
+            <div className="text-6xl mb-6 drop-shadow-lg">⚽</div>
             <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight text-white-diamond mb-6 uppercase">
               CONTACTO
             </h1>
@@ -122,7 +141,7 @@ export default function ContactoPage() {
               <div className="space-y-4">
                 {[
                   { icon: Phone, title: "Teléfono de Soporte", info: "+57 300 657 7286" },
-                  { icon: Mail, title: "Correo Electrónico", info: "urbancrowncol4@gmail.com" },
+                  { icon: Mail, title: "Correo Electrónico", info: "goldeorocoll@gmail.com" },
                   { icon: Clock, title: "Horario de Atención", info: "Lun - Vie: 8:00 AM - 6:00 PM | Sáb: 9:00 AM - 7:00 PM" },
                 ].map((item, index) => (
                   <div
@@ -172,8 +191,8 @@ export default function ContactoPage() {
 
           <div className="max-w-3xl mx-auto space-y-4">
             {[
-              { q: "¿Cuánto tarda el envío?", a: "El tiempo estimado de entrega es de 2 a 5 días hábiles a nivel nacional, dependiendo de tu ubicación geográfica." },
-              { q: "¿Puedo realizar cambios o devoluciones?", a: "Sí, dispones de hasta 30 días para solicitar cambios o devoluciones, siempre y cuando la pieza se encuentre en perfectas condiciones y con sus etiquetas originales." },
+              { q: "¿Cuánto tarda el envío?", a: "El tiempo estimado de entrega es de 3 a 5 días hábiles a nivel nacional, dependiendo de tu ubicación geográfica." },
+              { q: "¿Puedo realizar cambios o devoluciones?", a: "Sí, dispones de hasta 3 días para solicitar cambios o devoluciones, siempre y cuando la pieza se encuentre en perfectas condiciones y con sus etiquetas originales." },
               { q: "¿Ofrecen envíos internacionales?", a: "Por el momento realizamos envíos de forma exclusiva en todo el territorio de la República de Colombia." },
             ].map((faq, index) => (
               <motion.div

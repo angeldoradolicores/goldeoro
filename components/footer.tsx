@@ -55,8 +55,12 @@ const headingStyle = {
 export function Footer() {
   return (
     <footer style={{ background: '#050505', borderTop: '1px solid #1a1a1a' }}>
-      {/* Silver accent top line */}
-      <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.2), transparent)' }} />
+      {/* Colombia tricolor accent */}
+      <div className="flex" style={{ height: '3px' }}>
+        <div className="flex-1" style={{ background: '#FCD116' }} />
+        <div className="flex-1" style={{ background: '#003893' }} />
+        <div className="flex-1" style={{ background: '#CE1126' }} />
+      </div>
 
       <div className="container mx-auto px-4 lg:px-8 pt-20 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
@@ -74,10 +78,8 @@ export function Footer() {
                     letterSpacing: '0.25em',
                     textShadow: '0 1px 0 rgba(255,255,255,0.03)',
                   }}
-                  onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#DDE8F5'}
-                  onMouseLeave={e => (e.currentTarget as HTMLSpanElement).style.color = '#1a1a1a'}
                 >
-                  URBAN
+                  GOL
                 </span>
                 <span
                   className="block text-3xl font-black tracking-[0.25em] leading-none"
@@ -87,20 +89,18 @@ export function Footer() {
                     letterSpacing: '0.25em',
                     textShadow: '0 1px 0 rgba(255,255,255,0.03)',
                   }}
-                  onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#DDE8F5'}
-                  onMouseLeave={e => (e.currentTarget as HTMLSpanElement).style.color = '#1a1a1a'}
                 >
-                  CROWN
+                  DE ORO
                 </span>
                 <span
                   className="block text-[9px] mt-2 tracking-[0.5em] uppercase"
                   style={{
                     fontFamily: 'var(--font-sans)',
-                    color: '#333',
+                    color: '#FCD116',
                     letterSpacing: '0.5em',
                   }}
                 >
-                  Luxury Streetwear
+                  Selección Colombia & Mundial 2026
                 </span>
               </div>
             </Link>
@@ -109,13 +109,12 @@ export function Footer() {
               className="text-xs leading-relaxed mb-8"
               style={{
                 fontFamily: 'var(--font-sans)',
-                color: '#444',
-                maxWidth: '280px',
+                color: '#8B8B8B',
+                maxWidth: '320px',
                 lineHeight: 1.9,
               }}
             >
-              La tienda más exclusiva de gorras urbanas premium en Colombia.
-              Calidad, estilo y distinción en cada pieza.
+              GOL DE ORO trae las mejores camisetas, álbum Panini, cajas de sobres y artículos deportivos de las selecciones más importantes del mundo para vivir la pasión del Mundial 2026.
             </p>
 
             {/* Social Links */}
@@ -129,12 +128,12 @@ export function Footer() {
                   style={{ border: '1px solid #1a1a1a', color: '#333' }}
                   aria-label={social.label}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(221,232,245,0.4)'
-                    ;(e.currentTarget as HTMLAnchorElement).style.color = '#DDE8F5'
+                    (e.currentTarget as HTMLAnchorElement).style.borderColor = '#FCD116'
+                      ; (e.currentTarget as HTMLAnchorElement).style.color = '#FCD116'
                   }}
                   onMouseLeave={e => {
                     (e.currentTarget as HTMLAnchorElement).style.borderColor = '#1a1a1a'
-                    ;(e.currentTarget as HTMLAnchorElement).style.color = '#333'
+                      ; (e.currentTarget as HTMLAnchorElement).style.color = '#333'
                   }}
                 >
                   <social.icon style={{ width: '14px', height: '14px' }} />
@@ -202,8 +201,8 @@ export function Footer() {
             {/* Contact */}
             <div className="space-y-3" style={{ borderTop: '1px solid #1a1a1a', paddingTop: '20px' }}>
               {[
-                { icon: Phone, text: '+57 300 657 7286' },
-                { icon: Mail, text: 'urbancrowncol4@gmail.com' },
+                { icon: Phone, text: '3006577286' },
+                { icon: Mail, text: 'goldeorocoll@gmail.com' },
                 { icon: MapPin, text: 'Colombia' },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-2.5">
@@ -235,7 +234,7 @@ export function Footer() {
             className="text-[10px] uppercase tracking-[0.25em]"
             style={{ fontFamily: 'var(--font-sans)', color: '#333', letterSpacing: '0.25em' }}
           >
-            © 2026 Urban Crown. Todos los derechos reservados.
+            © 2026 Gol de Oro. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-8">
             {[

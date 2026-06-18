@@ -19,27 +19,27 @@ interface BlogPost {
 const posts: BlogPost[] = [
   {
     id: 1,
-    title: "Cómo limpiar y conservar tus gorras premium",
-    excerpt: "Aprende los mejores consejos y técnicas para lavar tus gorras de algodón, gamuza o materiales sintéticos sin perder la horma ni desgastar los colores.",
+    title: "Cómo completar tu álbum Panini del Mundial 2026",
+    excerpt: "Guía definitiva para conseguir los últimos álbumes y sobres de Panini del Mundial 2026. Tips para el canje, mercados de stickers y cómo organizar tu colección.",
     date: "Junio 8, 2026",
-    author: "Urban Crown Team",
-    image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800&q=80"
+    author: "Gol de Oro Team",
+    image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&q=80"
   },
   {
     id: 2,
-    title: "La evolución del Streetwear: De la calle a las pasarelas de lujo",
-    excerpt: "Descubre cómo las gorras y el estilo urbano pasaron de ser accesorios deportivos a convertirse en los máximos estandartes del lujo contemporáneo global.",
+    title: "La camiseta de Colombia: historia y evolución tricolor",
+    excerpt: "Desde la primera camiseta oficial hasta la edición del Mundial 2026. Un repaso por los diseños más icónicos de la Selección Colombia a través de la historia.",
     date: "Mayo 28, 2026",
-    author: "Crown Advisor",
-    image: "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=800&q=80"
+    author: "Gol de Oro Advisor",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
   },
   {
     id: 3,
-    title: "5 Combinaciones clave para lucir tu gorra con estilo",
-    excerpt: "Desde outfits monocromáticos hasta contrastes arriesgados. Te mostramos cómo hacer de tu gorra el elemento protagónico de tu look diario.",
+    title: "5 cosas que todo hincha colombiano debe tener para el Mundial 2026",
+    excerpt: "Camiseta oficial, álbum Panini, caja coleccionable, bufanda tricolor y más. Te mostramos cómo prepararte para vivir el Mundial 2026 como un campeón.",
     date: "Mayo 15, 2026",
     author: "Style Expert",
-    image: "https://images.unsplash.com/photo-1572307480813-ceb0e59d8325?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&q=80"
   }
 ]
 
@@ -56,9 +56,9 @@ export default function BlogPage() {
             className="text-center mb-16"
           >
             <BookOpen className="w-12 h-12 text-gold mx-auto mb-4" />
-            <h1 className="text-4xl md:text-6xl font-black text-gradient-gold">URBAN CROWN BLOG</h1>
+            <h1 className="text-4xl md:text-6xl font-black text-gradient-gold">GOL DE ORO BLOG</h1>
             <p className="text-muted-foreground mt-4 text-lg">
-              Tendencias, cuidados, historia y estilo del streetwear y la cultura de las gorras premium.
+              Fútbol, coleccionismo, la Tricolor y el Mundial 2026. Todo lo que un hincha necesita saber.
             </p>
           </motion.div>
 

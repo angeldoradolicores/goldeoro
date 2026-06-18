@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
     // 1. GREETINGS
     if (lowerMessage.match(/^(hola|hi|hey|buenos dias|buenas tardes|buenas noches|que tal|saludos)/)) {
-      response = '¡Hola! Bienvenido a Urban Crown. Soy CROWN ASISTENTE, tu asesor personal de estilo urbano. 👑\n\n¿En qué te puedo ayudar hoy? Pregúntame sobre:\n- Gorras disponibles y precios\n- Estilos destacados, exclusivas o novedades\n- Gorras en oferta/descuento\n- Envíos nacionales\n- Hablar directamente con un asesor'
+      response = '¡Hola! Bienvenido a Gol de Oro. Soy GOL DE ORO ASISTENTE, tu asesor personal de estilo. 👑\n\n¿En qué te puedo ayudar hoy? Pregúntame sobre:\n- Productos disponibles y precios\n- Estilos destacados, exclusivas o novedades\n- Ofertas y promociones\n- Envíos nacionales\n- Hablar directamente con un asesor'
       return NextResponse.json({ response })
     }
 
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
         const premium = products.filter(p => p.category?.toLowerCase() === 'premium')
         const allList = products.slice(0, 5) // Fallback list
 
-        let intro = 'En **Urban Crown** tenemos una colección brutal de gorras de alta gama. Aquí te recomiendo las mejores:\n\n'
+        let intro = 'En **Gol de Oro** tenemos una colección brutal de streetwear y artículos premium. Aquí te recomiendo las mejores:\n\n'
 
         if (lowerMessage.match(/(mas vendida|mas vendidas|popular|populares|favoritas)/)) {
           intro = '🔥 **Nuestras Gorras Más Vendidas:**\n\n'
@@ -105,13 +105,13 @@ export async function POST(request: Request) {
             featured.slice(0, 2).map(p => `- ${p.name}: ${formatPrice(p.price)}`).join('\n') + 
             `\n\n👑 **Premium de Lujo:**\n` + 
             (premium.length > 0 ? premium : products).slice(0, 2).map(p => `- ${p.name}: ${formatPrice(p.price)}`).join('\n') + 
-            `\n\n💡 **Recomendación de Estilo:** Si buscas marcar la diferencia con acabados de lujo, te sugerimos la línea *Premium*. Para el día a día y un look más callejero, las *Urban* son ideales.`
+            `\n\n💡 **Recomendación de Estilo:** Si buscas marcar la diferencia con acabados de lujo, te sugerimos la línea *Premium*. Para el día a día y un look más callejero, los artículos de la colección urbana son ideales.`
         }
 
         response += '\n\nPuedes ver la colección completa y comprar directamente en nuestra sección de **Catálogo**. ¿Te interesa algún estilo en particular?'
         return NextResponse.json({ response })
       } else {
-        response = 'Actualmente estamos actualizando nuestro inventario de gorras exclusivas. Puedes consultar con nuestro asesor al WhatsApp 3108999049 para conocer la fecha del próximo drop.'
+        response = 'Actualmente estamos actualizando nuestro inventario premium. Puedes consultar con nuestro asesor al WhatsApp 3108999049 para conocer la fecha del próximo lanzamiento.'
         return NextResponse.json({ response })
       }
     }
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
 
         response = `💸 **Gorras en Oferta Especial:**\n\n${promoList}\n\nAdemás, recuerda que obtienes **envío gratis** en compras superiores a $200.000. ¡No necesitas códigos promocionales, los descuentos se aplican directamente en tu carrito!`
       } else {
-        response = 'Todas nuestras gorras mantienen precios competitivos para su alta calidad. Visita la sección "Ofertas" en nuestra barra de menú para ver modelos con descuentos directos aplicados.'
+        response = 'Todos nuestros productos mantienen precios competitivos para su alta calidad. Visita la sección "Ofertas" en nuestra barra de menú para ver modelos con descuentos directos aplicados.'
       }
       return NextResponse.json({ response })
     }
@@ -154,7 +154,7 @@ export async function POST(request: Request) {
     }
 
     // 8. DEFAULT FALLBACK
-    response = `Gracias por tu mensaje. Como CROWN ASISTENTE de Urban Crown, puedo ayudarte con:\n\n` +
+    response = `Gracias por tu mensaje. Como GOL DE ORO ASISTENTE, puedo ayudarte con:\n\n` +
                `- Ver los productos, precios y recomendaciones de estilo\n` +
                `- Conocer los modelos en oferta y más vendidos\n` +
                `- Información de envíos nacionales (exclusivos por Interrapidisimo, 3-5 días)\n` +

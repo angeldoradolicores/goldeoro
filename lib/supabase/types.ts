@@ -78,7 +78,8 @@ export interface Database {
           category_id: string | null
           brand: string | null
           colors: string[]
-          sizes: string[]
+          sizes: string[] | null
+          sizes_stock: Json | null
           stock: number
           featured: boolean
           is_promotion: boolean

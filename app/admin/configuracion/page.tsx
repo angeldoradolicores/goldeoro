@@ -47,11 +47,11 @@ export default function ConfiguracionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label>Nombre de la Tienda</Label>
-            <Input defaultValue="Urban Crown" className="mt-1 bg-secondary border-border/50" />
+            <Input defaultValue="Gol de Oro" className="mt-1 bg-secondary border-border/50" />
           </div>
           <div>
             <Label>Email de Contacto</Label>
-            <Input defaultValue="info@urbancrown.co" className="mt-1 bg-secondary border-border/50" />
+            <Input defaultValue="info@goldeoro.co" className="mt-1 bg-secondary border-border/50" />
           </div>
           <div>
             <Label>Telefono</Label>
@@ -64,7 +64,7 @@ export default function ConfiguracionPage() {
           <div className="md:col-span-2">
             <Label>Descripcion</Label>
             <Textarea 
-              defaultValue="La tienda más exclusiva de gorras urbanas premium en Colombia."
+              defaultValue="La tienda oficial de fútbol, camisetas Colombia y coleccionables del Mundial 2026."
               className="mt-1 bg-secondary border-border/50"
               rows={3}
             />

@@ -19,6 +19,14 @@ export async function GET(
         .from('products')
         .select(`
           *,
+          product_type,
+          team,
+          season,
+          player,
+          jersey_type,
+          collection_type,
+          edition,
+          year,
           product_images(url, is_primary, sort_order),
           category:categories(name, slug)
         `)
@@ -38,6 +46,14 @@ export async function GET(
         .from('products')
         .select(`
           *,
+          product_type,
+          team,
+          season,
+          player,
+          jersey_type,
+          collection_type,
+          edition,
+          year,
           product_images(url, is_primary, sort_order),
           category:categories(name, slug)
         `)
@@ -64,6 +80,14 @@ export async function GET(
       ...product,
       images: sortedImages.length > 0 ? sortedImages : ['/images/placeholder-hat.jpg'],
       category: product.category?.name || 'Premium',
+      product_type: product.product_type,
+      team: product.team,
+      season: product.season,
+      player: product.player,
+      jersey_type: product.jersey_type,
+      collection_type: product.collection_type,
+      edition: product.edition,
+      year: product.year,
     }
 
     return NextResponse.json({ product: transformedProduct })

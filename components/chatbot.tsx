@@ -40,10 +40,10 @@ export function ChatBot() {
       })
 
       const data = await response.json()
-      
+
       // Small delay to make it feel more natural
       await new Promise(resolve => setTimeout(resolve, 500))
-      
+
       addMessage('bot', data.response)
     } catch (error) {
       console.error('Chatbot error:', error)
@@ -65,7 +65,7 @@ export function ChatBot() {
     { label: 'Productos', message: 'Que productos tienen?' },
     { label: 'Envios', message: 'Como funcionan los envios?' },
     { label: 'Promociones', message: 'Tienen promociones activas?' },
-    { label: 'Mas Vendidas', message: 'Cuáles son las gorras más vendidas?' },
+    { label: 'Más Vendidos', message: '¿Cuáles son los productos más vendidos?' },
   ]
 
   const handleQuickAction = (message: string) => {
@@ -101,9 +101,10 @@ export function ChatBot() {
               className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-full"
             >
               <Image
-                src="/logo.png"
-                alt="Logo Urban Crown"
+                src="/logoo.png"
+                alt="Logo Gol de Oro"
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover"
               />
             </motion.div>
@@ -126,19 +127,20 @@ export function ChatBot() {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full border border-chrome/40 relative overflow-hidden bg-background shrink-0">
                   <Image
-                    src="/logo.png"
-                    alt="Logo Urban Crown"
+                    src="/logoo.png"
+                    alt="Logo Gol de Oro"
                     fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover"
                   />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold flex items-center gap-1.5 text-foreground tracking-wide text-sm md:text-base">
-                    CROWN ASISTENTE
+                    GOL DE ORO ASISTENTE
                   </h3>
                   <div className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <p className="text-xs text-muted-foreground">Tu asesor de estilo Urban Crown</p>
+                    <p className="text-xs text-muted-foreground">Tu asesor de estilo Gol de Oro</p>
                   </div>
                 </div>
               </div>
@@ -150,16 +152,17 @@ export function ChatBot() {
                 <div className="text-center py-6">
                   <div className="w-16 h-16 mx-auto relative overflow-hidden rounded-full border border-border/50 mb-4 bg-background">
                     <Image
-                      src="/logo.png"
-                      alt="Logo Urban Crown"
+                      src="/logoo.png"
+                      alt="Logo Gol de Oro"
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover"
                     />
                   </div>
                   <p className="text-muted-foreground text-sm mb-4">
-                    ¡Hola! Soy CROWN ASISTENTE, tu asesor de estilo en Urban Crown. Pregúntame sobre productos, precios, envíos o promociones.
+                    ¡Hola! Soy GOL DE ORO ASISTENTE, tu asesor de estilo. Pregúntame sobre productos, precios, envíos o promociones.
                   </p>
-                  
+
                   {/* Quick Actions */}
                   <div className="flex flex-wrap gap-2 justify-center">
                     {quickActions.map((action) => (
@@ -183,25 +186,23 @@ export function ChatBot() {
                   transition={{ delay: 0.1 }}
                   className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                    message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
-                  }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
+                    }`}>
                     {message.role === 'user' ? (
                       <User className="w-4 h-4" />
                     ) : (
                       <Bot className="w-4 h-4 text-primary" />
                     )}
                   </div>
-                  <div className={`max-w-[80%] p-3 rounded-2xl ${
-                    message.role === 'user' 
-                      ? 'bg-primary text-primary-foreground rounded-br-sm' 
-                      : 'bg-secondary rounded-bl-sm'
-                  }`}>
+                  <div className={`max-w-[80%] p-3 rounded-2xl ${message.role === 'user'
+                    ? 'bg-primary text-primary-foreground rounded-br-sm'
+                    : 'bg-secondary rounded-bl-sm'
+                    }`}>
                     <p className="text-sm leading-relaxed whitespace-pre-line">{message.content}</p>
                     <span className="text-xs opacity-50 mt-1 block">
-                      {new Date(message.timestamp).toLocaleTimeString('es-CO', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                      {new Date(message.timestamp).toLocaleTimeString('es-CO', {
+                        hour: '2-digit',
+                        minute: '2-digit'
                       })}
                     </span>
                   </div>

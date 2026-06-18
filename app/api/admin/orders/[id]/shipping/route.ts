@@ -55,7 +55,7 @@ export async function PUT(
         },
         delivered: {
           title: '✅ ¡Tu pedido fue entregado!',
-          message: `Tu pedido #${order.order_number} ha sido entregado. ¡Gracias por tu compra en Urban Crown!`,
+          message: `Tu pedido #${order.order_number} ha sido entregado. ¡Gracias por tu compra en Gol de Oro!`,
           type: 'delivered',
         },
         cancelled: {

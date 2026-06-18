@@ -93,7 +93,7 @@ export default function ClientesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl md:text-3xl font-display font-bold">Clientes</h1>
-        <p className="text-muted-foreground">Usuarios registrados en Urban Crown</p>
+        <p className="text-muted-foreground">Usuarios registrados en Gol de Oro</p>
       </div>
 
       {/* Stats */}

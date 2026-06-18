@@ -7,6 +7,7 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { ChatBot } from "@/components/chatbot"
 
+
 interface FAQItem {
   question: string
   answer: string
@@ -15,7 +16,7 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: "¿Cómo sé qué talla elegir?",
-    answer: "¡No te preocupes por la talla! En Urban Crown seleccionamos gorras con sistemas de ajuste premium (Snapback, Strapback o Hebilla ajustable), lo que garantiza que se adaptan de forma perfecta a cualquier contorno de cabeza sin necesidad de elegir tallas."
+    answer: "¡No te preocupes por las tallas! En Gol de Oro trabajamos con camisetas en tallas S, M, L, XL y XXL. Nuestras fichas de producto incluyen medidas detalladas y guías de tallas para que encuentres la tuya fácilmente. En caso de dudas, consúltanos por WhatsApp y te asesoramos con gusto."
   },
   {
     question: "¿Cuánto demora en llegar mi pedido?",
@@ -23,15 +24,15 @@ const faqs: FAQItem[] = [
   },
   {
     question: "¿Puedo pagar al recibir mi paquete?",
-    answer: "¡Sí, totalmente! Ofrecemos la opción de Pago Contraentrega en alianza con Interrapidísimo. Pagas en efectivo directamente al transportador cuando recibas tu gorra en la puerta de tu casa."
+    answer: "¡Sí, totalmente! Ofrecemos la opción de Pago Contraentrega en alianza con Interrapidísimo. Pagas en efectivo directamente al transportador cuando recibas tu producto en la puerta de tu casa."
   },
   {
     question: "¿Los envíos son gratis?",
-    answer: "Ofrecemos envío gratis automático para cualquier compra superior a $200.000 COP. Para compras inferiores, el envío tiene una tarifa plana de $17.000 COP."
+    answer: "Ofrecemos envío gratis automático para cualquier compra superior a $300.000 COP. Para compras inferiores, el envío tiene una tarifa plana de $17.000 COP."
   },
   {
     question: "¿Cómo me contacto si tengo un inconveniente?",
-    answer: "Puedes comunicarte directamente con nuestro asesor personal al WhatsApp +57 300 657 7286 o por correo electrónico a urbancrowncol4@gmail.com. Estamos listos para ayudarte al instante."
+    answer: "Puedes comunicarte directamente con nuestro asesor personal al WhatsApp +57 300 657 7286 o por correo electrónico a goldeocoll@gmailcom. Estamos listos para ayudarte al instante."
   }
 ]
 
@@ -101,7 +102,7 @@ export default function FAQPage() {
           <div className="text-center bg-carbon rounded-none p-8 border border-steel/30 shadow-2xl">
             <h3 className="text-lg font-display font-semibold mb-3 text-white-diamond uppercase tracking-wide">¿Aún tienes dudas?</h3>
             <p className="text-titanium text-xs md:text-sm mb-6 max-w-md mx-auto font-sans font-light leading-relaxed">
-              Nuestro Crown Asistente o nuestro asesor por WhatsApp están disponibles para brindarte una atención preferencial.
+              Nuestro asistente o nuestro asesor por WhatsApp están disponibles para brindarte una atención preferencial.
             </p>
             <a
               href="https://wa.me/573006577286"

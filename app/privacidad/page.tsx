@@ -35,7 +35,7 @@ export default function PrivacidadPage() {
                 1. Tratamiento de Datos (Ley 1581 de 2012)
               </h3>
               <p className="text-xs md:text-sm">
-                En cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013 de la República de Colombia, Urban Crown informa que los datos personales recolectados a través de nuestro sitio web serán tratados de forma confidencial y segura.
+                En cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013 de la República de Colombia, Gol de Oro informa que los datos personales recolectados a través de nuestro sitio web serán tratados de forma confidencial y segura.
               </p>
             </div>
 
@@ -62,7 +62,7 @@ export default function PrivacidadPage() {
                   <span className="w-1.5 h-1.5 bg-gold-action" /> Procesar y despachar tus órdenes de compra.
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-gold-action" /> Brindar soporte personalizado a través de nuestro Crown Asistente o WhatsApp.
+                  <span className="w-1.5 h-1.5 bg-gold-action" /> Brindar soporte personalizado a través de nuestro asistente o WhatsApp.
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-gold-action" /> Informar sobre novedades del catálogo o promociones vigentes (previa autorización).
@@ -76,7 +76,7 @@ export default function PrivacidadPage() {
                 4. Tus Derechos (Habeas Data)
               </h3>
               <p className="text-xs md:text-sm">
-                Como titular de los datos, tienes derecho a conocer, actualizar, rectificar y solicitar la eliminación de tu información personal de nuestras bases de datos en cualquier momento. Para ejercer estos derechos, envíanos una solicitud a **urbancrowncol4@gmail.com**.
+                Como titular de los datos, tienes derecho a conocer, actualizar, rectificar y solicitar la eliminación de tu información personal de nuestras bases de datos en cualquier momento. Para ejercer estos derechos, envíanos una solicitud a **info@goldeoro.co**.
               </p>
             </div>
           </div>
@@ -84,10 +84,10 @@ export default function PrivacidadPage() {
           <div className="text-center bg-carbon rounded-none p-8 border border-steel/30 shadow-2xl">
             <h3 className="text-lg font-display font-semibold mb-3 text-white-diamond uppercase tracking-wide">¿Tienes alguna duda sobre tus datos?</h3>
             <p className="text-titanium text-xs md:text-sm mb-6 max-w-md mx-auto font-sans font-light leading-relaxed">
-              Contáctanos de forma directa al correo de soporte técnico y servicio al cliente de Urban Crown.
+              Contáctanos de forma directa al correo de soporte técnico y servicio al cliente de Gol de Oro.
             </p>
             <a 
-              href="mailto:urbancrowncol4@gmail.com" 
+              href="mailto:info@goldeoro.co" 
               className="inline-flex items-center justify-center px-8 py-4 bg-gold-action hover:bg-gold-action/90 text-obsidian font-bold text-xs uppercase tracking-widest rounded-none shadow-md transition-all"
             >
               Contactar Oficial de Privacidad

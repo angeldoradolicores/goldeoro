@@ -13,7 +13,7 @@ const features = [
   {
     icon: Shield,
     title: 'Garantía de Calidad',
-    description: 'Todas nuestras gorras cuentan con garantía de autenticidad y calidad premium.',
+    description: 'Todos nuestros productos cuentan con garantía de autenticidad y calidad premium.',
   },
   {
     icon: CreditCard,
@@ -30,22 +30,22 @@ const features = [
 const testimonials = [
   {
     name: 'Carlos Rodríguez',
-    role: 'Influencer',
-    content: 'La calidad de las gorras es increíble. El bordado en oro es simplemente espectacular. 100% recomendado.',
+    role: 'Hincha de la Tricolor',
+    content: 'La camiseta de Colombia que compré es increíble. Calidad impecable y llegó en tiempo récord. ¡Para el Mundial 2026 voy listo!',
     rating: 5,
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80',
   },
   {
     name: 'María González',
-    role: 'Fashionista',
-    content: 'Por fin encontré una tienda que entiende el streetwear de lujo. Mis nuevas gorras favoritas.',
+    role: 'Coleccionista Panini',
+    content: 'Por fin encontré una tienda que tiene todos los álbumes y sobres de Panini. Los precios son más que justos. Totalmente recomendada.',
     rating: 5,
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
   },
   {
     name: 'Andrés Martínez',
-    role: 'DJ Profesional',
-    content: 'El servicio al cliente es excepcional y los productos son de primera. Ya tengo 5 gorras de esta tienda.',
+    role: 'Fán del Fútbol',
+    content: 'El servicio al cliente es excepcional. Compré varios coleccionables del Mundial 2026 y todo llegó perfectamente empacado.',
     rating: 5,
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80',
   },
@@ -65,14 +65,14 @@ function SectionLabel({ eyebrow, title, highlight }: { eyebrow: string; title: s
   return (
     <div className="text-center mb-16">
       <div className="flex items-center justify-center gap-4 mb-5">
-        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.4))' }} />
+        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, rgba(252,209,22,0.4))' }} />
         <span
           className="text-[10px] font-semibold uppercase tracking-[0.45em]"
-          style={{ fontFamily: 'var(--font-sans)', color: '#DDE8F5', letterSpacing: '0.45em' }}
+          style={{ fontFamily: 'var(--font-sans)', color: '#FCD116', letterSpacing: '0.45em' }}
         >
           {eyebrow}
         </span>
-        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, rgba(221,232,245,0.4))' }} />
+        <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, rgba(252,209,22,0.4))' }} />
       </div>
       <h2
         className="text-3xl md:text-4xl lg:text-5xl font-black leading-tight"
@@ -81,7 +81,7 @@ function SectionLabel({ eyebrow, title, highlight }: { eyebrow: string; title: s
         {title}{' '}
         <span
           style={{
-            background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 50%, #EAF2FF 100%)',
+            background: 'linear-gradient(135deg, #FCD116 0%, #FFFFFF 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -120,7 +120,7 @@ export function FeaturesSection() {
           <SectionLabel
             eyebrow="Por Qué Elegirnos"
             title="La Experiencia"
-            highlight="Luxury"
+            highlight="Gol de Oro"
           />
         </motion.div>
 
@@ -303,20 +303,20 @@ export function CuratedSection() {
 
   const curatedItems = [
     {
-      title: 'Diseño Exquisito',
-      description: 'Silhouettes pensadas para destacar con presencia y carácter en cada lanzamiento.',
+      title: 'Calidad de Cancha',
+      description: 'Tejidos técnicos transpirables y versiones jugador O hincha de la más alta calidad.',
     },
     {
-      title: 'Ajuste Premium',
-      description: 'Tallas precisas y acabados suaves para una sensación de confort superior.',
+      title: 'Estampados Oficiales',
+      description: 'Personaliza tus camisetas con los nombres y números de las estrellas mundiales.',
+    },
+    {
+      title: 'Álbum y Láminas',
+      description: 'Cajas de sobres, álbum tapa dura y tapa blanda',
     },
     {
       title: 'Despacho Exprés',
-      description: 'Entrega confiable y rápida en toda Colombia con seguimiento personalizado.',
-    },
-    {
-      title: 'Atención VIP',
-      description: 'Soporte directo para elegir el modelo ideal y resolver dudas en minutos.',
+      description: 'Envíos rápidos a toda Colombia para que tu pasión no tenga que esperar.',
     },
   ]
 
@@ -336,16 +336,16 @@ export function CuratedSection() {
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
               className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6"
             >
-              Cada lanzamiento es una pieza
+              Cada producto es una pieza
               <span
                 style={{
-                  background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 50%, #EAF2FF 100%)',
+                  background: 'linear-gradient(135deg, var(--gold-action) 0%, #003893 55%, #CE1126 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
                 }}
               >
-                {' '}Crown Collective
+                {' '}Gol de Oro
               </span>
             </motion.h2>
             <motion.p
@@ -354,7 +354,7 @@ export function CuratedSection() {
               transition={{ duration: 0.9, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
               className="text-base md:text-lg text-slate-300 leading-relaxed max-w-xl mb-8"
             >
-              Solo colecciones hechas para quienes exigen estilo único. En nuestra casa no hay piezas normales: cada gorra es una declaración de exclusividad, actitud y trabajo artesanal.
+              Colecciones exclusivas para los hinchas que viven la fiesta más grande del fútbol. En nuestra tienda oficial, cada camiseta y álbum es un símbolo de orgullo colombiano, pasión y amor por el coleccionismo.
             </motion.p>
             <div className="grid gap-4 sm:grid-cols-2">
               <motion.div
@@ -363,8 +363,8 @@ export function CuratedSection() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="p-5 border border-steel/20 rounded-3xl bg-[#111111]"
               >
-                <p className="text-sm uppercase tracking-[0.24em] text-gold-action mb-3">Artesanía selecta</p>
-                <p className="text-sm text-slate-400 leading-relaxed">Materiales de primera y detalles cuidados en cada costura.</p>
+                <p className="text-sm uppercase tracking-[0.24em] text-gold-action mb-3">Coleccionistas</p>
+                <p className="text-sm text-slate-400 leading-relaxed">Álbum oficial Panini y caja de sobres  para completar.</p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
@@ -372,8 +372,8 @@ export function CuratedSection() {
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="p-5 border border-steel/20 rounded-3xl bg-[#111111]"
               >
-                <p className="text-sm uppercase tracking-[0.24em] text-gold-action mb-3">Actitud urbana</p>
-                <p className="text-sm text-slate-400 leading-relaxed">Cada silueta está diseñada para destacarse en la ciudad y en la noche.</p>
+                <p className="text-sm uppercase tracking-[0.24em] text-gold-action mb-3">Orgullo Tricolor</p>
+                <p className="text-sm text-slate-400 leading-relaxed">La camiseta oficial de la Selección Colombia y los artículos más esperados.</p>
               </motion.div>
             </div>
           </div>
@@ -418,7 +418,7 @@ export function BrandsSection() {
           transition={{ duration: 0.8 }}
           className="flex flex-wrap items-center justify-center gap-10 md:gap-20"
         >
-          {['SUPREME', 'NEW ERA', 'NIKE', 'ADIDAS', 'JORDAN'].map((brand, index) => (
+          {['FIFA', 'PANINI', 'ADIDAS', 'NIKE', 'COLOMBIA'].map((brand, index) => (
             <motion.span
               key={brand}
               initial={{ opacity: 0 }}
@@ -430,7 +430,7 @@ export function BrandsSection() {
                 color: '#1a1a1a',
                 letterSpacing: '0.25em',
               }}
-              onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#DDE8F5'}
+              onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#FCD116'}
               onMouseLeave={e => (e.currentTarget as HTMLSpanElement).style.color = '#1a1a1a'}
             >
               {brand}
@@ -451,10 +451,10 @@ export function PromoBanner() {
       {/* Background texture imagen con overlay fuerte */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1556306535-0f09a537f0a3?w=1920&q=80"
+          src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1920&q=80"
           alt="Promo background"
           className="w-full h-full object-cover"
-          style={{ opacity: 0.06 }}
+          style={{ opacity: 0.08 }}
         />
         <div
           className="absolute inset-0"
@@ -471,16 +471,16 @@ export function PromoBanner() {
           >
             {/* Badge */}
             <div className="flex items-center justify-center gap-3 mb-8">
-              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, rgba(221,232,245,0.4))' }} />
-              <Award style={{ width: '14px', height: '14px', color: '#DDE8F5' }} />
+              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to right, transparent, rgba(252,209,22,0.4))' }} />
+              <Award style={{ width: '14px', height: '14px', color: '#FCD116' }} />
               <span
                 className="text-[10px] font-semibold uppercase tracking-[0.45em]"
-                style={{ fontFamily: 'var(--font-sans)', color: '#DDE8F5', letterSpacing: '0.45em' }}
+                style={{ fontFamily: 'var(--font-sans)', color: '#FCD116', letterSpacing: '0.45em' }}
               >
                 Oferta Especial
               </span>
-              <Award style={{ width: '14px', height: '14px', color: '#DDE8F5' }} />
-              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, rgba(221,232,245,0.4))' }} />
+              <Award style={{ width: '14px', height: '14px', color: '#FCD116' }} />
+              <div style={{ width: '28px', height: '1px', background: 'linear-gradient(to left, transparent, rgba(252,209,22,0.4))' }} />
             </div>
 
             <h2
@@ -489,13 +489,13 @@ export function PromoBanner() {
             >
               <span
                 style={{
-                  background: 'linear-gradient(135deg, #C9CDD2 0%, #DDE8F5 40%, #EAF2FF 60%, #BFCEDF 100%)',
+                  background: 'linear-gradient(135deg, #FCD116 0%, #FFFFFF 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
                 }}
               >
-                30% OFF
+                10% OFF
               </span>
             </h2>
 
@@ -515,15 +515,15 @@ export function PromoBanner() {
                 className="font-bold px-3 py-1"
                 style={{
                   fontFamily: 'var(--font-cinzel)',
-                  color: '#DDE8F5',
-                  border: '1px solid rgba(221,232,245,0.25)',
-                  background: 'rgba(221,232,245,0.08)',
+                  color: '#FCD116',
+                  border: '1px solid rgba(252,209,22,0.25)',
+                  background: 'rgba(252,209,22,0.08)',
                   letterSpacing: '0.15em',
                 }}
               >
-                LUXURY30
+                GOL2026
               </span>
-              {' '}al finalizar tu compra y obtén 30% de descuento en toda tu orden.
+              {' '}al finalizar tu compra y obtén 10% de descuento en tu primer pedido.
             </p>
 
             {/* Countdown boxes */}
