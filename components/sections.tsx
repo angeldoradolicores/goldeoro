@@ -124,7 +124,7 @@ export function FeaturesSection() {
           />
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px"
+        <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-4 gap-px hide-scrollbar"
           style={{ border: '1px solid #1a1a1a' }}
         >
           {features.map((feature, index) => (
@@ -134,7 +134,7 @@ export function FeaturesSection() {
               animate={isInView ? 'visible' : 'hidden'}
               custom={index + 1}
               variants={fadeUp}
-              className="group"
+              className="group shrink-0 snap-center w-[85vw] md:w-auto"
             >
               <div
                 className="h-full p-8 transition-all duration-500"
@@ -221,7 +221,7 @@ export function TestimonialsSection() {
           />
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ border: '1px solid #1a1a1a' }}>
+        <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-px hide-scrollbar" style={{ border: '1px solid #1a1a1a' }}>
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.name}
@@ -229,6 +229,7 @@ export function TestimonialsSection() {
               animate={isInView ? 'visible' : 'hidden'}
               custom={index + 1}
               variants={fadeUp}
+              className="shrink-0 snap-center w-[85vw] md:w-auto"
             >
               <div
                 className="h-full p-8 transition-all duration-500"
@@ -356,7 +357,7 @@ export function CuratedSection() {
             >
               Colecciones exclusivas para los hinchas que viven la fiesta más grande del fútbol. En nuestra tienda oficial, cada camiseta y álbum es un símbolo de orgullo colombiano, pasión y amor por el coleccionismo.
             </motion.p>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
@@ -377,7 +378,7 @@ export function CuratedSection() {
               </motion.div>
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {curatedItems.map((item, index) => (
               <motion.div
                 key={item.title}

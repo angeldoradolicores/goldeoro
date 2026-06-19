@@ -163,7 +163,7 @@ export default function NosotrosPage() {
             <h2 className="text-3xl font-display font-bold text-white-diamond uppercase">Nuestros Valores</h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4 hide-scrollbar">
             {[
               { title: "PASIÓN FUTBOLERA", desc: "El fútbol es mucho más que un deporte; es emoción, identidad y orgullo. Cada producto refleja esa pasión por la pelota.", icon: Trophy },
               { title: "AUTENTICIDAD", desc: "Solo ofrecemos productos auténticos y oficiales. Camisetas 1.1, álbum Panini y coleccionables que cumplen con los más altos estándares.", icon: Shield },
@@ -179,7 +179,7 @@ export default function NosotrosPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05, duration: 0.6 }}
-                  className="p-8 bg-carbon border border-steel/30 rounded-none shadow-xl"
+                  className="shrink-0 snap-center w-[85vw] md:w-auto p-8 bg-carbon border border-steel/30 rounded-none shadow-xl"
                 >
                   <Icon className="w-6 h-6 text-gold-action mb-4" />
                   <h4 className="text-sm font-display font-semibold mb-2 text-white-diamond tracking-wider uppercase">{v.title}</h4>
@@ -203,7 +203,7 @@ export default function NosotrosPage() {
             <h2 className="text-3xl font-display font-bold text-white-diamond uppercase">¿Por qué elegir Gol de Oro?</h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 pb-4 hide-scrollbar">
             {[
               { title: "⚽ Productos Oficiales", desc: "Camisetas de la Selección Colombia, álbum Panini, cajas y de sobres del Mundial 2026 — todo auténtico y certificado." },
               { title: "🏆 Atención al Hincha", desc: "Asesoría cercana y personalizada para ayudarte a encontrar esa camiseta o álbum que buscas con tanto fervor." },
@@ -217,7 +217,7 @@ export default function NosotrosPage() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.05, duration: 0.6 }}
-                className="p-6 bg-graphite border border-steel/30 rounded-none hover:border-gold-action/30 transition-all duration-300"
+                className="shrink-0 snap-center w-[85vw] md:w-auto p-6 bg-graphite border border-steel/30 rounded-none hover:border-gold-action/30 transition-all duration-300"
               >
                 <h4 className="font-display font-semibold text-white-diamond text-sm mb-2 flex items-center gap-2 uppercase tracking-wider">
                   <span className="w-1.5 h-1.5 bg-gold-action" /> {choice.title}

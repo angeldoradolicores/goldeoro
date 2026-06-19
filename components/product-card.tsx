@@ -127,7 +127,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           className="h-full flex flex-col"
         >
           <div
-            className="relative overflow-hidden transition-all duration-500"
+            className="relative overflow-hidden transition-all duration-500 rounded-[22px] flex-1 flex flex-col"
             style={{
               background: '#080b11',
               backgroundImage: `
@@ -135,7 +135,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               radial-gradient(circle at bottom left, rgba(0,56,147,0.05) 0%, transparent 40%),
               radial-gradient(circle at bottom right, rgba(206,17,38,0.05) 0%, transparent 40%)
             `,
-              border: product.featured || product.is_promotion ? '1px solid rgba(200,164,77,0.35)' : (isHovered ? '1px solid rgba(252,209,22,0.2)' : '1px solid #262626'),
               boxShadow: product.featured || product.is_promotion
                 ? '0 28px 68px rgba(200,164,77,0.06), 0 6px 20px rgba(0,0,0,0.6)'
                 : isHovered
@@ -145,8 +144,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
+            {/* Borde Colombia */}
+            <div
+              className="absolute inset-0 rounded-[inherit] pointer-events-none z-30"
+              style={{
+                padding: '1.5px',
+                background: 'linear-gradient(135deg, #FCD116 0%, #003893 50%, #CE1126 100%)',
+                WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                WebkitMaskComposite: 'xor',
+                maskComposite: 'exclude',
+              }}
+            />
             {/* Image Container */}
-            <div className="relative aspect-square overflow-hidden" style={{ background: '#171717' }}>
+            <div className="relative aspect-[4/5] md:aspect-square overflow-hidden" style={{ background: '#171717' }}>
               <Image
                 src={(product.images || []).find(Boolean) || '/images/placeholder-hat.jpg'}
                 alt={product.name}
@@ -194,9 +204,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 {product.featured && product.stock > 0 && (
                   <MetalBadge text="Exclusivo" variant="gold" />
                 )}
-                {product.stock > 0 && product.stock < 5 && (
-                  <MetalBadge text={`Últimas ${product.stock}`} variant="crimson" />
-                )}
               </div>
 
               {/* Quick Actions (derecha) */}
@@ -234,9 +241,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 </button>
               </div>
 
-              {/* Add to Cart (bottom — always visible on mobile, hover on desktop) */}
+              {/* Add to Cart (bottom — hidden on mobile, hover on desktop) */}
               <div
-                className="absolute bottom-0 left-0 right-0 transition-all duration-400"
+                className="hidden md:block absolute bottom-0 left-0 right-0 transition-all duration-400 z-40"
                 style={{
                   opacity: isHovered ? 1 : undefined,
                   transform: isHovered ? 'translateY(0)' : undefined,

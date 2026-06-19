@@ -87,7 +87,7 @@ export default function PromocionesPage() {
         {/* Trust & Policy Grid */}
         <section className="py-20 relative z-10">
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-4 md:gap-8 pb-4 hide-scrollbar">
               {trustPromoCards.map((promo, index) => {
                 const Icon = promo.icon
                 return (
@@ -96,7 +96,7 @@ export default function PromocionesPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1, duration: 0.8 }}
-                    className="bg-carbon border border-steel/30 rounded-none p-8 hover:border-gold-action/30 transition-all duration-300 shadow-2xl relative overflow-hidden"
+                    className="shrink-0 snap-center w-[85vw] md:w-auto bg-carbon border border-steel/30 rounded-none p-8 hover:border-gold-action/30 transition-all duration-300 shadow-2xl relative overflow-hidden"
                   >
                     <div className="absolute top-6 right-6">
                       <Icon className="w-10 h-10 text-gold-action/10" />
@@ -138,7 +138,7 @@ export default function PromocionesPage() {
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="animate-pulse space-y-4">
                     <div className="aspect-square bg-graphite border border-steel/20 rounded-none" />
@@ -151,7 +151,7 @@ export default function PromocionesPage() {
                 ))}
               </div>
             ) : products.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
                 {products.map((product, index) => (
                   <ProductCard key={product.id} product={product} index={index} />
                 ))}

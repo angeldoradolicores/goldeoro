@@ -138,7 +138,7 @@ export default function ContactoPage() {
               className="space-y-8"
             >
               {/* Info Cards */}
-              <div className="space-y-4">
+              <div className="flex overflow-x-auto snap-x snap-mandatory lg:block lg:space-y-4 gap-4 pb-4 hide-scrollbar">
                 {[
                   { icon: Phone, title: "Teléfono de Soporte", info: "+57 300 657 7286" },
                   { icon: Mail, title: "Correo Electrónico", info: "goldeorocoll@gmail.com" },
@@ -146,7 +146,7 @@ export default function ContactoPage() {
                 ].map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-4 p-6 bg-carbon border border-steel/30 rounded-none hover:border-gold-action/30 transition-colors shadow-lg"
+                    className="shrink-0 snap-center w-[85vw] lg:w-auto flex items-start gap-4 p-6 bg-carbon border border-steel/30 rounded-none hover:border-gold-action/30 transition-colors shadow-lg"
                   >
                     <div className="w-12 h-12 bg-graphite border border-steel/30 rounded-none flex items-center justify-center flex-shrink-0">
                       <item.icon className="w-5 h-5 text-gold-action" />

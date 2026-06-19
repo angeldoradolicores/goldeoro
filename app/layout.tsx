@@ -38,6 +38,10 @@ export const metadata: Metadata = {
     description: 'Vive la pasión del Mundial 2026 con las mejores camisetas de fútbol, álbumes Panini y coleccionables premium.',
     type: 'website',
   },
+  icons: {
+    icon: '/logoo.png',
+    apple: '/logoo.png',
+  },
 }
 
 export const viewport: Viewport = {

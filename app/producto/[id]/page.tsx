@@ -81,7 +81,12 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
             setSelectedColor(initialColor)
             setSelectedImage(getImageIndexForColor(initialColor, data.product))
             
-            const initialSize = data.product.sizes?.[0] || ''
+            let initialSize = ''
+            if (data.product.sizes && data.product.sizes.length > 0) {
+              const sizesStock = data.product.sizes_stock || {}
+              const availableSize = data.product.sizes.find((size: string) => (sizesStock[size] ?? data.product.stock) > 0)
+              initialSize = availableSize || data.product.sizes[0]
+            }
             setSelectedSize(initialSize)
             
             const catParam = encodeURIComponent(data.product.category || '')

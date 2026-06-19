@@ -66,13 +66,13 @@ export function FeaturedProducts() {
 
         {/* Products Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
             {[...Array(4)].map((_, i) => (
               <ProductSkeleton key={i} />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
             {products.slice(0, 8).map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} />
             ))}

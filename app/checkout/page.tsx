@@ -1105,7 +1105,7 @@ export default function CheckoutPage() {
                       className="flex justify-between text-xs font-sans font-light"
                     >
                       <span className="text-titanium truncate max-w-[65%]">
-                        {item.product.name} x{item.quantity}
+                        {item.product.name} {item.selectedSize ? `(Talla: ${item.selectedSize})` : ''} x{item.quantity}
                       </span>
                       <span className="text-white-diamond font-medium">{formatPrice(item.product.price * item.quantity)}</span>
                     </div>
