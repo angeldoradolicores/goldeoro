@@ -31,16 +31,17 @@ export default function AuthCodeErrorPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-obsidian text-foreground p-6">
       <div className="max-w-xl w-full bg-graphite border border-steel/30 rounded-lg p-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Problema al confirmar tu cuenta</h1>
-        <p className="text-sm text-titanium mb-6">{friendly}</p>
+        <h1 className="text-2xl font-bold mb-4">Verificación de Cuenta</h1>
+        <p className="text-sm text-titanium mb-6">
+          Es probable que tu cuenta ya haya sido verificada exitosamente o que el enlace haya sido procesado por tu proveedor de correo. 
+          <br /><br />
+          Por favor, intenta iniciar sesión directamente.
+        </p>
 
-        {info.error && (
-          <pre className="text-xs text-steel bg-carbon p-3 rounded mb-4 break-words">{JSON.stringify(info, null, 2)}</pre>
-        )}
-
-        <div className="flex gap-3 justify-center">
-          <Link href="/auth/resend" className="btn-luxury px-4 py-2 rounded">Solicitar nuevo enlace</Link>
-          <Link href="/auth/login" className="btn-outline px-4 py-2 rounded">Ir a Iniciar Sesión</Link>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+          <Link href="/auth/login" className="btn-luxury px-6 py-3 rounded text-sm uppercase tracking-wider font-semibold">
+            Ir a Iniciar Sesión
+          </Link>
         </div>
       </div>
     </main>

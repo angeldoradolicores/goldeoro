@@ -76,11 +76,6 @@ export async function sendConfirmationEmail(to: string, actionLink: string, full
       to: cleanedTo,
       subject,
       html,
-      // Envelope forces SMTP MAIL FROM and RCPT TO, useful to control return-path
-      envelope: {
-        from: gmailUser || 'info@goldeoro.co',
-        to: cleanedTo,
-      },
       replyTo: gmailUser || 'info@goldeoro.co',
     })
     console.log('[mail] Confirmation email sent to', cleanedTo)
