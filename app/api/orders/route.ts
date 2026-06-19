@@ -101,39 +101,7 @@ export async function POST(request: Request) {
       console.warn('[orders] Order items insert warning (table may not exist):', itemsError.message)
     }
 
-    // Update product stock
-    for (const item of items) {
-      try {
-        await supabaseAdmin.rpc('decrement_size_stock', { 
-          p_product_id: item.productId, 
-          p_size: item.size || '',
-          p_quantity: item.quantity 
-        })
-      } catch {
-        // Fallback to old RPC if the new one doesn't exist yet
-        try {
-          await supabaseAdmin.rpc('decrement_stock', { 
-            product_id: item.productId, 
-            quantity: item.quantity 
-          })
-        } catch {
-        // If RPC doesn't exist, do it manually
-        await supabaseAdmin
-          .from('products')
-          .select('stock')
-          .eq('id', item.productId)
-          .single()
-          .then(async ({ data }) => {
-            if (data) {
-              await supabaseAdmin
-                .from('products')
-                .update({ stock: Math.max(0, data.stock - item.quantity) })
-                .eq('id', item.productId)
-            }
-          })
-        }
-      }
-    }
+    // Product stock decrement has been moved to the Wompi webhook when the payment is approved.
 
     // Generate Wompi checkout URL
     const wompiPublicKey = process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY || 'pub_test_XXXXXXXXXXXXXXXXXX'

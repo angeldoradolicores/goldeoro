@@ -54,6 +54,10 @@ export function Navbar() {
       if (initCalledRef.current) return
       initCalledRef.current = true
 
+      // ── Hydrate from localStorage immediately (badges appear instantly) ──
+      useCartStore.getState().hydrateCart(null)
+      useFavoritesStore.getState().hydrateFavorites(null)
+
       const { data: { session } } = await supabase.auth.getSession()
       let currentUser = session?.user ?? null
       if (!currentUser) {

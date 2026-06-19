@@ -151,12 +151,13 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 src={(product.images || []).find(Boolean) || '/images/placeholder-hat.jpg'}
                 alt={product.name}
                 fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover transition-opacity duration-300"
                 style={{
                   opacity: isHovered ? 0.9 : 1,
                 }}
-                loading="lazy"
+                loading={index < 6 ? 'eager' : 'lazy'}
+                priority={index < 4}
               />
 
               {/* Overlay gradiente al hover */}
@@ -233,18 +234,18 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 </button>
               </div>
 
-              {/* Add to Cart (bottom, aparece en hover) */}
+              {/* Add to Cart (bottom — always visible on mobile, hover on desktop) */}
               <div
                 className="absolute bottom-0 left-0 right-0 transition-all duration-400"
                 style={{
-                  opacity: isHovered ? 1 : 0,
-                  transform: isHovered ? 'translateY(0)' : 'translateY(12px)',
+                  opacity: isHovered ? 1 : undefined,
+                  transform: isHovered ? 'translateY(0)' : undefined,
                 }}
               >
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stock === 0}
-                  className="w-full py-3.5 flex items-center justify-center gap-2.5 text-[10px] font-bold uppercase transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-2.5 md:py-3.5 flex items-center justify-center gap-2 text-[9px] md:text-[10px] font-bold uppercase transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed md:opacity-0 md:translate-y-3 group-hover:opacity-100 group-hover:translate-y-0"
                   style={{
                     fontFamily: 'var(--font-sans)',
                     letterSpacing: '0.2em',
@@ -255,8 +256,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     backdropFilter: 'blur(8px)',
                   }}
                 >
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  {product.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
+                  <ShoppingBag className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                  <span className="hidden sm:inline">{product.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}</span>
+                  <span className="sm:hidden">{product.stock === 0 ? 'Agotado' : 'Agregar'}</span>
                 </button>
               </div>
             </div>
@@ -264,7 +266,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
 
             {/* Content */}
-            <div className="p-4 pb-5">
+            <div className="p-3 md:p-4 pb-4 md:pb-5">
               {/* Category */}
               <span
                 role="button"
@@ -297,7 +299,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
               {/* Name */}
               <h3
-                className="font-semibold text-sm mb-3 leading-snug transition-colors duration-300"
+                className="font-semibold text-xs md:text-sm mb-2 md:mb-3 leading-snug transition-colors duration-300 line-clamp-2"
                 style={{
                   fontFamily: 'var(--font-cinzel)',
                   color: isHovered ? '#F5F5F5' : '#C0C0C0',
@@ -330,9 +332,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               )}
 
               {/* Price */}
-              <div className="flex items-baseline gap-2.5">
+              <div className="flex items-baseline gap-1.5 md:gap-2.5">
                 <span
-                  className="text-base font-bold"
+                  className="text-sm md:text-base font-bold"
                   style={{
                     fontFamily: 'var(--font-cinzel)',
                     background: 'linear-gradient(135deg, #C9CDD2, #DDE8F5)',
@@ -400,7 +402,7 @@ interface ProductGridProps {
 
 export function ProductGrid({ products, className = '' }: ProductGridProps) {
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ${className}`}>
+    <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 ${className}`}>
       {products.map((product, index) => (
         <ProductCard key={product.id} product={product} index={index} />
       ))}

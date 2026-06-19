@@ -26,7 +26,11 @@ export function useProducts(options?: {
   const queryString = params.toString()
   const url = `/api/products${queryString ? `?${queryString}` : ''}`
 
-  const { data, error, isLoading, mutate } = useSWR<Product[]>(url, fetcher)
+  const { data, error, isLoading, mutate } = useSWR<Product[]>(url, fetcher, {
+    keepPreviousData: true,
+    revalidateOnFocus: false,
+    dedupingInterval: 30000,
+  })
 
   return {
     products: data || [],
@@ -39,7 +43,8 @@ export function useProducts(options?: {
 export function useProduct(slug: string) {
   const { data, error, isLoading, mutate } = useSWR<Product>(
     slug ? `/api/products/${slug}` : null,
-    fetcher
+    fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 60000 }
   )
 
   return {
@@ -60,7 +65,10 @@ export function usePromotionProducts(limit: number = 6) {
 
 // Categories hook
 export function useCategories() {
-  const { data, error, isLoading } = useSWR<Category[]>('/api/categories', fetcher)
+  const { data, error, isLoading } = useSWR<Category[]>('/api/categories', fetcher, {
+    revalidateOnFocus: false,
+    dedupingInterval: 60000,
+  })
 
   return {
     categories: data || [],

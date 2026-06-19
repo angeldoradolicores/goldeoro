@@ -3,8 +3,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendConfirmationEmail } from '@/lib/mail'
 
 async function getSiteUrl(request: Request) {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL
+  }
   const host = request.headers.get('host')
-  if (!host) return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  if (!host) return 'http://localhost:3000'
   const protocol = host.includes('localhost') || host.includes('127.0.0.1') ? 'http' : 'https'
   return `${protocol}://${host}`
 }

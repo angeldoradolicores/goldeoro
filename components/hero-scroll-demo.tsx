@@ -67,8 +67,8 @@ export function HeroScrollDemo() {
           <img
             src={`/Album-panini-colombia-2026.webp`}
             alt="hero"
-            height={720}
-            width={1400}
+            height={540}
+            width={900}
             className="mx-auto rounded-2xl object-cover h-full object-left-top"
             draggable={false}
           />

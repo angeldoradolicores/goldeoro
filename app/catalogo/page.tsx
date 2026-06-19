@@ -372,7 +372,7 @@ function CatalogoContent() {
         <section className="pb-32">
           <div className="container mx-auto px-4 max-w-7xl">
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8">
                 {[...Array(8)].map((_, i) => (
                   <ProductSkeleton key={i} />
                 ))}
@@ -386,7 +386,7 @@ function CatalogoContent() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
                   className={viewMode === 'grid'
-                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8'
+                    ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8'
                     : 'flex flex-col gap-6'
                   }
                 >

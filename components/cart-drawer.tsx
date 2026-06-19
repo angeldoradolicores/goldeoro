@@ -19,6 +19,12 @@ export function CartDrawer() {
   const { user } = useAuthStore()
   const router = useRouter()
   const cartTotal = total()
+  const hasInvalidItems = items.some(item => {
+    const availableStock = item.selectedSize && item.product.sizes_stock 
+      ? (item.product.sizes_stock[item.selectedSize] ?? 0) 
+      : (item.product.stock ?? 0);
+    return item.quantity > availableStock || availableStock <= 0;
+  })
 
   const handleCheckout = () => {
     setCartOpen(false)
@@ -154,6 +160,8 @@ export function CartDrawer() {
                       const availableStock = item.selectedSize && item.product.sizes_stock 
                         ? (item.product.sizes_stock[item.selectedSize] || 0) 
                         : (item.product.stock || 0);
+                      const isOutOfStock = availableStock <= 0;
+                      const isExceedingStock = item.quantity > availableStock;
 
                       return (
                         <motion.div
@@ -162,7 +170,7 @@ export function CartDrawer() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: 60 }}
                         transition={{ delay: index * 0.04, duration: 0.3 }}
-                        className="flex gap-4 py-5"
+                        className={`flex gap-4 py-5 transition-all duration-300 ${isOutOfStock || isExceedingStock ? 'opacity-40 grayscale' : ''}`}
                         style={{ borderBottom: '1px solid #1a1a1a' }}
                       >
                         {/* Image */}
@@ -212,6 +220,16 @@ export function CartDrawer() {
                           >
                             {formatPrice(item.product.price)}
                           </p>
+                          {isOutOfStock && (
+                            <p className="text-[10px] text-red-500 font-semibold uppercase mt-1 tracking-wider">
+                              Agotado en esta talla
+                            </p>
+                          )}
+                          {!isOutOfStock && isExceedingStock && (
+                            <p className="text-[10px] text-amber-500 font-semibold uppercase mt-1 tracking-wider">
+                              Excede stock (Disp: {availableStock})
+                            </p>
+                          )}
                         </div>
 
                         {/* Quantity & Remove */}
@@ -348,7 +366,10 @@ export function CartDrawer() {
                 <div className="space-y-3">
                   <button
                     onClick={handleCheckout}
-                    className="group w-full py-4 flex items-center justify-center gap-3 text-[11px] font-bold uppercase transition-all duration-300 shadow-lg text-white"
+                    disabled={hasInvalidItems}
+                    className={`group w-full py-4 flex items-center justify-center gap-3 text-[11px] font-bold uppercase transition-all duration-300 shadow-lg text-white ${
+                      hasInvalidItems ? 'opacity-40 cursor-not-allowed filter grayscale' : ''
+                    }`}
                     style={{
                       fontFamily: 'var(--font-sans)',
                       letterSpacing: '0.2em',
@@ -356,14 +377,22 @@ export function CartDrawer() {
                       border: 'none',
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'
+                      if (!hasInvalidItems) {
+                        (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'
+                      }
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'
+                      if (!hasInvalidItems) {
+                        (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'
+                      }
                     }}
                   >
-                    <span className="drop-shadow-md flex items-center gap-2">⚽ Finalizar Compra</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform drop-shadow-md" />
+                    <span className="drop-shadow-md flex items-center gap-2">
+                      {hasInvalidItems ? '⚠️ Ajustar cantidades' : '⚽ Finalizar Compra'}
+                    </span>
+                    {!hasInvalidItems && (
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform drop-shadow-md" />
+                    )}
                   </button>
 
                   <button

@@ -11,6 +11,7 @@ import { Footer } from '@/components/footer'
 import { ChatBot } from '@/components/chatbot'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { toast } from 'sonner'
 
 interface Product {
   id: string
@@ -110,6 +111,18 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
   const handleToggleFavorite = async () => {
     if (!product) return
     await toggleFavorite(product as any)
+  }
+
+  const handleShare = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => {
+          toast.success('¡Enlace del producto copiado al portapapeles!')
+        })
+        .catch(() => {
+          toast.error('No se pudo copiar el enlace')
+        })
+    }
   }
 
   if (loading) {
@@ -424,7 +437,12 @@ export default function ProductoPage({ params }: { params: Promise<{ id: string 
                 >
                   <Heart className={`w-4 h-4 ${product && isFav ? 'fill-current text-gold-action' : ''}`} />
                 </Button>
-                <Button variant="outline" size="icon" className="w-14 h-14 border-steel/30 rounded-none hover:border-gold-action/50 text-chrome">
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  size="icon"
+                  className="w-14 h-14 border-steel/30 rounded-none hover:border-gold-action/50 text-chrome"
+                >
                   <Share2 className="w-4 h-4" />
                 </Button>
               </div>

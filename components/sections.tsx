@@ -418,7 +418,7 @@ export function BrandsSection() {
           transition={{ duration: 0.8 }}
           className="flex flex-wrap items-center justify-center gap-10 md:gap-20"
         >
-          {['FIFA', 'PANINI', 'ADIDAS', 'NIKE', 'COLOMBIA'].map((brand, index) => (
+          {['FIFA', 'PANINI', 'ADIDAS', 'NIKE'].map((brand, index) => (
             <motion.span
               key={brand}
               initial={{ opacity: 0 }}

@@ -22,7 +22,7 @@ function findBestMatch(message: string, knowledge: { question: string; answer: s
   }
   for (const item of knowledge) {
     const questionWords = item.question.toLowerCase().split(' ')
-    const matchCount = questionWords.filter(word => 
+    const matchCount = questionWords.filter(word =>
       word.length > 3 && lowerMessage.includes(word)
     ).length
     if (matchCount >= 2) {
@@ -48,25 +48,25 @@ export async function POST(request: Request) {
 
     // 1. GREETINGS
     if (lowerMessage.match(/^(hola|hi|hey|buenos dias|buenas tardes|buenas noches|que tal|saludos)/)) {
-      response = '¡Hola! Bienvenido a Gol de Oro. Soy GOL DE ORO ASISTENTE, tu asesor personal de estilo. 👑\n\n¿En qué te puedo ayudar hoy? Pregúntame sobre:\n- Productos disponibles y precios\n- Estilos destacados, exclusivas o novedades\n- Ofertas y promociones\n- Envíos nacionales\n- Hablar directamente con un asesor'
+      response = '¡Hola! Bienvenido a Gol de Oro. Soy GOL DE ORO ASISTENTE \n\n¿En qué te puedo ayudar hoy? Pregúntame sobre:\n- Productos disponibles y precios\n- Estilos destacados, exclusivas o novedades\n- Ofertas y promociones\n- Envíos nacionales\n- Hablar directamente con un asesor'
       return NextResponse.json({ response })
     }
 
     // 2. THANKS
     if (lowerMessage.match(/(gracias|thank|genial|perfecto|excelente|super|ok)/)) {
-      response = '¡Con mucho gusto! Estoy aquí para que definas tu estilo con lo mejor. Si necesitas algo más, solo dime.'
+      response = '¡Con mucho gusto!. Si necesitas algo más, solo dime.'
       return NextResponse.json({ response })
     }
 
     // 3. WHATSAPP ASESOR / CONTACTO
     if (lowerMessage.match(/(asesor|telefono|contacto|whatsapp|hablar con alguien|humano|soporte|celular|numero)/)) {
-      response = 'Claro que sí, puedes comunicarte directamente con nuestro asesor de estilo por WhatsApp al número: 3108999049. Estará encantado de darte una atención personalizada.'
+      response = 'Claro que sí, puedes comunicarte directamente con nuestro asesor de estilo por WhatsApp al número: 3006577286. Estará encantado de darte una atención personalizada.'
       return NextResponse.json({ response })
     }
 
     // 4. SHIPPING / ENVIOS
     if (lowerMessage.match(/(envio|envios|tiempo|entrega|interrapidisimo|despacho|llega|demora)/)) {
-      response = 'Nuestros envíos se realizan exclusivamente a través de **Interrapidisimo** a todo el país. 🚚\n\n- **Tiempo de entrega:** De 3 a 5 días hábiles.\n- **Costo:** ¡El envío es completamente gratis por compras mayores a $200.000!\n\nUna vez despachado tu pedido, te compartiremos el número de guía para que puedas rastrearlo en tiempo real.'
+      response = 'Nuestros envíos se realizan exclusivamente a través de Interrapidisimo a todo el país. 🚚\n\n- Tiempo de entrega: De 3 a 5 días hábiles.\n- Costo: ¡El envío es completamente gratis por compras mayores a $300.000!\n\nUna vez despachado tu pedido, te compartiremos el número de guía para que puedas rastrearlo en tiempo real.'
       return NextResponse.json({ response })
     }
 
@@ -84,34 +84,33 @@ export async function POST(request: Request) {
         const premium = products.filter(p => p.category?.toLowerCase() === 'premium')
         const allList = products.slice(0, 5) // Fallback list
 
-        let intro = 'En **Gol de Oro** tenemos una colección brutal de streetwear y artículos premium. Aquí te recomiendo las mejores:\n\n'
+        let intro = 'Gol de Oro :\n\n'
 
         if (lowerMessage.match(/(mas vendida|mas vendidas|popular|populares|favoritas)/)) {
-          intro = '🔥 **Nuestras Gorras Más Vendidas:**\n\n'
+          intro = '🔥 Nuestras Gorras Más Vendidas:\n\n'
           const list = featured.length > 0 ? featured : allList
-          response = intro + list.map(p => `- **${p.name}**: ${formatPrice(p.price)} (Diseño exclusivo destacado)`).join('\n')
+          response = intro + list.map(p => `- ${p.name}: ${formatPrice(p.price)} (Diseño exclusivo destacado)`).join('\n')
         } else if (lowerMessage.match(/(exclusiva|exclusivas|premium|lujo|lujosa)/)) {
-          intro = '👑 **Nuestra Colección Exclusiva (Premium):**\n\n'
+          intro = 'Nuestra Colección Exclusiva (Premium):\n\n'
           const list = premium.length > 0 ? premium : featured
-          response = intro + list.map(p => `- **${p.name}**: ${formatPrice(p.price)} (Edición de alta costura urbana)`).join('\n')
+          response = intro + list.map(p => `- ${p.name}: ${formatPrice(p.price)} (Edición de alta costura urbana)`).join('\n')
         } else if (lowerMessage.match(/(nueva|nuevas|reciente|novedad|novedades|llegaron)/)) {
-          intro = '✨ **Novedades Recién Llegadas:**\n\n'
+          intro = 'Novedades Recién Llegadas:\n\n'
           const list = products.slice(-3) // Last 3 products added
-          response = intro + list.map(p => `- **${p.name}**: ${formatPrice(p.price)} (Lo último en streetwear)`).join('\n')
+          response = intro + list.map(p => `- ${p.name}: ${formatPrice(p.price)} (Lo último en streetwear)`).join('\n')
         } else {
           // General recommendation on styles, prices & products
-          response = intro + 
-            `🌟 **Destacadas:**\n` + 
-            featured.slice(0, 2).map(p => `- ${p.name}: ${formatPrice(p.price)}`).join('\n') + 
-            `\n\n👑 **Premium de Lujo:**\n` + 
-            (premium.length > 0 ? premium : products).slice(0, 2).map(p => `- ${p.name}: ${formatPrice(p.price)}`).join('\n') + 
-            `\n\n💡 **Recomendación de Estilo:** Si buscas marcar la diferencia con acabados de lujo, te sugerimos la línea *Premium*. Para el día a día y un look más callejero, los artículos de la colección urbana son ideales.`
+          response = intro +
+            `Destacadas:\n` +
+            featured.slice(0, 2).map(p => `- ${p.name}: ${formatPrice(p.price)}`).join('\n') +
+            `\n\nPremium de Lujo:\n` +
+            (premium.length > 0 ? premium : products).slice(0, 2).map(p => `- ${p.name}: ${formatPrice(p.price)}`).join('\n')
         }
 
-        response += '\n\nPuedes ver la colección completa y comprar directamente en nuestra sección de **Catálogo**. ¿Te interesa algún estilo en particular?'
+        response += '\n\nPuedes ver la colección completa y comprar directamente en nuestra sección de Coleccion. ¿Te interesa algún estilo en particular?'
         return NextResponse.json({ response })
       } else {
-        response = 'Actualmente estamos actualizando nuestro inventario premium. Puedes consultar con nuestro asesor al WhatsApp 3108999049 para conocer la fecha del próximo lanzamiento.'
+        response = 'Actualmente estamos actualizando nuestro inventario. Puedes consultar con nuestro asesor al WhatsApp 3006577286 para conocer la fecha del próximo lanzamiento.'
         return NextResponse.json({ response })
       }
     }
@@ -155,17 +154,17 @@ export async function POST(request: Request) {
 
     // 8. DEFAULT FALLBACK
     response = `Gracias por tu mensaje. Como GOL DE ORO ASISTENTE, puedo ayudarte con:\n\n` +
-               `- Ver los productos, precios y recomendaciones de estilo\n` +
-               `- Conocer los modelos en oferta y más vendidos\n` +
-               `- Información de envíos nacionales (exclusivos por Interrapidisimo, 3-5 días)\n` +
-               `- Datos de contacto de nuestro asesor personal (WhatsApp 3108999049)\n\n` +
-               `¿De qué tema te gustaría que habláramos? Si prefieres, escríbele directamente a nuestro asesor.`
+      `- Ver los productos, precios y recomendaciones de estilo\n` +
+      `- Conocer los modelos en oferta y más vendidos\n` +
+      `- Información de envíos nacionales (exclusivos por Interrapidisimo, 3-5 días)\n` +
+      `- Datos de contacto de nuestro asesor personal (WhatsApp 3006577286)\n\n` +
+      `¿De qué tema te gustaría que habláramos? Si prefieres, escríbele directamente a nuestro asesor.`
 
     return NextResponse.json({ response })
   } catch (error) {
     console.error('[v0] Chatbot API error:', error)
-    return NextResponse.json({ 
-      response: 'Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo o escríbele directamente a nuestro asesor al WhatsApp 3108999049.' 
+    return NextResponse.json({
+      response: 'Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo o escríbele directamente a nuestro asesor al WhatsApp 3108999049.'
     }, { status: 200 })
   }
 }

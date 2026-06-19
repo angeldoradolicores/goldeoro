@@ -82,6 +82,51 @@ export async function POST(request: Request) {
 
       console.log(`[wompi-webhook] Order ${order.order_number} updated to ${newStatus}`)
 
+      // Decrement stock only when payment is approved
+      if (newStatus === 'paid') {
+        const orderItems = order.items || []
+        console.log(`[wompi-webhook] Decrementing stock for ${orderItems.length} items of order ${order.order_number}`)
+        for (const item of orderItems) {
+          if (item.product_id) {
+            try {
+              await supabaseAdmin.rpc('decrement_size_stock', { 
+                p_product_id: item.product_id, 
+                p_size: item.size || '',
+                p_quantity: item.quantity 
+              })
+              console.log(`[wompi-webhook] Stock decremented for product ${item.product_id}, size ${item.size}, quantity ${item.quantity}`)
+            } catch (err) {
+              console.error('[wompi-webhook] Error decrementing size stock via RPC:', err)
+              // Fallback to old RPC
+              try {
+                await supabaseAdmin.rpc('decrement_stock', { 
+                  product_id: item.product_id, 
+                  quantity: item.quantity 
+                })
+              } catch (err2) {
+                console.error('[wompi-webhook] Fallback RPC decrement_stock also failed:', err2)
+                // Manual fallback
+                try {
+                  const { data: pData } = await supabaseAdmin
+                    .from('products')
+                    .select('stock')
+                    .eq('id', item.product_id)
+                    .single()
+                  if (pData) {
+                    await supabaseAdmin
+                      .from('products')
+                      .update({ stock: Math.max(0, pData.stock - item.quantity) })
+                      .eq('id', item.product_id)
+                  }
+                } catch (err3) {
+                  console.error('[wompi-webhook] Manual stock update failed:', err3)
+                }
+              }
+            }
+          }
+        }
+      }
+
       // Create notification for customer
       if (order.user_id) {
         const title = newStatus === 'paid' ? '💰 Pago Confirmado' : '❌ Pago Cancelado/Rechazado'

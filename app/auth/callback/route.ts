@@ -31,6 +31,8 @@ export async function GET(request: Request) {
       
       if (isLocalEnv) {
         return NextResponse.redirect(`${origin}${finalNext}`)
+      } else if (process.env.NEXT_PUBLIC_SITE_URL) {
+        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_URL}${finalNext}`)
       } else if (forwardedHost) {
         return NextResponse.redirect(`https://${forwardedHost}${finalNext}`)
       } else {

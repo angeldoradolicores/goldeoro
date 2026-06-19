@@ -50,6 +50,7 @@ export async function GET() {
             category: item.product.category || 'Premium',
             colors: item.product.colors || [],
             sizes: item.product.sizes || [],
+            sizes_stock: item.product.sizes_stock || {},
             stock: item.product.stock || 0,
             featured: item.product.featured || false,
           },

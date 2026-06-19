@@ -63,6 +63,12 @@ export default function CheckoutPage() {
   const { user, isInitialized } = useAuthStore()
   const router = useRouter()
   const cartTotal = total()
+  const hasInvalidItems = items.some(item => {
+    const availableStock = item.selectedSize && item.product.sizes_stock 
+      ? (item.product.sizes_stock[item.selectedSize] ?? 0) 
+      : (item.product.stock ?? 0);
+    return item.quantity > availableStock || availableStock <= 0;
+  })
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [promoCode, setPromoCode] = useState('')
@@ -314,6 +320,12 @@ export default function CheckoutPage() {
 
   // Complete order
   const handleCompleteOrder = async () => {
+    if (hasInvalidItems) {
+      toast.error('Por favor corrige los productos sin stock en tu carrito.')
+      setStep(1)
+      return
+    }
+
     if (!validateShippingInfo()) {
       toast.error('Por favor completa todos los campos de envío con datos válidos')
       setStep(2)
@@ -487,56 +499,82 @@ export default function CheckoutPage() {
                       <Package className="w-4 h-4 text-gold-action" />
                       Tu Carrito ({items.length} {items.length === 1 ? 'producto' : 'productos'})
                     </h2>
-                    {items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex gap-4 p-4 rounded-none bg-carbon border border-steel/30 shadow-md"
-                      >
-                        <div className="relative w-20 h-20 rounded-none bg-graphite overflow-hidden border border-steel/30 shrink-0">
-                          <Image
-                            src={item.product.images?.[0] || '/images/placeholder-hat.jpg'}
-                            alt={item.product.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm text-white-diamond truncate">{item.product.name}</h3>
-                          <p className="text-xs text-titanium mt-1 font-light font-sans">
-                            Color: {item.selectedColor} {item.selectedSize && `· Talla: ${item.selectedSize}`}
-                          </p>
-                          <p className="text-gold-action font-semibold text-sm mt-2 font-sans">
-                            {formatPrice(item.product.price)}
-                          </p>
-                        </div>
-                        <div className="flex flex-col items-end justify-between">
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="p-1 text-titanium hover:text-destructive transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                          <div className="flex items-center gap-2">
+                    {items.map((item) => {
+                      const availableStock = item.selectedSize && item.product.sizes_stock 
+                        ? (item.product.sizes_stock[item.selectedSize] || 0) 
+                        : (item.product.stock || 0);
+                      const isOutOfStock = availableStock <= 0;
+                      const isExceedingStock = item.quantity > availableStock;
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={`flex gap-4 p-4 rounded-none bg-carbon border border-steel/30 shadow-md transition-all duration-300 ${
+                            isOutOfStock || isExceedingStock ? 'opacity-40 grayscale' : ''
+                          }`}
+                        >
+                          <div className="relative w-20 h-20 rounded-none bg-graphite overflow-hidden border border-steel/30 shrink-0">
+                            <Image
+                              src={item.product.images?.[0] || '/images/placeholder-hat.jpg'}
+                              alt={item.product.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm text-white-diamond truncate">{item.product.name}</h3>
+                            <p className="text-xs text-titanium mt-1 font-light font-sans">
+                              Color: {item.selectedColor} {item.selectedSize && `· Talla: ${item.selectedSize}`}
+                            </p>
+                            <p className="text-gold-action font-semibold text-sm mt-2 font-sans">
+                              {formatPrice(item.product.price)}
+                            </p>
+                            {isOutOfStock && (
+                              <p className="text-[10px] text-red-500 font-semibold uppercase mt-1">
+                                Agotado en esta talla
+                              </p>
+                            )}
+                            {!isOutOfStock && isExceedingStock && (
+                              <p className="text-[10px] text-amber-500 font-semibold uppercase mt-1">
+                                Excede stock (Disp: {availableStock})
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end justify-between">
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="w-7 h-7 rounded-none bg-graphite border border-steel/30 flex items-center justify-center hover:bg-gold-action hover:text-obsidian transition-colors text-chrome"
+                              onClick={() => removeItem(item.id)}
+                              className="p-1 text-titanium hover:text-destructive transition-colors"
                             >
-                              <Minus className="w-3 h-3" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
-                            <span className="w-6 text-center text-xs text-white-diamond font-sans font-semibold">{item.quantity}</span>
-                            <button
-                              onClick={() => item.quantity < item.product.stock && updateQuantity(item.id, item.quantity + 1)}
-                              disabled={item.quantity >= item.product.stock}
-                              className={`w-7 h-7 rounded-none bg-graphite border border-steel/30 flex items-center justify-center transition-colors text-chrome ${item.quantity >= item.product.stock ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gold-action hover:text-obsidian'}`}
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="w-7 h-7 rounded-none bg-graphite border border-steel/30 flex items-center justify-center hover:bg-gold-action hover:text-obsidian transition-colors text-chrome"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <span className="w-6 text-center text-xs text-white-diamond font-sans font-semibold">{item.quantity}</span>
+                              <button
+                                onClick={() => item.quantity < availableStock && updateQuantity(item.id, item.quantity + 1)}
+                                disabled={item.quantity >= availableStock || isOutOfStock}
+                                className={`w-7 h-7 rounded-none bg-graphite border border-steel/30 flex items-center justify-center transition-colors text-chrome ${item.quantity >= availableStock || isOutOfStock ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gold-action hover:text-obsidian'}`}
+                              >
+                                <Plus className="w-3 h-3" />
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                    <Button onClick={() => setStep(2)} className="w-full btn-luxury py-6 text-xs uppercase tracking-[0.25em] font-semibold rounded-none mt-6">
-                      Continuar con Envío
+                      );
+                    })}
+                    <Button 
+                      onClick={() => setStep(2)} 
+                      disabled={hasInvalidItems}
+                      className={`w-full btn-luxury py-6 text-xs uppercase tracking-[0.25em] font-semibold rounded-none mt-6 ${
+                        hasInvalidItems ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {hasInvalidItems ? 'Ajustar cantidades en carrito' : 'Continuar con Envío'}
                     </Button>
                   </motion.div>
                 )}

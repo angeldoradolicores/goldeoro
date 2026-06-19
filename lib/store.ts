@@ -191,11 +191,19 @@ export const useCartStore = create<CartStore>((set, get) => ({
   addItem: (product, color, size, quantity = 1) => {
     const itemId = createCartItemId(product.id, color, size)
     const existingItem = get().items.find((i) => i.id === itemId)
+    
+    const sizeStock = size && product.sizes_stock
+      ? (product.sizes_stock[size] ?? 0)
+      : (product.stock ?? 0)
+
+    const currentQty = existingItem ? existingItem.quantity : 0
+    const finalQty = Math.max(0, Math.min(currentQty + quantity, sizeStock))
+
     const newItems = existingItem
       ? get().items.map((i) =>
-          i.id === itemId ? { ...i, quantity: i.quantity + quantity } : i
+          i.id === itemId ? { ...i, quantity: finalQty } : i
         )
-      : [...get().items, { id: itemId, product, quantity, selectedColor: color, selectedSize: size }]
+      : [...get().items, { id: itemId, product, quantity: finalQty, selectedColor: color, selectedSize: size }]
 
     let currentUserId = get().userId
     set({ items: newItems, isOpen: true })
@@ -290,7 +298,11 @@ export const useCartStore = create<CartStore>((set, get) => ({
     const itemToUpdate = get().items.find((i) => i.id === itemId)
     if (!itemToUpdate) return
 
-    const clampedQuantity = Math.max(0, Math.min(quantity, itemToUpdate.product.stock || 0))
+    const sizeStock = itemToUpdate.selectedSize && itemToUpdate.product.sizes_stock
+      ? (itemToUpdate.product.sizes_stock[itemToUpdate.selectedSize] ?? 0)
+      : (itemToUpdate.product.stock ?? 0)
+
+    const clampedQuantity = Math.max(0, Math.min(quantity, sizeStock))
     const newItems = clampedQuantity === 0
       ? get().items.filter((i) => i.id !== itemId)
       : get().items.map((i) =>
