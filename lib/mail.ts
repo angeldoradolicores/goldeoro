@@ -84,6 +84,67 @@ export async function sendConfirmationEmail(to: string, actionLink: string, full
   }
 }
 
+export async function sendPasswordResetEmail(to: string, actionLink: string) {
+  const fromEmail = gmailUser ? `Gol de Oro <${gmailUser}>` : 'Gol de Oro <info@goldeoro.co>'
+  const subject = '🔐 Restablece tu contraseña - GOL DE ORO'
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>${subject}</title>
+      </head>
+      <body style="margin:0;padding:0;background:#050505;color:#ffffff;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <div style="max-width:680px;margin:0 auto;padding:40px 24px;">
+          <div style="background:#111111;border:1px solid rgba(255,255,255,.08);border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);">
+            <div style="padding:36px 32px 24px;text-align:center;background:linear-gradient(180deg, rgba(226,177,60,.12), transparent);">
+              <p style="margin:0;font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#E2B13C;">Gol de Oro</p>
+              <h1 style="margin:16px 0 0 0;font-size:32px;line-height:1.1;color:#ffffff;">Restablecer Contraseña</h1>
+            </div>
+
+            <div style="padding:32px;background:#111111;">
+              <p style="margin:0 0 20px 0;font-size:16px;color:#dddddd;">Hola,</p>
+              <p style="margin:0 0 24px 0;font-size:15px;color:#999999;line-height:1.8;">Recibimos una solicitud para restablecer la contraseña de tu cuenta GOL DE ORO. Haz clic en el botón de abajo para elegir una nueva.</p>
+              <a href="${actionLink}" style="display:inline-flex;align-items:center;justify-content:center;width:100%;padding:16px 20px;margin:0 auto 24px auto;background:#E2B13C;color:#000000;font-weight:800;text-transform:uppercase;letter-spacing:1px;border-radius:14px;text-decoration:none;font-size:14px;">Restablecer Contraseña</a>
+              <p style="margin:0 0 16px 0;font-size:14px;color:#7f7f7f;line-height:1.8;">Si tú no solicitaste esto, puedes ignorar este mensaje de forma segura.</p>
+              <p style="margin:0;font-size:14px;color:#7f7f7f;line-height:1.8;">Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
+              <p style="margin:16px 0 0 0;padding:16px;background:rgba(255,255,255,.04);border-radius:14px;font-size:13px;color:#f2f2f2;word-break:break-all;">${actionLink}</p>
+            </div>
+
+            <div style="padding:24px 32px 32px;background:#0b0b0b;text-align:center;"> 
+              <p style="margin:0;font-size:12px;color:#666666;">GOL DE ORO — Estilo ganador, pasión por el fútbol.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+
+  const cleanedTo = to.trim().toLowerCase()
+
+  console.log('[mail] Preparing password reset email', { to: cleanedTo, from: fromEmail })
+
+  if (!transporter) {
+    console.warn('[mail] Gmail transporter is not configured. Skipping real send.')
+    return
+  }
+
+  try {
+    await transporter.sendMail({
+      from: fromEmail,
+      to: cleanedTo,
+      subject,
+      html,
+      replyTo: gmailUser || 'info@goldeoro.co',
+    })
+    console.log('[mail] Password reset email sent to', cleanedTo)
+  } catch (err) {
+    console.error('[mail] sendPasswordResetEmail failed:', err)
+  }
+}
+
+
 interface OrderItem {
   product_name: string
   quantity: number

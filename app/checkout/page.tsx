@@ -64,8 +64,8 @@ export default function CheckoutPage() {
   const router = useRouter()
   const cartTotal = total()
   const hasInvalidItems = items.some(item => {
-    const availableStock = item.selectedSize && item.product.sizes_stock 
-      ? (item.product.sizes_stock[item.selectedSize] ?? 0) 
+    const availableStock = item.selectedSize && item.product.sizes_stock
+      ? (item.product.sizes_stock[item.selectedSize] ?? 0)
       : (item.product.stock ?? 0);
     return item.quantity > availableStock || availableStock <= 0;
   })
@@ -100,19 +100,19 @@ export default function CheckoutPage() {
   const isValidEmail = (email: string) => email.trim() === '' ? false : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const isValidPhone = (phone: string) => phone.trim() === '' ? false : /^\d{7,15}$/.test(normalizeDigits(phone))
   const isValidPostalCode = (postalCode: string) => postalCode.trim() === '' ? true : /^\d{4,10}$/.test(postalCode)
-  
+
   const getEmailError = (email: string): string | null => {
     if (!email.trim()) return 'El correo es requerido'
     if (!isValidEmail(email)) return 'Formato de correo inválido (ej: ejemplo@correo.com)'
     return null
   }
-  
+
   const getPhoneError = (phone: string): string | null => {
     if (!phone.trim()) return 'El teléfono es requerido'
     if (!isValidPhone(phone)) return 'Teléfono inválido (7-15 dígitos)'
     return null
   }
-  
+
   const getPostalCodeError = (postalCode: string): string | null => {
     if (postalCode.trim() === '') return null
     if (!isValidPostalCode(postalCode)) return 'Código postal inválido (solo dígitos, 4-10 caracteres)'
@@ -168,12 +168,12 @@ export default function CheckoutPage() {
 
   const loadUserDataAndAddresses = async () => {
     if (!user) return
-    
+
     try {
       const supabase = createClient()
-      
+
       console.log('Fetching profile for user:', user.id)
-      
+
       // Load profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -467,11 +467,10 @@ export default function CheckoutPage() {
                   disabled={s.num > step}
                   className={`flex items-center gap-2 ${s.num <= step ? 'text-gold-action' : 'text-titanium'}`}
                 >
-                  <span className={`w-8 h-8 rounded-none flex items-center justify-center text-xs font-semibold transition-all ${
-                    s.num < step ? 'bg-gold-action text-obsidian' :
+                  <span className={`w-8 h-8 rounded-none flex items-center justify-center text-xs font-semibold transition-all ${s.num < step ? 'bg-gold-action text-obsidian' :
                     s.num === step ? 'bg-gold-action text-obsidian ring-2 ring-gold-action/40' :
-                    'bg-graphite text-titanium border border-steel/30'
-                  }`}>
+                      'bg-graphite text-titanium border border-steel/30'
+                    }`}>
                     {s.num < step ? <CheckCircle className="w-4 h-4 text-obsidian" /> : s.num}
                   </span>
                   <span className="hidden sm:inline text-xs font-semibold uppercase tracking-wider">{s.label}</span>
@@ -500,8 +499,8 @@ export default function CheckoutPage() {
                       Tu Carrito ({items.length} {items.length === 1 ? 'producto' : 'productos'})
                     </h2>
                     {items.map((item) => {
-                      const availableStock = item.selectedSize && item.product.sizes_stock 
-                        ? (item.product.sizes_stock[item.selectedSize] || 0) 
+                      const availableStock = item.selectedSize && item.product.sizes_stock
+                        ? (item.product.sizes_stock[item.selectedSize] || 0)
                         : (item.product.stock || 0);
                       const isOutOfStock = availableStock <= 0;
                       const isExceedingStock = item.quantity > availableStock;
@@ -509,9 +508,8 @@ export default function CheckoutPage() {
                       return (
                         <div
                           key={item.id}
-                          className={`flex gap-4 p-4 rounded-none bg-carbon border border-steel/30 shadow-md transition-all duration-300 ${
-                            isOutOfStock || isExceedingStock ? 'opacity-40 grayscale' : ''
-                          }`}
+                          className={`flex gap-4 p-4 rounded-none bg-carbon border border-steel/30 shadow-md transition-all duration-300 ${isOutOfStock || isExceedingStock ? 'opacity-40 grayscale' : ''
+                            }`}
                         >
                           <div className="relative w-20 h-20 rounded-none bg-graphite overflow-hidden border border-steel/30 shrink-0">
                             <Image
@@ -567,12 +565,11 @@ export default function CheckoutPage() {
                         </div>
                       );
                     })}
-                    <Button 
-                      onClick={() => setStep(2)} 
+                    <Button
+                      onClick={() => setStep(2)}
                       disabled={hasInvalidItems}
-                      className={`w-full btn-luxury py-6 text-xs uppercase tracking-[0.25em] font-semibold rounded-none mt-6 ${
-                        hasInvalidItems ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                      className={`w-full btn-luxury py-6 text-xs uppercase tracking-[0.25em] font-semibold rounded-none mt-6 ${hasInvalidItems ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                     >
                       {hasInvalidItems ? 'Ajustar cantidades en carrito' : 'Continuar con Envío'}
                     </Button>
@@ -628,18 +625,18 @@ export default function CheckoutPage() {
                               <Input
                                 placeholder="Nombre completo"
                                 value={newAddress.full_name}
-                                onChange={(e) => setNewAddress({...newAddress, full_name: e.target.value})}
+                                onChange={(e) => setNewAddress({ ...newAddress, full_name: e.target.value })}
                                 className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
                               />
                               <Input
                                 placeholder="Calle y número"
                                 value={newAddress.street}
-                                onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+                                onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
                                 className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
                               />
                               <Select
                                 value={newAddress.state}
-                                onValueChange={(value) => setNewAddress({...newAddress, state: value})}
+                                onValueChange={(value) => setNewAddress({ ...newAddress, state: value })}
                               >
                                 <SelectTrigger className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs">
                                   <SelectValue placeholder="Departamento" />
@@ -653,7 +650,7 @@ export default function CheckoutPage() {
                               <Input
                                 placeholder="Ciudad"
                                 value={newAddress.city}
-                                onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                                onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
                                 className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
                               />
                               <Input
@@ -661,7 +658,7 @@ export default function CheckoutPage() {
                                 inputMode="numeric"
                                 pattern="[0-9]*"
                                 value={newAddress.postal_code}
-                                onChange={(e) => setNewAddress({...newAddress, postal_code: e.target.value})}
+                                onChange={(e) => setNewAddress({ ...newAddress, postal_code: e.target.value })}
                                 className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
                               />
                               <Input
@@ -669,7 +666,7 @@ export default function CheckoutPage() {
                                 type="tel"
                                 inputMode="tel"
                                 value={newAddress.phone}
-                                onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
+                                onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
                                 className="bg-graphite border-steel/30 rounded-none text-white-diamond focus:border-gold-action h-10 text-xs"
                               />
                               <div className="flex gap-2">
@@ -711,11 +708,10 @@ export default function CheckoutPage() {
                           type="email"
                           value={shippingData.email}
                           onChange={(e) => setShippingData({ ...shippingData, email: e.target.value })}
-                          className={`bg-graphite border rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel ${
-                            shippingData.email.trim() && getEmailError(shippingData.email)
-                              ? 'border-destructive focus:border-destructive'
-                              : 'border-steel/30'
-                          }`}
+                          className={`bg-graphite border rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel ${shippingData.email.trim() && getEmailError(shippingData.email)
+                            ? 'border-destructive focus:border-destructive'
+                            : 'border-steel/30'
+                            }`}
                           placeholder="tu@email.com"
                           required
                         />
@@ -734,11 +730,10 @@ export default function CheckoutPage() {
                             setShippingData({ ...shippingData, phone: digits })
                           }}
                           maxLength={15}
-                          className={`bg-graphite border rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel ${
-                            shippingData.phone.trim() && getPhoneError(shippingData.phone)
-                              ? 'border-destructive focus:border-destructive'
-                              : 'border-steel/30'
-                          }`}
+                          className={`bg-graphite border rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel ${shippingData.phone.trim() && getPhoneError(shippingData.phone)
+                            ? 'border-destructive focus:border-destructive'
+                            : 'border-steel/30'
+                            }`}
                           placeholder="3001234567"
                           required
                         />
@@ -793,11 +788,10 @@ export default function CheckoutPage() {
                             setShippingData({ ...shippingData, postalCode: digits })
                           }}
                           maxLength={10}
-                          className={`bg-graphite border rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel ${
-                            shippingData.postalCode.trim() && getPostalCodeError(shippingData.postalCode)
-                              ? 'border-destructive focus:border-destructive'
-                              : 'border-steel/30'
-                          }`}
+                          className={`bg-graphite border rounded-none text-white-diamond focus:border-gold-action h-12 text-sm placeholder:text-steel ${shippingData.postalCode.trim() && getPostalCodeError(shippingData.postalCode)
+                            ? 'border-destructive focus:border-destructive'
+                            : 'border-steel/30'
+                            }`}
                           placeholder="110111"
                         />
                         {shippingData.postalCode.trim() && getPostalCodeError(shippingData.postalCode) && (
@@ -826,11 +820,10 @@ export default function CheckoutPage() {
                           {shippingOptions.map((option) => (
                             <div
                               key={option.id}
-                              className={`flex items-center justify-between p-4 rounded-none border cursor-pointer transition-all ${
-                                selectedShipping === option.id
-                                  ? 'border-gold-action bg-gold-action/10'
-                                  : 'border-steel/30 bg-graphite/30 hover:border-gold-action/40'
-                              }`}
+                              className={`flex items-center justify-between p-4 rounded-none border cursor-pointer transition-all ${selectedShipping === option.id
+                                ? 'border-gold-action bg-gold-action/10'
+                                : 'border-steel/30 bg-graphite/30 hover:border-gold-action/40'
+                                }`}
                               onClick={() => setSelectedShipping(option.id)}
                             >
                               <div className="flex items-center gap-3">
@@ -937,11 +930,10 @@ export default function CheckoutPage() {
                         {paymentMethods.map((method) => (
                           <div
                             key={method.id}
-                            className={`flex flex-col items-center p-5 rounded-none border cursor-pointer transition-all ${
-                              selectedPayment === method.id
-                                ? 'border-gold-action bg-gold-action/10'
-                                : 'border-steel/30 bg-graphite/30 hover:border-gold-action/40'
-                            }`}
+                            className={`flex flex-col items-center p-5 rounded-none border cursor-pointer transition-all ${selectedPayment === method.id
+                              ? 'border-gold-action bg-gold-action/10'
+                              : 'border-steel/30 bg-graphite/30 hover:border-gold-action/40'
+                              }`}
                             onClick={() => setSelectedPayment(method.id)}
                           >
                             <RadioGroupItem value={method.id} id={method.id} className="sr-only" />
@@ -1100,14 +1092,20 @@ export default function CheckoutPage() {
 
                 <div className="space-y-4 mb-6 max-h-48 overflow-y-auto pr-2">
                   {items.map((item) => (
-                    <div
-                      key={`summary-${item.product.id}`}
-                      className="flex justify-between text-xs font-sans font-light"
-                    >
-                      <span className="text-titanium truncate max-w-[65%]">
-                        {item.product.name} {item.selectedSize ? `(Talla: ${item.selectedSize})` : ''} x{item.quantity}
+                    <div key={`summary-${item.id || item.product.id}`} className="flex justify-between text-xs font-sans font-light">
+                      <div className="flex flex-col flex-1 pr-2">
+                        <span className="text-titanium">
+                          {item.product.name}
+                        </span>
+
+                        <span className="text-titanium">
+                          {item.selectedSize ? `(Talla: ${item.selectedSize})` : ''} x{item.quantity}
+                        </span>
+                      </div>
+
+                      <span className="text-white-diamond font-medium whitespace-nowrap">
+                        {formatPrice(item.product.price * item.quantity)}
                       </span>
-                      <span className="text-white-diamond font-medium">{formatPrice(item.product.price * item.quantity)}</span>
                     </div>
                   ))}
                 </div>
@@ -1138,7 +1136,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-               
+
               </div>
             </div>
           </div>

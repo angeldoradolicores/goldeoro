@@ -8,7 +8,6 @@ import SparklesUI from './sparkles'
 import { useCartStore, useFavoritesStore } from '@/lib/store'
 import { toast } from 'sonner'
 import { useState } from 'react'
-import { BackgroundGradient } from './ui/background-gradient'
 
 export interface Product {
   id: string
@@ -113,7 +112,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       className="group h-full"
       style={{ transformStyle: 'preserve-3d' }}
     >
-      <BackgroundGradient containerClassName="h-full" className="rounded-[22px] bg-[#080b11] h-full overflow-hidden">
+      <div className="rounded-[22px] bg-[#080b11] h-full overflow-hidden">
         <div
           role="link"
           tabIndex={0}
@@ -135,11 +134,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               radial-gradient(circle at bottom left, rgba(0,56,147,0.05) 0%, transparent 40%),
               radial-gradient(circle at bottom right, rgba(206,17,38,0.05) 0%, transparent 40%)
             `,
-              boxShadow: product.featured || product.is_promotion
-                ? '0 28px 68px rgba(200,164,77,0.06), 0 6px 20px rgba(0,0,0,0.6)'
-                : isHovered
-                  ? '0 20px 48px rgba(0,0,0,0.75), 0 0 0 1px rgba(252,209,22,0.15), 0 0 30px rgba(0,56,147,0.1)'
-                  : '0 4px 16px rgba(0,0,0,0.4)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.4)'
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -374,7 +369,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             />
           </div>
         </div>
-      </BackgroundGradient>
+      </div>
     </motion.div>
   )
 }

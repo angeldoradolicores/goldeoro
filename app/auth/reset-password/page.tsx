@@ -28,26 +28,12 @@ function ResetPasswordContent() {
   const [confirmPassword, setConfirmPassword] = useState('')
 
   useEffect(() => {
-    const accessToken = searchParams.get('access_token')
-    const refreshToken = searchParams.get('refresh_token')
-    const type = searchParams.get('type')
-
-    if (!accessToken || !refreshToken || type !== 'recovery') {
-      setInvalidLink(true)
-      setInitializing(false)
-      return
-    }
-
     const initializeSession = async () => {
       const supabase = createClient()
-      const { error } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      })
+      const { data: { session }, error } = await supabase.auth.getSession()
 
-      if (error) {
-        console.error('[reset-password] setSession error:', error.message)
-        setError('No se pudo iniciar sesión con este enlace. Intenta de nuevo.')
+      if (error || !session) {
+        console.error('[reset-password] getSession error or no session:', error?.message)
         setInvalidLink(true)
       } else {
         setSessionOk(true)
@@ -56,7 +42,7 @@ function ResetPasswordContent() {
     }
 
     initializeSession()
-  }, [searchParams])
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

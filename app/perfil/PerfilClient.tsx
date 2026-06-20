@@ -131,7 +131,6 @@ const menuItems = [
   { icon: Bell, label: 'Notificaciones', id: 'notificaciones' },
   { icon: Heart, label: 'Favoritos', id: 'favoritos' },
   { icon: MapPin, label: 'Direcciones', id: 'direcciones' },
-  { icon: Shield, label: 'Seguridad', id: 'seguridad' },
 ]
 
 export default function PerfilClient({ initialUser, initialProfile, initialOrders, initialAddresses }: {
@@ -175,10 +174,6 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
   const [addressForm, setAddressForm] = useState<Omit<Address, 'id'>>(emptyAddress)
   const [municipalities, setMunicipalities] = useState<string[]>([])
 
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [changingPassword, setChangingPassword] = useState(false)
-  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
 
   const unreadCount = notifications.filter(n => !n.read).length
 
@@ -360,20 +355,6 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
     if (!error) { setAddresses(prev => prev.filter(a => a.id !== id)); toast.success('Dirección eliminada') }
   }
 
-  const handleRequestPasswordChange = () => {
-    if (newPassword !== confirmPassword) { toast.error('Las contraseñas no coinciden'); return }
-    if (newPassword.length < 6) { toast.error('Mínimo 6 caracteres'); return }
-    setShowPasswordConfirm(true)
-  }
-
-  const handleChangePassword = async () => {
-    setShowPasswordConfirm(false)
-    setChangingPassword(true)
-    const { error } = await supabase.auth.updateUser({ password: newPassword })
-    if (error) toast.error('Error al cambiar la contraseña')
-    else { toast.success('¡Contraseña actualizada correctamente!'); setNewPassword(''); setConfirmPassword('') }
-    setChangingPassword(false)
-  }
 
   const renderContent = () => {
     switch (activeSection) {
@@ -737,29 +718,6 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
           </motion.div>
         )
 
-      case 'seguridad':
-        return (
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-            <h2 className="text-xl font-display font-semibold uppercase tracking-wider text-white-diamond pb-4 border-b border-steel/10">Seguridad</h2>
-            <div className="bg-graphite/40 border border-steel/30 p-6 rounded-none space-y-6 shadow-xl">
-              <h3 className="font-display text-sm uppercase tracking-wider text-white-diamond flex items-center gap-2 border-b border-steel/10 pb-3"><Shield className="w-4 h-4 text-chrome" /> Cambiar Contraseña</h3>
-              <div className="space-y-4">
-                <div className="space-y-2"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Nueva contraseña</label><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" /></div>
-                <div className="space-y-2"><label className="text-[10px] font-semibold uppercase tracking-wider text-titanium">Confirmar contraseña</label><Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repite la nueva contraseña" className="bg-carbon border-steel/30 rounded-none focus:border-chrome text-white-diamond text-sm font-sans" /></div>
-                <Button className="w-full btn-luxury rounded-none text-xs uppercase tracking-wider font-semibold py-4" onClick={handleRequestPasswordChange} disabled={changingPassword || !newPassword || !confirmPassword}>
-                  {changingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2 text-obsidian" /> : null}Actualizar Contraseña
-                </Button>
-              </div>
-            </div>
-            <div className="border border-destructive/20 bg-destructive/5 rounded-none p-6 shadow-xl">
-              <h3 className="font-display text-sm uppercase tracking-wider text-destructive mb-2">Zona de Peligro</h3>
-              <p className="text-titanium text-xs font-light mb-4">Cierra tu sesión activa en este y otros dispositivos conectados.</p>
-              <Button variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive/10 rounded-none text-xs uppercase tracking-wider font-semibold py-4 px-6" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" /> Cerrar Sesión
-              </Button>
-            </div>
-          </motion.div>
-        )
 
       default:
         return null
@@ -841,58 +799,6 @@ export default function PerfilClient({ initialUser, initialProfile, initialOrder
         </div>
       </main>
       <Footer />
-
-      {/* Password Change Confirmation Modal */}
-      <AnimatePresence>
-        {showPasswordConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: 'rgba(5,5,5,0.85)', backdropFilter: 'blur(6px)' }}
-            onClick={() => setShowPasswordConfirm(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.93, y: 16 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.93, y: 16 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-              className="bg-carbon border border-steel/40 rounded-none p-8 max-w-md w-full shadow-2xl"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-steel/20">
-                <Shield className="w-5 h-5 text-chrome shrink-0" />
-                <h3 className="font-display text-base uppercase tracking-widest text-white-diamond">Confirmar cambio de contraseña</h3>
-              </div>
-              <p className="text-titanium text-sm font-light mb-6 leading-relaxed">
-                ¿Estás seguro que deseas cambiar tu contraseña? Esta acción actualizará tu clave de acceso de inmediato.
-              </p>
-              <div className="p-4 bg-graphite/60 border border-steel/20 rounded-none mb-6">
-                <p className="text-[10px] uppercase tracking-widest text-titanium mb-1">Nueva contraseña</p>
-                <p className="text-white-diamond text-sm font-semibold tracking-wider">{'•'.repeat(newPassword.length)}</p>
-              </div>
-              <div className="flex gap-3">
-                <Button
-                  className="flex-1 btn-luxury rounded-none text-xs uppercase tracking-wider font-semibold py-4"
-                  onClick={handleChangePassword}
-                  disabled={changingPassword}
-                >
-                  {changingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2 text-obsidian" /> : null}
-                  Confirmar Cambio
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 border-steel/40 text-chrome hover:border-chrome rounded-none text-xs uppercase tracking-wider font-semibold py-4"
-                  onClick={() => setShowPasswordConfirm(false)}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

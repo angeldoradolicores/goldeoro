@@ -22,12 +22,14 @@ export default function RecuperarPage() {
     }
     setLoading(true)
     setError('')
-    const supabase = createClient()
-    const { error: supaErr } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
+    const response = await fetch('/api/auth/recuperar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
     })
+    
     setLoading(false)
-    if (supaErr) {
+    if (!response.ok) {
       setError('Error al enviar el correo. Verifica la dirección e inténtalo de nuevo.')
     } else {
       setSent(true)
