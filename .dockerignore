@@ -10,8 +10,6 @@ yarn-debug.log
 *.log
 .env
 .env.local
-.env.production
-.env.development
 coverage
 /dist
 build
