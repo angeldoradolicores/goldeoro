@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+.vscode
+.DS_Store
+npm-debug.log
+pnpm-debug.log
+yarn-debug.log
+*.log
+.env
+.env.local
+.env.production
+.env.development
+coverage
+/dist
+build
